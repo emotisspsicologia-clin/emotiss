@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'">
+<meta name="referrer" content="no-referrer">
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SiAGE | Sistema de Agendamento e Gestão Emotiss</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Work+Sans:wght@500;600;700&display=swap">
+<style>
+/* Layout: cabeçalho + abas; gestão vê a semana em colunas, paciente vê cartões empilhados */
+:root{
+  --bg:#f1ece1; --surface:#ffffff; --surface-2:#f5f0e8; --line:#e3dccd;
+  --fg:#17130f; --muted:#6b6358; --accent:#17130f; --accent-fg:#f5f0e8;
+  --ok:#2f7d4f; --warn:#94600f; --bad:#a02a1c; --info:#2f5f9e;
+  --warm:#b8573b; --gold:#e8c98f; --band:#17130f;
+  --font-display:"Work Sans","Segoe UI",system-ui,sans-serif;
+  --font-body:"Manrope","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14110e; --surface:#1f1b17; --surface-2:#2a2520; --line:#37312a;
+    --fg:#f5f0e8; --muted:#a59d8d; --accent:#f5f0e8; --accent-fg:#17130f;
+    --ok:#6cc48f; --warn:#e0a850; --bad:#ec8b82; --info:#8ab4ea;
+    --warm:#e08a6c; --band:#1f1b17; color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--font-body);padding:22px 16px 80px;font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+.app{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.7rem;letter-spacing:-.01em} h2{font-size:1.2rem} h3{font-size:.95rem}
+p{margin:0}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.top .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+.tab{appearance:none;border:0;background:none;color:var(--muted);font:600 .92rem var(--font-body);padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--fg)}
+.badge{background:var(--accent);color:var(--accent-fg);border-radius:99px;font-size:.72rem;padding:0 7px;min-width:20px;text-align:center;line-height:20px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{appearance:none;font:600 .88rem var(--font-body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.small{padding:4px 10px;font-size:.8rem}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between}
+.seg{display:flex;gap:6px}
+.weeklabel{font-family:var(--font-display);font-size:1.05rem}
+.stats{display:flex;flex-wrap:wrap;gap:6px 22px;color:var(--muted);font-size:.9rem}
+.stats b{color:var(--fg);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel-form{display:flex;flex-direction:column;gap:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted);font-weight:500;min-width:0}
+label.f.wide{grid-column:1/-1}
+label.f.check{flex-direction:row;align-items:flex-start;gap:8px;color:var(--fg);font-size:.88rem}
+label.f.check input{width:auto;margin-top:3px}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%}
+textarea{min-height:76px;resize:vertical}
+input[type=file]{padding:6px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.week{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:1000px){.week{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.day.today{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.day header{display:flex;gap:8px;align-items:baseline}
+.dw{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--muted);font-weight:600}
+.dn{font-family:var(--font-display);font-weight:700}
+.none{color:var(--muted);font-size:.85rem}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sess{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;background:var(--bg);min-width:0}
+.sess .t{font-weight:600}
+.sess .who{overflow-wrap:anywhere}
+.meta{color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.pill.agendada{color:var(--info)} .pill.confirmada{color:var(--ok)} .pill.realizada{color:var(--muted)}
+.pill.faltou{color:var(--warn)} .pill.cancelada{color:var(--bad)}
+.pill.nova{color:var(--accent)} .pill.tag{color:var(--muted);font-weight:500}
+select.st{padding:3px 6px;font-size:.8rem;width:auto}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{font:inherit;font-size:.85rem;font-weight:600;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);border-radius:99px;padding:7px 14px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.item.av.unread{border-color:var(--warm);box-shadow:inset 4px 0 0 var(--warm)}
+.item.unread{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.item h3{overflow-wrap:anywhere}
+.item p.body{white-space:pre-wrap;overflow-wrap:anywhere}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--surface-2);padding:2px 8px;border-radius:6px;font-size:.88rem;user-select:all}
+a{color:var(--accent)}
+a.file{font-weight:600;font-size:.88rem;overflow-wrap:anywhere}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:22px;color:var(--muted);text-align:center}
+.empty b{display:block;color:var(--fg);font-family:var(--font-display);font-size:1.02rem;margin-bottom:2px}
+.cols{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:900px){.cols.two{grid-template-columns:1fr 1fr}}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;max-width:820px;margin:18px auto}
+#toast{position:fixed;left:16px;right:16px;bottom:16px;display:flex;justify-content:center;pointer-events:none}
+#toast span{background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;max-width:520px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.gates{max-width:1000px}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.svc{appearance:none;text-align:left;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.svc:hover{border-color:var(--accent)}
+.svc.sel{border:2px solid var(--accent);padding:13px;background:var(--surface-2)}
+.svc strong{font-family:var(--font-display);font-size:1.02rem}
+.svc .body{color:var(--muted);font-size:.88rem}
+.svc .kv{font-size:.86rem}
+.notice{border:2px solid var(--warm);background:var(--surface-2);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.notice .ttl{font-family:var(--font-display);font-weight:700;font-size:1.02rem;color:var(--warm)}
+.ok-box{border:1px solid var(--ok);color:var(--ok);border-radius:8px;padding:10px 12px;font-weight:600}
+.step{display:flex;flex-direction:column;gap:10px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cal .dh{font-size:.72rem;color:var(--muted);text-align:center;font-weight:600}
+.cal button{appearance:none;aspect-ratio:1;min-height:36px;border:1px solid transparent;border-radius:8px;background:none;color:var(--muted);font:inherit;opacity:.55}
+.cal button.avail{background:var(--surface-2);color:var(--fg);border-color:var(--line);font-weight:600;cursor:pointer;opacity:1}
+.cal button.avail:hover{border-color:var(--accent)}
+.cal button.sel{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);opacity:1}
+.cal button.today{text-decoration:underline}
+.hours{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px}
+.sum{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.cap{text-transform:capitalize}
+details>summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile.big{grid-column:span 2;border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.tile .tl{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile b{font:700 1.35rem var(--font-display);overflow-wrap:anywhere}
+.tile .ts{color:var(--muted);font-size:.85rem}
+.top.pac{border-bottom:1px solid var(--line);padding-bottom:14px}
+.top.pac h1{font-size:2.1rem}.nm{color:var(--accent)}
+.tabs{position:sticky;top:0;z-index:5;background:var(--bg)}
+.cols{align-items:start}
+.top.pac .code{font-size:.95rem}
+.top.pac .sub{display:flex;gap:8px;align-items:center;margin-top:6px}
+.nudge{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--accent);background:var(--surface-2);border-radius:10px;padding:12px 16px}
+.busca{width:100%;font:inherit;padding:9px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg)}
+.lista-rec .list{max-height:60vh;overflow:auto}
+.fold{padding:12px 16px}.fold>summary{color:var(--fg);font-family:var(--font-display);font-size:1.05rem}
+a.btn{text-decoration:none;display:inline-block}
+.fv{display:grid;grid-template-columns:minmax(120px,230px) 1fr;gap:4px 14px;font-size:.88rem;border-top:1px solid var(--line);padding-top:8px}
+.fv h4{grid-column:1/-1;margin:10px 0 0;font:700 .72rem var(--font-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.fv dt{color:var(--muted)}.fv dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+@media (max-width:600px){.fv{grid-template-columns:1fr}.fv dd{margin-bottom:6px}}
+.fx{max-width:720px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:14px}
+.fx .f{margin:0 0 14px;min-width:0}
+.fx .f>label,.fx .q{display:block;font-weight:600;font-size:.88rem;margin:0 0 7px}
+.fx .req::after{content:' *';color:var(--bad)}
+.fx input[type=text],.fx input[type=tel],.fx input[type=email],.fx select,.fx textarea{min-height:46px;border-radius:10px;padding:10px 12px}
+.fx textarea{min-height:130px}
+.fx input.valid{border-color:var(--ok)}
+.fx .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 12px;align-items:stretch;justify-content:normal}
+.fx .opts,.fx .yn{display:flex;flex-wrap:wrap;gap:8px}
+.fx .opts.col{flex-direction:column}
+.fx .o{position:relative;display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;flex:1 1 auto}
+.fx .yn .o{flex:0 0 auto;min-width:84px;justify-content:center;font-weight:600}
+.fx .o::before{content:'';width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);flex:none}
+.fx .yn .o::before{display:none}
+.fx .o input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;padding:0}
+.fx .o:has(input:checked){border-color:var(--accent);background:var(--surface-2);font-weight:600}
+.fx .o:has(input:checked)::before{border-color:var(--accent);background:radial-gradient(var(--accent) 42%,transparent 48%)}
+.fx .yn .o:has(input:checked){background:var(--accent);color:var(--accent-fg)}
+.fx .o:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.fx .chk{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:.88rem;cursor:pointer}
+.fx .chk input{width:20px;height:20px;padding:0;flex:none;margin-top:2px;accent-color:var(--accent)}
+.fx .sub,.fx .sub2{margin:10px 0 0;padding:12px 14px 2px;background:var(--surface-2);border-radius:10px}
+.fx .hint{font-size:.8rem;color:var(--muted);margin:7px 0 0}
+.fx .err{color:var(--bad);font-weight:600;font-size:.88rem;margin:8px 0 0}
+.fx .bad,.fx .f.bad .o,.fx .f.bad .chk{border-color:var(--bad)!important}
+.fx .btns{display:flex;gap:10px}.fx .btns .btn{flex:1;min-height:46px}
+.fx .blk+.blk{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.fx .blk>h2{font-size:1rem;margin-bottom:12px}
+.fx .lead{color:var(--muted);font-size:.88rem;margin:2px 0 14px}
+.fx .t{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.fx .pbar{height:6px;background:var(--line);border-radius:9px;overflow:hidden}
+.fx .pbar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.fx .dots{display:flex;justify-content:space-between;gap:4px;margin-top:10px;font-size:.72rem;color:var(--muted)}
+.fx .dots span{flex:1;text-align:center}.fx .dots .on{color:var(--fg);font-weight:700}
+.fx .nx{display:flex;gap:12px;align-items:flex-start;font-size:.92rem;margin-top:10px}
+.fx .nx b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-size:.78rem;display:flex;align-items:center;justify-content:center}
+.fx .soc{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== Identidade Emotiss (proposta A) ===== */
+body{padding:0 0 90px;font-family:var(--font-body)}
+h1,h2,h3,.dn,.weeklabel,.tile b,.svc strong,.notice .ttl{font-family:var(--font-display);font-weight:600}
+.app{max-width:none;margin:0;gap:0}
+.top{display:block;background:var(--band);color:#f5f0e8;padding:26px 18px 70px;border-radius:0 0 34px 34px;border:0}
+.top>.in{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.top .eyebrow{color:var(--gold)}
+.top h1{color:#f5f0e8;font-size:1.9rem}
+.top .sub,.top .meta{color:#cdc5b6}
+.top.pac{border-bottom:0;padding-bottom:70px}
+.top.pac h1{font-size:2.2rem;color:#f5f0e8}
+.nm{color:var(--gold)}
+.top .code{background:none;border:1px solid #f5f0e855;color:#f5f0e8;letter-spacing:.08em}
+.hdr{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.hdr .logo{height:54px;aspect-ratio:3.357;color:#f5f0e8;display:block}
+.top .btn{background:none;color:#f5f0e8;border-color:#f5f0e866}
+.top .btn:hover{border-color:var(--gold)}
+.tabs{width:calc(100% - 32px);max-width:1048px;margin:-28px auto 18px;background:var(--surface);border:0;border-radius:99px;padding:6px;gap:4px;box-shadow:0 6px 20px #17130f2b;position:relative;z-index:2}
+.tab{flex:1;justify-content:center;border:0;margin:0;border-radius:99px;padding:10px 16px}
+.tab[aria-selected="true"],.tab[aria-selected="true"]:hover{background:var(--accent);color:var(--accent-fg)}
+.badge{background:var(--warm);color:#fff}
+.tabs[hidden]+main{margin-top:-34px}
+main{display:block;max-width:1080px;width:100%;margin:0 auto;padding:0 16px;position:relative}
+.card{border:0;border-radius:22px;box-shadow:0 4px 18px #17130f14}
+.item,.day,.tile,.nudge,.notice,.empty{border-radius:18px}
+.day.today{border-color:var(--warm);box-shadow:inset 0 3px 0 var(--warm)}
+.btn,.sess{border-radius:12px}
+/* toque quente: data em círculo e destaque terracota */
+.tile.big{background:var(--warm);color:#fff;border:0;box-shadow:none}
+.tile.big .tl,.tile.big .ts{color:#ffffffcc}
+.item.sc{flex-direction:row;align-items:center;gap:14px}
+.dbadge{flex:none;width:58px;height:58px;border-radius:50%;background:var(--surface-2);color:var(--warm);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.dbadge b{font:700 1.35rem var(--font-display)}.dbadge small{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-top:2px}
+.nudge{border-style:dashed;border-width:1.5px}
+.cal button.today{text-decoration:none;box-shadow:inset 0 0 0 2px var(--warm)}
+@media (max-width:640px){.top.pac h1{font-size:1.8rem}.hdr{align-items:flex-start}.hdr .logo{height:44px}.tab{padding:9px 12px}}
+
+/* aceite em terracota */
+.notice{box-shadow:inset 6px 0 0 var(--warm)}
+.item.aceite{border-color:var(--warm);box-shadow:inset 4px 0 0 var(--warm)}
+.pill.aceite-ok{color:var(--warm)}
+h2.aceite-h{color:var(--warm)}
+.notice input[type=checkbox]{accent-color:var(--warm)}
+/* checkbox visível, na paleta */
+label.f.check input[type=checkbox],.fx .chk input[type=checkbox]{flex:none;width:24px;height:24px;min-width:24px;padding:0;margin:0;accent-color:var(--warm);cursor:pointer;border-radius:6px}
+label.f.check{align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--warm);border-radius:14px;background:var(--surface-2);line-height:1.4}
+label.f.check span{flex:1;min-width:0}
+/* código no topo em pílula destacada */
+.top .code,.top.pac .code{display:inline-block;background:var(--gold);color:#17130f;border:0;border-radius:999px;padding:2px 11px;font-size:.78rem;line-height:1.5;font-weight:700;letter-spacing:.06em;box-shadow:none}
+/* profissionais, filtros e agenda por profissional */
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;margin-right:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{appearance:none;font:600 .8rem var(--font-body);padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center}
+.chip .dot{margin-right:6px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.filters{display:flex;flex-direction:column;gap:8px;background:var(--surface);border-radius:18px;padding:12px 14px;box-shadow:0 2px 10px #17130f10}
+.frow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.frow>.eyebrow{min-width:88px}
+.sess{border-left:4px solid var(--c,var(--line))}
+.pchip{display:inline-flex;align-items:center;font-size:.74rem;font-weight:700;color:var(--c)}
+.wins{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.win{border:1.5px dashed var(--c);border-radius:10px;padding:3px 8px;font-size:.74rem;background:color-mix(in srgb,var(--c) 10%,transparent);display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere;gap:2px}
+.win b{font-weight:700}
+.win .btn.small{align-self:flex-start;padding:1px 8px;font-size:.7rem}
+.day header .add{margin-left:auto;padding:0 9px;line-height:1.5}
+.av{border-radius:50%;object-fit:cover;flex:none;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;color:var(--warm)}
+.prof{display:flex;gap:14px;align-items:flex-start;min-width:0}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.pill.cancelamento{color:var(--bad)}.pill.agendamento{color:var(--ok)}.pill.solicitacao{color:var(--warm)}
+.pedido>summary{font-size:.82rem;color:var(--warm)}
+/* trilha de agendamento */
+.trail{list-style:none;margin:0;padding:0;display:flex}
+.trail li{flex:1;position:relative;text-align:center;font-size:.82rem;font-weight:600;color:var(--muted)}
+.trail li::before{content:'';position:absolute;top:16px;left:-50%;width:100%;height:2px;background:var(--line)}
+.trail li:first-child::before{display:none}
+.trail li.done::before,.trail li.cur::before{background:var(--warm)}
+.trail li.cur,.trail li.done{color:var(--fg)}
+.trail .tl-in,.trail button{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit}
+.trail button{cursor:pointer}
+.trail .n{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 .9rem var(--font-display)}
+.trail li.cur .n{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.trail li.done .n{background:var(--warm);border-color:var(--warm);color:#fff}
+.guide{background:var(--surface-2);border-radius:12px;padding:10px 14px;font-size:.92rem;border-left:4px solid var(--warm)}
+.guide b{color:var(--warm)}
+.wiz-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:6px}
+.pillb{border-radius:999px!important;min-height:44px;padding:9px 22px}
+.pillb.small{min-height:36px;padding:5px 16px}
+.wiz-nav .btn.primary{box-shadow:0 6px 16px #17130f33}
+.pillb[disabled]{box-shadow:none!important}
+.resumo{grid-template-columns:minmax(110px,180px) 1fr}
+/* login: abas do paciente e botões em pílula flutuante */
+.pform{flex:1}
+.ptabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:#17130f14}
+.ptabs button{flex:1;appearance:none;border:0;border-radius:999px;padding:9px 12px;font:600 .88rem var(--font-body);background:none;color:#4a4236;cursor:pointer}
+.ptabs button[aria-selected="true"]{background:#17130f;color:#f5f0e8;box-shadow:0 3px 10px #17130f40}
+.gates .actions{flex-direction:column;align-items:stretch;gap:10px;padding-top:6px}
+.gates .actions .btn{border-radius:999px;min-height:46px;padding:11px 22px;font-size:.95rem;box-shadow:0 6px 16px #17130f33;transition:transform .15s,box-shadow .15s}
+.gates .actions .btn:hover{transform:translateY(-1px);box-shadow:0 9px 20px #17130f40}
+.gates .actions .btn.small{min-height:40px;font-size:.85rem;box-shadow:none;background:transparent;border:1.5px solid currentColor;color:inherit}
+.gates .hl .actions .btn.small{color:#4a4236}
+/* login: paciente em destaque, gestão alinhada */
+.gates{max-width:none;margin:0;gap:16px;align-items:stretch}
+@media (min-width:900px){.gates{grid-template-columns:1.5fr 1fr}}
+.gates .card .actions{margin-top:auto}
+.gates .card .eyebrow{margin-bottom:-6px}
+.gates .hl{background:var(--band);color:#f5f0e8;box-shadow:0 10px 30px #17130f40,inset 0 4px 0 var(--warm)}
+.gates .hl .eyebrow{color:var(--gold)}
+.gates .hl h2{color:#f5f0e8;font-size:1.4rem}
+.gates .hl .meta,.gates .hl label.f{color:#cdc5b6}
+.gates .hl input{background:#ffffff14;border-color:#f5f0e855;color:#f5f0e8}
+.gates .hl .btn.primary{background:#f5f0e8;color:#17130f;border-color:#f5f0e8}
+/* data da sessão: quadrado arredondado terracota */
+.dbadge{border-radius:16px}
+
+/* destaque do paciente em terracota */
+.gates .hl{background:#b8573b;color:#fff;box-shadow:0 10px 30px #b8573b55}
+.gates .hl .eyebrow{color:#ffe9c9}
+.gates .hl h2{color:#fff}
+.gates .hl .meta,.gates .hl label.f{color:#ffffffe0}
+.gates .hl input{background:#ffffff26;border-color:#ffffff80;color:#fff}
+.gates .hl input::placeholder{color:#ffffffb3}
+.gates .hl .btn.primary{background:#fff;color:#8f3f27;border-color:#fff}
+
+/* destaque do paciente em #d8a24a (texto escuro para contraste) */
+.gates .hl{background:#d8a24a;color:#17130f;box-shadow:0 10px 30px #d8a24a66}
+.gates .hl .eyebrow{color:#5a3c0f}
+.gates .hl h2{color:#17130f}
+.gates .hl .meta,.gates .hl label.f{color:#3b2a0c}
+.gates .hl input{background:#ffffff59;border-color:#17130f55;color:#17130f}
+.gates .hl input::placeholder{color:#17130fb3}
+.gates .hl .btn.primary{background:#17130f;color:#f5f0e8;border-color:#17130f}
+
+/* destaque do paciente: creme #f4efe5 levemente escurecido para se destacar do fundo */
+.gates .hl{background:#ebe2d0;color:#17130f;border:1.5px solid #d3c4a5;box-shadow:0 10px 26px #17130f26,inset 0 4px 0 #b8573b}
+.gates .hl .eyebrow{color:#8f3f27}
+.gates .hl h2{color:#17130f}
+.gates .hl .meta,.gates .hl label.f{color:#4a4236}
+.gates .hl input{background:#fff;border-color:#c9b995;color:#17130f}
+.gates .hl input::placeholder{color:#8b8274}
+.gates .hl .btn.primary{background:#17130f;color:#f5f0e8;border-color:#17130f}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="144 406 715 213"><path d="M309.8,612.6 C314.1,612.52 318.29,611.13 322.4,609.86 C324.93,609.08 327.31,607.82 329.6,606.48 C332,605.08 334.28,603.47 336.4,601.68 C338.45,599.96 340.35,598.05 342.06,596 C343.79,593.94 345.33,591.72 346.68,589.4 C348.01,587.11 349.15,584.69 350.06,582.2 C351.01,579.6 351.77,576.92 352.25,574.2 C352.73,571.43 352.94,568.61 352.95,565.8 C353.14,529.4 353.71,492.99 352.85,456.6 C352.75,452.1 351.58,447.64 350.08,443.4 C348.68,439.49 346.62,435.79 344.23,432.4 C341.96,429.18 339.12,426.36 336.2,423.71 C334.21,421.91 331.97,420.35 329.6,419.1 C326.14,417.28 322.53,415.72 318.8,414.55 C315.96,413.66 312.98,413 310,412.96 C271.27,412.47 232.52,412.13 193.8,412.96 C189.57,413.05 185.38,414.28 181.4,415.73 C177.65,417.09 174.14,419.12 170.8,421.3 C168.35,422.9 166.11,424.84 164.13,427 C161.53,429.84 159.1,432.88 157.15,436.2 C155.34,439.26 154,442.61 152.93,446 C151.97,449.05 151.13,452.21 151.09,455.4 C150.51,493.6 150.28,531.81 151.07,570 C151.16,574.09 152.32,578.15 153.71,582 C155.09,585.82 157.14,589.39 159.33,592.8 C160.86,595.17 162.72,597.35 164.8,599.26 C167.71,601.92 170.86,604.35 174.2,606.45 C176.63,607.97 179.29,609.12 182,610.06 C184.92,611.07 187.91,612.2 191,612.26 C230.59,613.05 270.21,613.32 309.8,612.6 Z M240.4,580.47 L237.6,579.84 L236.44,577.6 L239.68,569.4 L238.8,562.98 C236.53,563.69 234.13,564.06 232,565.12 C229.35,566.45 227.07,568.41 224.6,570.06 L221.61,569.2 L220.7,566.4 C221.8,565.12 222.64,563.57 224,562.57 C226.46,560.77 229.16,559.23 232,558.11 C234.48,557.13 237.15,556.61 239.8,556.34 C242.25,556.08 244.73,556.48 247.2,556.56 L243.6,548.86 L236.8,546.68 C235.76,548.19 234.9,549.83 233.69,551.2 C232.42,552.64 230.97,553.94 229.4,555.05 C227.98,556.06 226.42,556.87 224.8,557.49 C223.06,558.16 221.23,558.58 219.4,558.88 C218.8,558.98 218.2,558.73 217.6,558.66 L215.94,557 L216.3,553.8 L225,550.27 L229.6,545.68 C227.47,545.76 225.31,545.59 223.2,545.93 C220.95,546.29 218.62,546.69 216.6,547.76 C212.42,549.96 208.73,553 204.8,555.62 L202.4,555.25 L200.89,553 L201.75,550.2 C203.3,548.85 204.75,547.37 206.4,546.16 C208.04,544.95 209.76,543.84 211.6,542.96 C213.85,541.89 216.15,540.8 218.6,540.34 C222.68,539.57 226.86,539.14 231,539.3 C234.65,539.44 238.2,540.57 241.8,541.21 C241.76,535.07 242.2,528.91 241.68,522.8 C241.34,518.86 240.05,515.07 239.23,511.2 C238.51,513.07 238.04,515.05 237.06,516.8 C236.04,518.62 234.55,520.13 233.3,521.8 C234.09,523.67 235.08,525.46 235.68,527.4 C236.21,529.15 236.32,531 236.65,532.8 L236.11,534.8 L234.2,536.12 L232.4,536.08 L230.6,534.6 L228,525.69 C222.4,527.81 217.01,530.61 211.2,532.06 C206.26,533.29 201.07,533.14 196,533.68 L193.75,531 L194.2,529.01 L195.8,527.58 C199.47,527.21 203.19,527.19 206.8,526.47 C210.18,525.79 213.39,524.42 216.68,523.4 C215.39,522.19 214.29,520.73 212.8,519.77 C211.41,518.88 209.83,518.21 208.2,517.94 C206.1,517.59 203.93,517.93 201.8,517.93 L193.4,521.35 L191.2,519.97 L190.7,517.8 L192.6,515.1 C194.2,514.27 195.71,513.23 197.4,512.59 C199.07,511.96 200.83,511.55 202.6,511.33 C204.19,511.12 205.84,510.97 207.4,511.33 C210.57,512.06 213.53,513.49 216.6,514.57 L222.8,520.97 C224.2,520.17 225.73,519.57 227,518.58 C228.46,517.43 229.6,515.93 230.9,514.6 L233,507.71 C229.07,508.03 225.14,508.78 221.2,508.66 C217.89,508.56 214.55,508.07 211.4,507.05 C207.49,505.79 203.8,503.86 200.2,501.87 C198.18,500.76 196.47,499.16 194.6,497.81 L193.75,496 L194.8,493.28 L197.2,492.41 L207.6,498.66 L208.67,497 L209.09,491.4 L207.03,485.4 C206.02,484.3 205.17,483.02 204,482.09 C202.05,480.53 199.82,479.36 197.73,478 L198.19,474.8 L200.8,473.54 L207.4,476.54 L213.46,483.8 L215.52,491.6 L214.05,501 C216.17,501.41 218.25,502.21 220.4,502.22 C224.81,502.26 229.2,501.52 233.6,501.17 C232.88,497.38 232.63,493.47 231.45,489.8 C229.88,484.93 227.42,480.39 225.4,475.68 C223.47,475.62 221.51,475.82 219.6,475.5 C217.94,475.22 216.3,474.65 214.8,473.88 C213.14,473.03 211.55,471.97 210.2,470.68 C209.1,469.64 208.43,468.23 207.55,467 L208.55,464.2 L211.4,463.38 L218,468.3 L224.2,469.28 C224.72,465.92 225.07,462.53 225.77,459.2 C225.93,458.47 226.43,457.87 226.76,457.2 L228.6,456.31 L230.55,456.6 L232.22,458.6 L230.8,466.72 L234.6,462.57 L237.1,455.8 L240,454.95 L242.43,457.2 C242.17,458.93 242.17,460.73 241.66,462.4 C241.15,464.03 240.34,465.57 239.41,467 C238.51,468.38 237.42,469.65 236.2,470.75 C234.81,472 233.15,472.92 231.62,474 C233.64,478.73 236.21,483.27 237.67,488.2 C239.07,492.93 239.32,497.93 240.15,502.8 L245.27,508.8 L247.5,517.6 L256.08,510.8 C256.07,507.27 256.33,503.72 256.06,500.2 C255.92,498.49 255.49,496.79 254.85,495.2 C254.21,493.62 253.12,492.27 252.26,490.8 L243.05,484.6 L242.7,482 L243.83,480.4 L247.6,480.13 L255.8,484.97 L258.2,477.64 L260.6,476.67 L263,477.73 L263.71,479.4 L263.22,484.2 L259.73,490.6 C260.38,492.27 261.29,493.85 261.68,495.6 C262.32,498.49 262.42,501.47 262.79,504.4 C263.68,503.53 264.68,502.76 265.46,501.8 C266.98,499.95 268.59,498.12 269.69,496 C270.8,493.87 271.24,491.47 272.02,489.2 C271.77,487.27 271.85,485.26 271.28,483.4 C270.67,481.41 269.63,479.55 268.51,477.8 C267.19,475.76 265.69,473.82 264,472.07 C262.76,470.79 261.2,469.87 259.8,468.77 L253,468.5 L247,471.64 L244.65,471 L243.44,469 L243.92,466.6 C244.75,465.91 245.42,464.99 246.4,464.54 C249.11,463.3 252.02,462.58 254.83,461.6 C254.21,459.67 253.31,457.8 252.99,455.8 C252.6,453.36 252.53,450.86 252.72,448.4 C252.81,447.31 253.44,446.34 253.8,445.31 L256.6,444.33 L259.24,446.6 C259.19,448.8 258.81,451.02 259.09,453.2 C259.38,455.4 260.33,457.47 260.95,459.6 L268,466.88 C268.64,464.52 268.94,462.04 269.93,459.8 C270.74,457.96 272.18,456.47 273.31,454.8 L276.4,452.73 L279.65,454.6 L279.6,457.39 C278.52,458.72 277.18,459.89 276.35,461.4 C275.46,463.01 275.13,464.87 274.53,466.6 C274.67,469.47 274.44,472.38 274.95,475.2 C275.28,477.02 276.32,478.64 277,480.35 C278.93,479.39 281.07,478.76 282.8,477.47 C284.76,476.01 286.22,473.96 287.92,472.2 L289.07,468.4 L288.37,462.6 L289,460.6 L292.2,459.39 L294.57,461.4 L295.45,469 L293.6,475.17 C291.27,477.67 289.31,480.58 286.6,482.66 C284.19,484.52 281.17,485.42 278.46,486.8 L278.4,490 C280.87,489.81 283.38,489.96 285.8,489.44 C288.03,488.96 290.24,488.21 292.2,487.05 C294.43,485.74 296.43,484.04 298.2,482.15 C300.26,479.95 301.8,477.31 303.6,474.89 L306.2,474.94 L307.88,476.8 L307.85,479 C307.25,480.13 306.84,481.39 306.05,482.4 C303.94,485.09 301.9,487.94 299.2,490.04 C296.4,492.21 293.07,493.64 289.8,495 C288.03,495.74 286.1,496.06 284.2,496.26 C281.75,496.52 279.27,496.33 276.8,496.37 C275.55,498.45 274.47,500.64 273.04,502.6 C271.49,504.73 269.61,506.6 267.89,508.6 C270.13,508.75 272.36,509.21 274.6,509.04 C276.52,508.9 278.46,508.5 280.2,507.68 C283.05,506.35 285.75,504.66 288.2,502.69 C291.71,499.86 294.73,496.48 298,493.38 L306.8,490.81 L313.8,491.73 L315.29,493.8 L315.03,496 L312.8,497.67 L304.6,497.53 L299.59,500.4 L302.6,503.44 L305.6,504.69 L314.8,503.7 L316.23,504.8 L316.76,507 L315.83,509 C315.09,509.41 314.43,510.03 313.6,510.22 C311.11,510.8 308.53,510.92 306,511.26 L300.09,509.4 L295,505.14 C292.53,507.1 290.29,509.38 287.6,511.04 C285.11,512.57 282.43,513.91 279.6,514.63 C276.55,515.41 273.34,515.59 270.2,515.48 C267.49,515.38 264.87,514.5 262.2,514 L248.4,524.74 C248.18,528.69 247.68,532.64 247.74,536.6 C247.78,538.82 248.11,541.06 248.7,543.2 C249.46,545.95 250.48,548.65 251.77,551.2 C252.99,553.59 254.72,555.69 256.2,557.93 L261.9,550.4 C260.79,548.13 259.4,545.98 258.57,543.6 C257.66,541.02 257.01,538.32 256.72,535.6 C256.38,532.48 256.72,529.33 256.71,526.2 L258.4,523.95 L261.2,523.9 L262.88,525.6 L263.6,536.93 L266.8,535.33 L269.66,531.8 L269.88,528.4 L267.72,523.6 L268.8,521.1 L270.6,520.3 L272.6,520.74 L275.67,525.4 L276.43,530.6 L275.24,535 L271.4,539.87 L265.34,543.2 L267,546.33 C269.07,545.4 271.03,544.19 273.2,543.53 C277.12,542.34 281.19,541.71 285.19,540.8 C285.56,539.6 286.15,538.45 286.31,537.2 C286.52,535.55 286.53,533.85 286.29,532.2 C286.11,530.95 285.66,529.72 285.06,528.6 C284.05,526.7 282.7,525 281.51,523.2 L281.79,521.2 L284,519.5 L287,520.37 L291,526.15 L292.2,526.16 L297,523.77 L300.6,517.35 L303.2,517.18 L305.07,519 L304.66,523.2 L301.49,528.4 C300.2,529.35 299.05,530.55 297.6,531.25 C296.11,531.97 294.41,532.15 292.82,532.6 L292.68,538.2 L306.8,529.93 L309.8,530.52 L310.91,533.6 C310.06,534.6 309.43,535.83 308.37,536.6 C305.02,539.01 301.44,541.11 297.8,543.04 C295.5,544.26 293.08,545.26 290.6,546.04 C287.23,547.11 283.73,547.75 280.29,548.6 L282.21,552 L285.6,554.69 C286.73,554.97 287.83,555.48 289,555.53 C291.47,555.62 293.93,555.25 296.4,555.11 L297.9,558 L296.2,560.68 L288.4,561.91 L282.4,560.27 C280.71,558.91 278.74,557.85 277.34,556.2 C275.82,554.41 274.98,552.14 273.8,550.11 C272.27,550.94 270.62,551.58 269.2,552.6 C267.69,553.69 266.23,554.92 265.09,556.4 C263.43,558.56 262.28,561.07 260.87,563.4 L273,572.43 L273.66,575 L272.4,577.09 L269.2,577.45 C267.73,576.59 266.13,575.93 264.8,574.87 C260.71,571.6 256.93,567.97 253,564.53 L245.6,562.87 L245.65,572.4 L243.28,577.8 L240.4,580.47 Z M686.2,471.6 C687.84,471.49 689.4,470.85 691,470.47 C692,469.75 693.15,469.18 694,468.29 C694.79,467.46 695.23,466.36 695.85,465.4 C696.08,464.13 696.53,462.89 696.53,461.6 C696.53,460.38 696.07,459.2 695.84,458 C695.09,456.92 694.48,455.73 693.6,454.75 C692.98,454.07 692.18,453.58 691.4,453.1 C690.84,452.76 690.24,452.47 689.6,452.31 C688.36,451.99 687.08,451.69 685.8,451.7 C684.45,451.71 683.07,451.89 681.8,452.36 C680.49,452.85 679.4,453.81 678.2,454.53 L675.76,458 C675.53,459.27 675.08,460.51 675.08,461.8 C675.08,463.02 675.35,464.25 675.74,465.4 C676.04,466.28 676.6,467.05 677.15,467.8 C677.56,468.35 678.03,468.88 678.6,469.27 C679.66,469.99 680.77,470.69 682,471.07 C683.35,471.48 684.79,471.69 686.2,471.6 Z M444.81,552.2 L444.6,535.61 L397.58,535.4 L397.6,511.18 L439.9,511 L439.8,494.53 L397.6,494.42 L397.6,470.36 L444.6,470.2 L444.81,453.6 L379,453.53 L378.93,552.2 L444.81,552.2 Z M672.63,552.2 L672.6,537.95 C669.33,537.85 666.05,538 662.8,537.64 C661.94,537.55 661.21,536.95 660.41,536.6 L659.15,534.6 L658.76,493.8 L672.71,493.6 L672.73,479.8 L658.76,479.6 L658.76,453.6 L641.4,453.5 L641.3,479.6 L630.54,479.8 L630.54,493.4 L641.3,493.8 C641.3,508 640.99,522.2 641.3,536.4 C641.35,538.76 641.67,541.15 642.37,543.4 C642.85,544.94 643.98,546.2 644.79,547.6 L650,551.06 C652.13,551.46 654.23,552.14 656.4,552.25 C661.8,552.52 667.22,552.22 672.63,552.2 Z M551.79,552.2 C551.61,534 552.22,515.78 551.27,497.6 C551.11,494.59 549.42,491.87 548.5,489 L542.8,482.34 L533.6,478.56 C529.6,478.61 525.55,478.06 521.6,478.7 C518.91,479.14 516.53,480.74 514,481.75 L506.6,489.61 L503.66,484.2 C501.84,482.85 500.24,481.13 498.2,480.15 C496.08,479.14 493.72,478.66 491.4,478.33 C489.22,478.02 486.97,477.9 484.8,478.26 C481.98,478.71 479.2,479.55 476.6,480.73 C474.9,481.49 473.45,482.74 472.08,484 C470.57,485.39 469.36,487.08 468,488.62 L467.8,479.75 L450.34,479.8 L450.4,552.26 L467.85,552.2 C467.88,538.27 467.62,524.33 467.93,510.4 C467.98,507.78 468.35,505.15 468.95,502.6 C469.32,501.01 469.98,499.47 470.8,498.06 C471.48,496.9 472.36,495.83 473.4,494.98 C474.4,494.15 475.57,493.52 476.8,493.11 C478.08,492.68 479.45,492.51 480.8,492.49 C482.14,492.47 483.51,492.6 484.78,493 C486.01,493.38 487.05,494.2 488.19,494.8 C488.95,495.73 489.89,496.55 490.47,497.6 C491.13,498.78 491.82,500.05 491.86,501.4 C492.46,518.32 492.22,535.27 492.4,552.2 L509.89,552.2 C509.9,538.47 509.69,524.73 509.93,511 C509.97,508.45 510.25,505.9 510.75,503.4 C511.07,501.81 511.56,500.22 512.35,498.8 C513.2,497.29 514.52,496.1 515.6,494.75 C516.8,494.16 517.92,493.36 519.2,492.97 C520.42,492.6 521.72,492.49 523,492.49 C524.28,492.48 525.58,492.58 526.8,492.96 C528.02,493.34 529.07,494.13 530.2,494.72 C530.93,495.62 531.85,496.41 532.4,497.44 C533.09,498.73 533.81,500.13 533.86,501.6 C534.45,518.46 534.16,535.33 534.3,552.2 L551.79,552.2 Z M595.89,553.6 C598.55,553.62 601.21,553.08 603.8,552.45 C606.14,551.88 608.42,551.04 610.6,550.02 C612.57,549.1 614.47,547.99 616.2,546.67 C618.18,545.17 620.01,543.46 621.66,541.6 C623.12,539.95 624.45,538.15 625.47,536.2 C626.93,533.39 628.16,530.44 629.06,527.4 C629.82,524.81 630.2,522.1 630.43,519.4 C630.66,516.88 630.64,514.33 630.44,511.8 C630.25,509.44 629.91,507.08 629.27,504.8 C628.51,502.12 627.56,499.47 626.27,497 C625.01,494.57 623.43,492.29 621.67,490.2 C620.12,488.37 618.31,486.76 616.4,485.3 C614.66,483.98 612.77,482.86 610.8,481.91 C608.75,480.92 606.6,480.12 604.4,479.52 C602.18,478.91 599.9,478.48 597.6,478.31 C594.68,478.08 591.71,478 588.8,478.33 C585.68,478.68 582.59,479.38 579.6,480.34 C577.36,481.05 575.23,482.11 573.2,483.31 C571.27,484.45 569.46,485.8 567.8,487.3 C566.16,488.78 564.67,490.43 563.36,492.2 C562.02,494.01 560.86,495.96 559.9,498 C558.91,500.12 558.1,502.34 557.51,504.6 C556.9,506.95 556.51,509.37 556.31,511.8 C556.11,514.33 556.11,516.87 556.32,519.4 C556.52,521.89 556.91,524.38 557.53,526.8 C558.12,529.13 558.94,531.42 559.95,533.6 C560.9,535.63 562.01,537.61 563.36,539.4 C564.91,541.45 566.63,543.41 568.6,545.06 C570.81,546.91 573.25,548.5 575.8,549.85 C577.82,550.92 579.96,551.85 582.2,552.27 C586.71,553.11 591.3,553.56 595.89,553.6 Z M736.67,553.6 C740.58,553.48 744.44,552.5 748.2,551.44 C750.12,550.9 751.91,549.91 753.6,548.84 C755.22,547.81 756.73,546.58 758.06,545.2 C759.25,543.95 760.28,542.52 761.1,541 C761.97,539.36 762.65,537.6 763.08,535.8 C763.52,533.97 763.7,532.08 763.69,530.2 C763.69,528.39 763.6,526.53 763.05,524.8 C762.35,522.62 761.02,520.7 760,518.65 C757.87,516.94 756.02,514.8 753.6,513.53 C750.41,511.85 746.88,510.86 743.4,509.93 C737.53,508.36 731.47,507.6 725.6,506.05 C724.11,505.65 722.8,504.75 721.4,504.1 L718.91,500.8 L719.31,496.4 L721.42,494 C722.48,493.51 723.45,492.73 724.6,492.52 C727.16,492.04 729.8,491.82 732.4,491.95 C734.05,492.03 735.67,492.52 737.2,493.14 C738.5,493.66 739.73,494.42 740.8,495.33 C741.83,496.2 742.73,497.25 743.44,498.4 C744.28,499.78 744.75,501.36 745.4,502.84 L761.6,502.85 C761.43,501.76 761.39,500.65 761.08,499.6 C760.49,497.62 759.81,495.65 758.9,493.8 C758.06,492.1 757.03,490.48 755.85,489 C754.65,487.51 753.3,486.12 751.8,484.93 C750.13,483.61 748.39,482.28 746.4,481.52 C742.53,480.05 738.49,478.98 734.4,478.31 C731.77,477.88 729.06,478.07 726.4,478.25 C724.04,478.41 721.66,478.66 719.4,479.33 C716.56,480.17 713.93,481.6 711.2,482.74 L704.51,489.6 C703.71,492.13 702.59,494.59 702.1,497.2 C701.78,498.97 701.9,500.81 702.11,502.6 C702.31,504.24 702.57,505.92 703.31,507.4 C704.37,509.54 706.04,511.32 707.4,513.28 C709.73,514.73 711.8,516.74 714.4,517.62 C722.22,520.26 730.46,521.48 738.4,523.74 C740.01,524.19 741.47,525.08 743,525.75 L746.04,529.2 L745.9,534.4 L743.93,537 L740.8,538.82 C737.53,539.16 734.28,539.9 731,539.86 C729.22,539.83 727.46,539.27 725.8,538.62 C724.22,537.99 722.7,537.15 721.4,536.05 C720.04,534.91 718.91,533.49 717.94,532 C717.1,530.71 716.65,529.21 716,527.82 L699.2,527.82 C699.31,528.81 699.21,529.85 699.53,530.8 C700.54,533.81 701.62,536.82 703.16,539.6 C704.14,541.37 705.55,542.89 707,544.31 C708.45,545.73 710.01,547.09 711.8,548.06 C714.99,549.77 718.27,551.48 721.8,552.27 C726.66,553.35 731.69,553.76 736.67,553.6 Z M803.18,553.6 C807.26,553.44 811.28,552.37 815.2,551.24 C817.06,550.7 818.77,549.69 820.4,548.63 C821.93,547.64 823.36,546.46 824.6,545.12 C825.81,543.82 826.85,542.36 827.7,540.8 C828.48,539.36 829.09,537.8 829.47,536.2 C829.92,534.24 830.16,532.21 830.17,530.2 C830.17,528.32 830.05,526.39 829.48,524.6 C828.8,522.47 827.48,520.6 826.48,518.6 C824.38,516.93 822.55,514.88 820.2,513.59 C817.46,512.09 814.42,511.14 811.4,510.33 C805.07,508.63 798.53,507.76 792.2,506.07 C790.64,505.66 789.27,504.72 787.8,504.05 L785.32,500.6 L785.8,496.42 L788,493.92 C789,493.46 789.92,492.74 791,492.54 C793.63,492.07 796.33,491.84 799,491.96 C800.58,492.03 802.14,492.51 803.6,493.11 C804.96,493.67 806.24,494.45 807.36,495.4 C808.43,496.3 809.33,497.41 810.07,498.6 C810.89,499.92 811.36,501.43 812,502.85 L828,502.85 C827.89,501.9 827.92,500.92 827.66,500 C827.08,497.95 826.41,495.92 825.49,494 C824.68,492.3 823.67,490.67 822.48,489.2 C821.16,487.55 819.65,486.03 818,484.71 C816.47,483.48 814.84,482.27 813,481.58 C809.12,480.12 805.09,478.99 801,478.32 C798.3,477.88 795.53,478.07 792.8,478.25 C790.44,478.41 788.06,478.66 785.8,479.35 C782.89,480.24 780.06,481.45 777.4,482.93 C775.92,483.76 774.65,484.96 773.49,486.2 C772.42,487.34 771.48,488.61 770.76,490 C769.95,491.58 769.35,493.27 768.95,495 C768.59,496.57 768.48,498.19 768.47,499.8 C768.47,501.41 768.57,503.04 768.95,504.6 C769.34,506.26 769.82,507.97 770.76,509.4 C772.08,511.4 773.74,513.19 775.6,514.69 C777.2,515.98 779.03,517.07 781,517.68 C788.89,520.11 797.06,521.52 805,523.77 C806.54,524.2 807.93,525.06 809.4,525.7 L812.47,529 L812.47,534.2 L810.4,537.04 L807.2,538.85 C804,539.19 800.82,539.87 797.6,539.87 C795.96,539.86 794.34,539.38 792.8,538.82 C791.31,538.29 789.85,537.6 788.6,536.63 C787.21,535.56 785.96,534.25 784.97,532.8 C783.94,531.28 783.39,529.48 782.6,527.82 L765.6,527.82 C765.77,528.95 765.7,530.14 766.12,531.2 C767.49,534.7 769.33,538 770.94,541.4 C773.49,543.69 775.69,546.44 778.6,548.26 C781.6,550.13 784.95,551.54 788.4,552.29 C793.23,553.34 798.23,553.79 803.18,553.6 Z M694.49,552.2 L694.49,479.8 L677.2,479.69 L677,552.2 L694.49,552.2 Z M594.6,538.62 L586.6,537.46 L580.4,533.32 C578.98,531.15 577.11,529.21 576.15,526.8 C574.98,523.88 574.29,520.74 574.12,517.6 C573.95,514.25 574.25,510.83 575.14,507.6 C575.89,504.86 577.69,502.53 578.96,500 C580.78,498.45 582.41,496.68 584.4,495.36 C585.6,494.56 587.01,494.09 588.4,493.74 C589.96,493.34 591.59,493.01 593.2,493.11 C595.71,493.28 598.21,493.77 600.6,494.55 C601.99,495 603.24,495.87 604.4,496.76 C605.61,497.7 606.8,498.73 607.65,500 C609.1,502.18 610.44,504.5 611.22,507 C612.07,509.7 612.45,512.57 612.46,515.4 C612.47,518.36 612.11,521.36 611.26,524.2 C610.48,526.83 609.25,529.38 607.63,531.6 C606.24,533.49 604.14,534.72 602.4,536.29 L594.6,538.62 Z M844.65,553.6 L848.6,552.25 C849.56,551.36 850.7,550.65 851.47,549.6 C852.29,548.46 852.67,547.07 853.27,545.8 L853.47,541.6 C853.05,540.47 852.82,539.24 852.21,538.2 C851.58,537.12 850.76,536.14 849.8,535.34 C848.86,534.56 847.71,534.04 846.6,533.53 C846.1,533.29 845.55,533.17 845,533.12 C843.94,533.03 842.85,532.94 841.8,533.13 C840.62,533.34 839.44,533.72 838.4,534.31 C837.25,534.96 836.34,535.97 835.32,536.8 C834.66,538 833.84,539.13 833.33,540.4 C833.03,541.15 832.96,541.99 832.91,542.8 C832.87,543.53 832.88,544.29 833.06,545 C833.34,546.17 833.66,547.37 834.28,548.4 C834.99,549.57 835.92,550.64 837,551.49 C838,552.28 839.27,552.65 840.4,553.23 L844.65,553.6 Z M550.86,577.4 C550.91,577.39 550.95,577.37 551,577.36 C551.08,577.24 551.17,577.13 551.24,577 C551.64,576.24 552.01,575.47 552.4,574.71 L552.2,574.6 L551.6,574.62 C551.51,574.75 551.41,574.86 551.34,575 C550.98,575.72 550.66,576.47 550.32,577.2 L550.4,577.42 C550.55,577.41 550.71,577.42 550.86,577.4 Z M398.6,591 C399.08,590.95 399.53,590.76 400,590.64 L401.53,589.4 L402.08,587.8 L401.84,586.6 L401.4,585.94 C401.07,585.72 400.78,585.41 400.4,585.28 C399.1,584.85 397.71,584.67 396.4,584.26 C395.78,584.06 395.2,583.73 394.6,583.47 L394.12,582.8 C394.08,582.53 393.98,582.27 393.99,582 C393.99,581.73 394.1,581.47 394.15,581.2 C394.35,580.93 394.5,580.63 394.73,580.4 C394.92,580.21 395.18,580.1 395.4,579.95 L397.4,579.57 L399.6,580.11 C399.88,580.34 400.19,580.53 400.43,580.8 C400.73,581.14 400.94,581.54 401.2,581.91 L401.87,581.4 L400.94,580 C400.49,579.71 400.1,579.32 399.6,579.14 C398.9,578.88 398.15,578.76 397.4,578.71 C396.86,578.69 396.31,578.77 395.8,578.93 C395.23,579.11 394.7,579.4 394.2,579.72 C393.94,579.89 393.78,580.17 393.57,580.4 L393.05,582 L393.3,583.4 L393.8,584.08 C394.27,584.35 394.69,584.72 395.2,584.89 C396.77,585.41 398.4,585.71 400,586.13 L400.9,587 L401.03,588.4 L400.6,589.2 C400.4,589.36 400.23,589.56 400,589.68 C399.69,589.86 399.35,589.99 399,590.08 C398.54,590.18 398.07,590.25 397.6,590.25 C397.13,590.25 396.66,590.19 396.2,590.08 C395.78,589.97 395.38,589.82 395,589.62 C394.7,589.46 394.41,589.25 394.2,588.99 C393.87,588.59 393.67,588.11 393.4,587.67 L392.59,588.2 C392.86,588.64 393.06,589.14 393.4,589.52 C393.74,589.89 394.15,590.21 394.6,590.44 C395.16,590.72 395.78,590.91 396.4,591 C397.13,591.1 397.87,591.07 398.6,591 Z M421.03,591 C421.43,590.96 421.83,590.87 422.2,590.69 C422.69,590.46 423.14,590.15 423.55,589.8 C423.88,589.51 424.12,589.12 424.4,588.78 L424.66,587.8 L424,587.53 L423,589.09 L421.4,590.06 L420,590.25 L417.8,589.67 L416.75,588.8 C416.41,588.07 415.95,587.38 415.72,586.6 C415.54,586.02 415.54,585.4 415.54,584.8 C415.54,584.26 415.61,583.73 415.72,583.2 C415.81,582.79 415.94,582.38 416.13,582 C416.3,581.64 416.52,581.3 416.79,581 C417.08,580.67 417.43,580.39 417.8,580.16 C418.11,579.96 418.45,579.82 418.8,579.73 C419.19,579.62 419.6,579.57 420,579.57 C420.47,579.57 420.95,579.61 421.4,579.73 C421.75,579.82 422.09,579.99 422.39,580.2 C422.7,580.42 422.98,580.7 423.2,581 C423.45,581.33 423.6,581.72 423.8,582.09 L424.64,581.6 C424.36,581.13 424.15,580.62 423.8,580.2 C423.53,579.87 423.19,579.57 422.8,579.38 C422.24,579.09 421.62,578.9 421,578.8 C420.41,578.7 419.79,578.67 419.2,578.78 C418.43,578.93 417.73,579.31 417,579.58 L415.35,581.4 C415.14,582 414.86,582.58 414.72,583.2 C414.59,583.79 414.56,584.4 414.56,585 C414.56,585.54 414.57,586.09 414.72,586.6 C414.96,587.43 415.39,588.2 415.72,589 L417,590.22 C417.67,590.48 418.3,590.87 419,591 C419.66,591.13 420.35,591.07 421.03,591 Z M436.2,591 C436.9,590.88 437.53,590.5 438.2,590.25 L439.87,588.4 C440.08,587.8 440.36,587.22 440.49,586.6 C440.62,586.01 440.66,585.4 440.65,584.8 C440.65,584.2 440.63,583.58 440.46,583 C440.24,582.23 439.81,581.53 439.49,580.8 L438.2,579.57 L436,578.79 L433.6,578.91 L431.6,579.9 C431.16,580.47 430.64,580.98 430.28,581.6 C430.01,582.09 429.8,582.64 429.74,583.2 C429.61,584.33 429.74,585.47 429.73,586.6 L430.73,589 C431.09,589.36 431.41,589.75 431.8,590.07 C432.1,590.31 432.44,590.5 432.8,590.65 C433.18,590.81 433.59,590.94 434,590.99 C434.73,591.06 435.48,591.13 436.2,591 Z M465.61,591 C466.3,590.82 466.94,590.51 467.6,590.27 C468.16,589.64 468.83,589.1 469.29,588.4 C469.6,587.92 469.75,587.35 469.88,586.8 C470.01,586.28 470.06,585.74 470.06,585.2 C470.06,584.46 470.05,583.72 469.88,583 C469.71,582.3 469.32,581.67 469.04,581 L467.6,579.55 L465.4,578.79 L463,578.91 L461,579.92 C460.57,580.48 460.03,580.97 459.7,581.6 C459.4,582.15 459.21,582.78 459.14,583.4 C459.03,584.46 459.01,585.54 459.16,586.6 C459.27,587.3 459.55,587.99 459.91,588.6 C460.24,589.16 460.69,589.65 461.2,590.05 C461.67,590.42 462.23,590.67 462.8,590.85 C463.31,591.02 463.86,591.06 464.4,591.09 C464.8,591.11 465.22,591.1 465.61,591 Z M481.68,591 C482.21,590.92 482.69,590.64 483.2,590.46 L484.6,588.93 L484.71,590.8 L485.5,590.8 L485.5,585.2 L485.2,585.04 L480.6,585.11 L480.55,585.8 C480.63,585.83 480.71,585.9 480.8,585.9 C482.07,585.95 483.33,585.94 484.6,585.96 L484.43,587.8 L483.72,589 L482.6,589.86 C482,589.99 481.41,590.22 480.8,590.25 C480.26,590.27 479.73,590.09 479.2,590.01 L477.4,588.87 C477.12,588.38 476.73,587.94 476.56,587.4 C476.31,586.56 476.2,585.68 476.15,584.8 C476.12,584.26 476.22,583.72 476.33,583.2 C476.42,582.79 476.56,582.38 476.75,582 C476.92,581.65 477.14,581.33 477.4,581.04 C477.7,580.72 478.03,580.42 478.4,580.18 C478.71,579.98 479.05,579.84 479.4,579.74 C479.79,579.63 480.2,579.57 480.6,579.58 C481.14,579.58 481.68,579.64 482.2,579.77 C482.53,579.85 482.83,580.02 483.12,580.2 C483.38,580.37 483.64,580.56 483.83,580.8 C484.14,581.19 484.34,581.66 484.6,582.09 L485.34,581.6 C485.12,581.2 484.98,580.75 484.68,580.4 C484.32,579.97 483.83,579.67 483.4,579.31 C482.87,579.14 482.35,578.89 481.8,578.81 C481.14,578.72 480.46,578.69 479.8,578.8 C479.1,578.92 478.47,579.26 477.8,579.5 L476.12,581.2 C475.85,581.93 475.42,582.63 475.31,583.4 C475.15,584.46 475.32,585.53 475.32,586.6 L476.32,589 L477.6,590.22 C478.27,590.48 478.9,590.86 479.6,591 C480.28,591.13 480.99,591.1 481.68,591 Z M527.6,591 C528.01,590.96 528.42,590.84 528.8,590.68 C529.16,590.53 529.51,590.35 529.8,590.09 C530.28,589.65 530.64,589.1 531.07,588.6 L531.22,587.8 L530.5,587.6 L529.6,589.07 L528,590.05 C527.47,590.11 526.94,590.23 526.4,590.23 C526,590.23 525.59,590.16 525.2,590.04 C524.87,589.94 524.55,589.79 524.26,589.6 C523.92,589.37 523.63,589.07 523.32,588.8 C522.99,588.13 522.55,587.51 522.34,586.8 C522.14,586.16 522.08,585.47 522.11,584.8 C522.15,583.99 522.29,583.17 522.54,582.4 C522.7,581.89 523,581.42 523.34,581 C523.6,580.67 523.96,580.42 524.31,580.2 C524.65,579.99 525.02,579.83 525.4,579.72 C525.79,579.61 526.2,579.56 526.6,579.57 C527.07,579.57 527.55,579.62 528,579.74 C528.34,579.83 528.66,579.99 528.94,580.2 C529.27,580.44 529.55,580.75 529.8,581.07 C530.04,581.38 530.2,581.75 530.4,582.09 L531.17,581.6 C530.91,581.15 530.74,580.65 530.4,580.26 C530.07,579.87 529.6,579.62 529.2,579.3 C528.6,579.13 528.02,578.86 527.4,578.78 C526.81,578.7 526.19,578.69 525.6,578.81 C524.9,578.95 524.27,579.29 523.6,579.54 L521.92,581.4 C521.71,582 521.43,582.58 521.29,583.2 C521.16,583.79 521.12,584.4 521.12,585 C521.13,585.6 521.16,586.22 521.32,586.8 C521.51,587.5 521.77,588.2 522.16,588.8 C522.54,589.37 523.12,589.77 523.6,590.26 C524.27,590.51 524.9,590.88 525.6,591.01 C526.26,591.13 526.94,591.07 527.6,591 Z M586.83,591 C587.23,590.96 587.64,590.88 588,590.7 C588.57,590.4 589.11,590.03 589.59,589.6 C589.89,589.32 590.06,588.93 590.3,588.6 L590.46,587.8 L589.8,587.53 L588.8,589.1 L587.2,590.06 C586.73,590.13 586.27,590.24 585.8,590.25 C585.4,590.25 584.99,590.19 584.6,590.09 C584.25,589.99 583.91,589.86 583.6,589.67 C583.22,589.43 582.86,589.14 582.56,588.8 C582.3,588.51 582.09,588.16 581.92,587.8 C581.74,587.42 581.6,587.01 581.52,586.6 C581.41,586.01 581.35,585.4 581.35,584.8 C581.35,584.26 581.42,583.73 581.53,583.2 C581.61,582.79 581.75,582.38 581.93,582 C582.11,581.64 582.33,581.3 582.6,581 C582.89,580.68 583.23,580.39 583.6,580.16 C583.91,579.97 584.25,579.82 584.6,579.73 C584.99,579.63 585.4,579.57 585.8,579.57 C586.27,579.57 586.75,579.61 587.2,579.73 C587.56,579.82 587.9,579.99 588.2,580.2 C588.51,580.42 588.79,580.69 589.02,581 C589.26,581.33 589.41,581.72 589.6,582.08 L590.45,581.6 C590.17,581.13 589.97,580.62 589.62,580.2 C589.34,579.86 588.99,579.56 588.6,579.37 C588.04,579.09 587.42,578.9 586.8,578.8 C586.21,578.7 585.59,578.67 585,578.78 C584.23,578.93 583.53,579.32 582.8,579.59 L581.16,581.4 C580.95,582 580.66,582.58 580.52,583.2 C580.4,583.79 580.37,584.4 580.38,585 C580.38,585.54 580.4,586.08 580.53,586.6 C580.67,587.22 580.84,587.85 581.17,588.4 C581.55,589.03 582.06,589.57 582.6,590.07 C582.88,590.34 583.24,590.51 583.6,590.66 C583.98,590.82 584.39,590.96 584.8,591 C585.47,591.07 586.16,591.06 586.83,591 Z M627.86,591 L627.96,590.4 L627.2,590.24 L625.72,589 C625.98,588.33 626.34,587.7 626.51,587 C626.7,586.21 626.7,585.38 626.8,584.57 L626.2,584.37 L626,584.59 C625.94,585.26 625.93,585.94 625.81,586.6 C625.73,587.01 625.55,587.4 625.41,587.8 L625,588.24 L622.12,584.6 C622.61,584.23 623.15,583.91 623.6,583.5 C623.95,583.18 624.2,582.77 624.49,582.4 L624.76,581 L624.45,579.8 L623.4,578.96 L622.4,578.76 L620.6,579.2 L619.71,580.2 L619.49,581.4 C619.58,581.8 619.6,582.23 619.78,582.6 C620.05,583.17 620.46,583.67 620.8,584.2 C620.15,584.73 619.44,585.21 618.83,585.8 C618.54,586.08 618.37,586.47 618.13,586.8 L617.91,588.2 L618.31,589.6 L619.6,590.7 C620,590.81 620.39,591.01 620.8,591.03 C621.53,591.07 622.27,590.94 623,590.89 L625.2,589.61 L626.8,590.89 L627.86,591 Z M706.76,591 C707.47,590.87 708.12,590.48 708.8,590.22 L710.44,588.4 C710.65,587.8 710.99,587.23 711.07,586.6 C711.21,585.47 711.07,584.33 711.07,583.2 L710.07,580.8 L708.4,579.35 C707.67,579.15 706.96,578.82 706.2,578.75 C705.47,578.68 704.73,578.88 704,578.95 L702.06,580 C701.63,580.6 701.12,581.16 700.75,581.8 C700.54,582.17 700.43,582.59 700.35,583 C700.23,583.59 700.15,584.2 700.15,584.8 C700.15,585.47 700.17,586.15 700.34,586.8 C700.56,587.57 700.99,588.27 701.31,589 L702.6,590.23 C703.27,590.49 703.9,590.87 704.6,591 C705.31,591.13 706.05,591.13 706.76,591 Z M735.56,591 C736.13,590.92 736.65,590.66 737.2,590.5 L738.5,589.4 L739.03,587.8 L738.7,586.4 L737.4,585.29 C736.07,584.95 734.72,584.66 733.4,584.27 C732.85,584.11 732.33,583.85 731.8,583.64 L731.1,582.8 L730.94,582 L731.12,581.2 C731.31,580.93 731.46,580.63 731.7,580.4 C731.9,580.2 732.17,580.08 732.4,579.93 C733,579.81 733.59,579.6 734.2,579.56 C734.67,579.54 735.14,579.62 735.6,579.72 C735.95,579.81 736.29,579.94 736.6,580.13 C736.9,580.32 737.17,580.57 737.4,580.84 C737.64,581.14 737.8,581.49 738,581.82 L738.2,581.9 L738.81,581.4 C738.63,581.07 738.53,580.69 738.28,580.4 C737.91,579.98 737.43,579.68 737,579.32 C736.2,579.12 735.42,578.81 734.6,578.73 C734,578.68 733.38,578.75 732.8,578.92 C732.23,579.08 731.73,579.44 731.2,579.7 L730.31,580.8 L729.96,582.2 L730.36,583.6 C730.57,583.82 730.75,584.09 731,584.27 C731.31,584.5 731.64,584.71 732,584.83 C733.65,585.34 735.33,585.71 737,586.15 L737.88,587 L738.07,587.8 C738.02,588.07 738,588.35 737.91,588.6 C737.82,588.82 737.66,589 737.54,589.2 L736.6,589.87 L734.4,590.24 L732,589.65 L731.15,589 L730.4,587.74 L730.2,587.66 L729.53,588.2 C729.82,588.66 730.04,589.17 730.4,589.57 C730.74,589.93 731.15,590.24 731.6,590.46 C732.17,590.73 732.78,590.92 733.4,591.01 C734.11,591.1 734.85,591.1 735.56,591 Z M758,591 C758.41,590.96 758.82,590.84 759.2,590.68 C759.56,590.53 759.91,590.35 760.2,590.08 C760.68,589.64 761.04,589.09 761.46,588.6 L761.62,587.8 L760.9,587.6 L760,589.07 L758.4,590.05 C757.87,590.11 757.34,590.23 756.8,590.23 C756.4,590.23 755.99,590.16 755.6,590.04 C755.27,589.95 754.94,589.79 754.65,589.6 C754.31,589.37 754.03,589.07 753.72,588.8 C753.39,588.13 752.95,587.51 752.73,586.8 C752.54,586.16 752.48,585.47 752.51,584.8 C752.55,583.99 752.68,583.17 752.93,582.4 C753.1,581.89 753.4,581.42 753.74,581 C754,580.67 754.35,580.42 754.71,580.2 C755.05,579.99 755.42,579.83 755.8,579.72 C756.19,579.61 756.6,579.56 757,579.57 C757.47,579.57 757.95,579.62 758.4,579.74 C758.73,579.83 759.02,580.05 759.34,580.2 L760.8,582.09 L761.56,581.6 C761.31,581.15 761.13,580.65 760.8,580.26 C760.47,579.87 760,579.62 759.6,579.3 C759,579.13 758.42,578.86 757.8,578.78 C757.21,578.7 756.59,578.69 756,578.81 C755.3,578.95 754.67,579.29 754,579.53 C753.44,580.16 752.78,580.7 752.31,581.4 C752,581.88 751.85,582.45 751.72,583 C751.59,583.52 751.54,584.06 751.53,584.6 C751.53,585.34 751.54,586.09 751.71,586.8 C751.89,587.5 752.16,588.2 752.56,588.8 C752.93,589.37 753.52,589.78 754,590.26 C754.67,590.51 755.3,590.88 756,591.01 C756.66,591.13 757.34,591.07 758,591 Z M773.13,591 C773.57,590.96 773.99,590.82 774.4,590.65 C774.76,590.5 775.12,590.33 775.4,590.07 C775.93,589.57 776.44,589.03 776.81,588.4 C777.14,587.85 777.38,587.23 777.46,586.6 C777.6,585.48 777.46,584.33 777.45,583.2 L776.45,580.8 C776.1,580.45 775.81,580.02 775.4,579.75 C774.85,579.38 774.2,579.19 773.6,578.91 L771,578.82 L769,579.57 L767.33,581.4 C767.12,582 766.84,582.58 766.7,583.2 C766.57,583.79 766.53,584.4 766.53,585 C766.54,585.6 766.56,586.22 766.73,586.8 C766.95,587.57 767.38,588.27 767.7,589 L769,590.25 C769.67,590.5 770.3,590.87 771,591 C771.7,591.13 772.42,591.07 773.13,591 Z M802.57,591 C803.28,590.87 803.92,590.49 804.6,590.23 L806.25,588.4 C806.46,587.8 806.74,587.22 806.88,586.6 C807,586.08 807.03,585.54 807.03,585 C807.03,584.4 807.01,583.79 806.88,583.2 C806.74,582.58 806.57,581.95 806.24,581.4 C805.86,580.77 805.28,580.29 804.8,579.73 L803.2,578.95 C802.33,578.9 801.47,578.75 800.6,578.79 C800.12,578.82 799.65,578.98 799.2,579.16 C798.84,579.3 798.48,579.47 798.2,579.73 C797.66,580.23 797.13,580.77 796.76,581.4 C796.43,581.95 796.26,582.58 796.12,583.2 C795.99,583.79 795.96,584.4 795.96,585 C795.96,585.54 795.97,586.09 796.12,586.6 C796.36,587.43 796.78,588.2 797.11,589 L798.4,590.22 C799.07,590.48 799.7,590.86 800.4,590.99 C801.11,591.12 801.86,591.13 802.57,591 Z M818.64,591 C819.26,590.88 819.81,590.53 820.4,590.3 L821.6,588.91 L821.69,590.8 L822.47,590.8 L822.47,585.2 L822.2,585.04 L817.6,585.06 L817.6,585.89 L821.57,586 C821.53,586.53 821.57,587.08 821.44,587.6 C821.33,588.03 821.05,588.4 820.86,588.8 L819.6,589.83 C819,589.97 818.41,590.21 817.8,590.24 C817.26,590.28 816.73,590.11 816.2,590.04 L814.4,588.9 C814.13,588.47 813.75,588.08 813.59,587.6 C813.31,586.76 813.12,585.88 813.11,585 C813.11,584.12 813.29,583.24 813.55,582.4 C813.71,581.88 814.03,581.42 814.37,581 C814.65,580.66 815.02,580.39 815.4,580.15 C815.71,579.96 816.05,579.82 816.4,579.73 C816.79,579.62 817.2,579.57 817.6,579.57 C818.07,579.57 818.54,579.62 819,579.73 C819.35,579.81 819.69,579.95 820,580.14 C820.3,580.33 820.57,580.57 820.8,580.85 C821.11,581.23 821.33,581.67 821.6,582.08 L822.31,581.6 C822.04,581.13 821.83,580.62 821.48,580.2 C821.18,579.84 820.81,579.53 820.4,579.32 C819.9,579.07 819.35,578.9 818.8,578.82 C818.14,578.72 817.46,578.72 816.8,578.79 C816.32,578.84 815.85,578.99 815.4,579.17 C815.04,579.31 814.68,579.49 814.4,579.74 C813.86,580.24 813.43,580.85 812.95,581.4 C812.7,582.27 812.29,583.1 812.19,584 C812.08,584.93 812.14,585.88 812.32,586.8 C812.46,587.51 812.87,588.13 813.15,588.8 L814.6,590.26 C815.27,590.51 815.9,590.88 816.6,591.01 C817.27,591.13 817.97,591.12 818.64,591 Z M381.07,590.8 L381.11,586 L385.4,585.81 L387,585.08 L387.84,584 C387.95,583.47 388.13,582.94 388.18,582.4 C388.2,582.07 388.11,581.73 388.08,581.4 L387.23,580 L386.2,579.3 C385.53,579.17 384.88,578.94 384.2,578.9 C382.84,578.84 381.48,578.97 380.12,579 L380.12,590.8 L381.07,590.8 Z M408.7,590.8 L408.7,579 L408,578.9 L407.76,579.2 L407.76,590.8 L408.7,590.8 Z M454.65,590.8 L454.65,590.2 L454.4,590.07 L447.49,590 L447.45,579 L446.6,578.91 L446.51,590.8 L454.65,590.8 Z M492.49,590.8 L492.49,579 L491.8,578.9 L491.54,579.2 L491.54,590.8 L492.49,590.8 Z M508.21,590.8 L503.49,579 L502.4,578.92 L497.62,590.8 L498.58,590.8 L500.2,587.13 L505.6,587.13 L505.88,587.4 L507.25,590.8 L508.21,590.8 Z M545.05,590.8 L545.05,590.2 L544.8,590.07 L537.89,590 L537.84,579 L537,578.91 L536.9,590.8 L545.05,590.8 Z M551.1,590.8 L551.09,579 L550.4,578.9 L550.15,579.2 L550.15,590.8 L551.1,590.8 Z M566.94,590.8 L566.93,579 L566.09,579 L566,589.64 C563.7,586.16 561.42,582.67 559.09,579.2 C559.02,579.08 558.9,579 558.8,578.9 L557.8,578.92 L557.71,590.8 L558.62,590.8 L558.6,580.14 L565.73,590.8 L566.94,590.8 Z M574.51,590.8 L574.5,579 L573.8,578.9 L573.57,579.2 L573.57,590.8 L574.51,590.8 Z M605.27,590.8 C603.72,586.93 602.2,583.05 600.62,579.2 C600.58,579.08 600.47,579 600.4,578.9 L599.4,578.97 L594.67,590.8 L595.65,590.8 L597.2,587.13 L602.8,587.18 L604.28,590.8 L605.27,590.8 Z M650.48,590.8 L650.47,579 L649.61,579 L649.6,589.64 L642.47,579 L641.26,579 L641.25,590.8 L642.12,590.8 L642.2,580.15 C644.5,583.64 646.79,587.13 649.11,590.6 C649.19,590.72 649.3,590.8 649.4,590.9 L650.48,590.8 Z M665.59,590.8 L665.59,590.2 L665.4,590.07 L658.2,590.07 L658.03,589.8 L658.03,585.4 L663.6,585.26 L663.76,585 L663.6,584.35 L658.2,584.35 L658.03,584.2 L658.09,579.8 L665.2,579.74 L665.3,579 L657.2,578.9 L657.1,590.8 L665.59,590.8 Z M676.32,591 C676.82,590.92 677.33,590.82 677.8,590.62 C678.15,590.48 678.46,590.25 678.74,590 C679,589.77 679.23,589.5 679.42,589.2 C679.61,588.89 679.77,588.55 679.85,588.2 C679.99,587.61 680.07,587 680.09,586.4 C680.15,583.93 680.08,581.47 680.08,579 L679.14,579 C679.13,581.47 679.15,583.93 679.12,586.4 C679.12,586.8 679.11,587.21 679.03,587.6 C678.96,587.95 678.79,588.27 678.67,588.6 L677.4,589.84 L675.4,590.25 L673.44,589.8 C673.18,589.6 672.89,589.44 672.67,589.2 C672.45,588.96 672.3,588.67 672.12,588.4 C671.99,587.73 671.76,587.08 671.73,586.4 C671.62,583.94 671.72,581.47 671.71,579 L671,578.9 L670.82,579.2 C670.82,581.6 670.78,584 670.82,586.4 C670.83,586.94 670.86,587.47 670.96,588 C671.03,588.35 671.16,588.69 671.33,589 C671.51,589.32 671.72,589.64 672,589.89 C672.36,590.21 672.76,590.5 673.2,590.67 C673.77,590.9 674.39,591 675,591.06 C675.44,591.11 675.88,591.07 676.32,591 Z M695.38,590.8 L692.02,585.6 L693.7,584.8 L694.67,583.4 L694.71,581.4 L694.28,580.4 L693,579.32 C692.67,579.22 692.35,579.04 692,579.02 C690.15,578.93 688.3,579.01 686.45,579 L686.44,590.8 L687.34,590.8 L687.34,585.8 L690.8,585.71 L694.3,590.8 L695.38,590.8 Z M718.02,590.8 L718.07,586 L722.8,585.68 L724,585.04 L724.89,583.8 C724.96,583.4 725.09,583.01 725.12,582.6 C725.14,582.2 725.05,581.8 725.02,581.4 L724.52,580.4 L723.2,579.31 C722.53,579.18 721.88,578.94 721.2,578.91 C719.83,578.84 718.46,578.97 717.1,579 L717.09,590.8 L718.02,590.8 Z M745.67,590.8 L745.66,579 L745,578.9 L744.72,579.2 L744.72,590.8 L745.67,590.8 Z M791.58,590.8 L791.4,590.07 L784.44,590 L784.38,579 L783.6,578.9 L783.48,590.8 L791.58,590.8 Z M829.46,590.8 L829.45,579 L828.8,578.9 L828.51,579.2 L828.51,590.8 L829.46,590.8 Z M845.15,590.8 L840.46,579 L839.4,578.9 L834.55,590.8 L835.53,590.8 L836.91,587.4 L837.2,587.13 L842.6,587.13 L844.18,590.8 L845.15,590.8 Z M435.4,590.21 C434.86,590.21 434.32,590.19 433.8,590.08 C433.45,590 433.11,589.85 432.8,589.66 C432.42,589.42 432.08,589.13 431.78,588.8 C431.52,588.5 431.3,588.16 431.13,587.8 C430.95,587.42 430.82,587.01 430.73,586.6 C430.63,586.07 430.56,585.54 430.56,585 C430.56,584.4 430.62,583.79 430.74,583.2 C430.82,582.79 430.96,582.38 431.14,582 C431.31,581.64 431.53,581.3 431.8,581 C432.09,580.68 432.43,580.39 432.8,580.16 C433.11,579.96 433.45,579.82 433.8,579.73 C434.26,579.62 434.73,579.57 435.2,579.57 C435.6,579.57 436.01,579.62 436.4,579.72 C436.75,579.81 437.09,579.95 437.4,580.14 C437.79,580.38 438.1,580.71 438.45,581 C438.78,581.67 439.22,582.29 439.45,583 C439.63,583.58 439.69,584.19 439.69,584.8 C439.69,585.47 439.65,586.16 439.45,586.8 C439.23,587.51 438.79,588.13 438.46,588.8 C438.11,589.09 437.79,589.43 437.4,589.67 C437.09,589.86 436.75,589.99 436.4,590.09 C436.08,590.17 435.74,590.21 435.4,590.21 Z M464.8,590.21 C464.26,590.22 463.72,590.19 463.2,590.07 C462.85,590 462.5,589.84 462.2,589.65 C461.83,589.41 461.49,589.11 461.2,588.78 C460.94,588.49 460.73,588.15 460.56,587.8 C460.37,587.42 460.24,587.01 460.16,586.6 C460.05,586.07 459.99,585.54 460,585 C460,584.4 460.05,583.79 460.16,583.2 C460.24,582.79 460.38,582.38 460.57,582 C460.73,581.66 460.95,581.33 461.2,581.04 C461.49,580.71 461.83,580.41 462.2,580.17 C462.5,579.97 462.85,579.83 463.2,579.74 C463.66,579.62 464.13,579.54 464.6,579.57 C465.21,579.61 465.8,579.82 466.4,579.95 L467.87,581 C468.2,581.67 468.64,582.29 468.87,583 C469.06,583.58 469.1,584.2 469.1,584.8 C469.1,585.47 469.07,586.16 468.87,586.8 C468.66,587.51 468.21,588.13 467.88,588.8 C467.52,589.09 467.19,589.43 466.8,589.68 C466.56,589.84 466.28,589.96 466,590.04 C465.61,590.14 465.2,590.21 464.8,590.21 Z M621.8,583.84 L621.52,583.8 C621.28,583.45 621.01,583.12 620.8,582.76 C620.66,582.52 620.53,582.27 620.45,582 C620.37,581.74 620.37,581.47 620.34,581.2 C620.39,581 620.4,580.79 620.49,580.6 C620.59,580.38 620.77,580.2 620.91,580 C621.07,579.9 621.22,579.76 621.4,579.7 C621.66,579.61 621.93,579.55 622.2,579.55 C622.47,579.55 622.73,579.65 623,579.71 L623.66,580.2 L623.88,580.6 L623.88,581.8 L623.27,582.8 L621.8,583.84 Z M706,590.2 C705.47,590.2 704.92,590.19 704.4,590.08 C704.05,590.01 703.71,589.86 703.4,589.67 C703.01,589.43 702.63,589.15 702.35,588.8 C702.01,588.38 701.72,587.91 701.56,587.4 C701.31,586.63 701.18,585.81 701.13,585 C701.1,584.4 701.2,583.79 701.32,583.2 C701.4,582.79 701.54,582.38 701.72,582 C701.89,581.64 702.09,581.29 702.36,581 C702.66,580.67 703.02,580.38 703.4,580.15 C703.71,579.95 704.05,579.82 704.4,579.73 C704.79,579.62 705.2,579.57 705.6,579.57 C706.07,579.57 706.54,579.62 707,579.73 C707.35,579.81 707.69,579.96 708,580.15 C708.37,580.39 708.72,580.67 709.02,581 C709.29,581.3 709.5,581.64 709.67,582 C709.85,582.38 709.99,582.79 710.08,583.2 C710.19,583.73 710.26,584.26 710.26,584.8 C710.26,585.4 710.2,586.01 710.08,586.6 C710,587.01 709.86,587.42 709.68,587.8 C709.51,588.16 709.3,588.51 709.04,588.8 C708.73,589.13 708.38,589.42 708,589.66 C707.69,589.86 707.35,589.99 707,590.08 C706.68,590.17 706.34,590.2 706,590.2 Z M772.2,590.24 C771.66,590.23 771.12,590.15 770.6,590.02 C770.28,589.93 769.97,589.78 769.69,589.6 C769.34,589.37 768.99,589.13 768.73,588.8 C768.4,588.38 768.11,587.91 767.94,587.4 C767.7,586.63 767.55,585.81 767.52,585 C767.49,584.33 767.56,583.64 767.76,583 C767.97,582.29 768.41,581.67 768.74,581 C769.1,580.71 769.41,580.38 769.8,580.14 C770.11,579.95 770.45,579.81 770.8,579.72 C771.19,579.62 771.6,579.57 772,579.57 C772.47,579.57 772.94,579.62 773.4,579.73 C773.75,579.82 774.09,579.96 774.4,580.16 C774.77,580.39 775.13,580.66 775.4,581.01 C775.77,581.49 776.08,582.03 776.27,582.6 C776.5,583.31 776.61,584.06 776.65,584.8 C776.68,585.4 776.59,586.01 776.47,586.6 C776.39,587.01 776.25,587.42 776.06,587.8 C775.89,588.16 775.68,588.5 775.41,588.8 C775.12,589.13 774.77,589.42 774.4,589.66 C774.09,589.85 773.75,589.99 773.4,590.08 C773.01,590.18 772.6,590.25 772.2,590.24 Z M801.8,590.2 C801.27,590.2 800.72,590.19 800.2,590.08 C799.85,590.01 799.51,589.86 799.2,589.67 C798.82,589.43 798.44,589.15 798.15,588.8 C797.82,588.38 797.54,587.91 797.37,587.4 C797.13,586.63 796.99,585.81 796.94,585 C796.9,584.4 797.01,583.79 797.12,583.2 C797.2,582.79 797.34,582.38 797.53,582 C797.7,581.64 797.9,581.29 798.17,581 C798.47,580.67 798.82,580.39 799.2,580.15 C799.51,579.96 799.85,579.82 800.2,579.73 C800.59,579.63 801,579.54 801.4,579.57 C802.08,579.63 802.73,579.84 803.4,579.98 L804.83,581 C805.1,581.47 805.46,581.89 805.63,582.4 C805.88,583.17 806.03,583.99 806.07,584.8 C806.1,585.47 805.96,586.14 805.83,586.8 C805.76,587.15 805.64,587.48 805.48,587.8 C805.31,588.15 805.11,588.51 804.85,588.8 C804.54,589.14 804.18,589.43 803.8,589.67 C803.49,589.86 803.15,589.99 802.8,590.08 C802.48,590.17 802.14,590.2 801.8,590.2 Z M384.8,585.02 C383.6,585.13 382.4,585.06 381.2,585.09 L381.08,585 L381.07,580 L381.2,579.74 C382.13,579.74 383.07,579.7 384,579.74 C384.47,579.76 384.94,579.82 385.4,579.94 C385.69,580.01 385.96,580.15 386.2,580.32 C386.46,580.5 386.65,580.77 386.87,581 C386.95,581.2 387.05,581.39 387.1,581.6 C387.17,581.86 387.22,582.13 387.22,582.4 C387.21,582.74 387.14,583.07 387.06,583.4 C387.03,583.54 386.94,583.67 386.88,583.8 L386,584.65 C385.6,584.78 385.22,584.98 384.8,585.02 Z M691.2,584.83 C689.93,584.9 688.65,584.81 687.38,584.8 L687.4,579.78 C688.53,579.77 689.67,579.72 690.8,579.74 C691.14,579.74 691.47,579.79 691.8,579.86 C692.07,579.91 692.33,580.02 692.6,580.11 L693.43,580.8 C693.54,581.07 693.68,581.32 693.76,581.6 C693.83,581.86 693.88,582.13 693.86,582.4 C693.84,582.74 693.75,583.07 693.65,583.4 C693.61,583.54 693.52,583.67 693.45,583.8 L692.6,584.5 C692.13,584.61 691.68,584.8 691.2,584.83 Z M721.8,585.02 C720.61,585.13 719.4,585.06 718.2,585.09 L718.03,585 L718.08,579.8 C719.05,579.78 720.03,579.72 721,579.74 C721.4,579.75 721.81,579.8 722.2,579.91 C722.55,580 722.87,580.19 723.2,580.34 C723.41,580.56 723.65,580.75 723.82,581 C723.94,581.18 724.03,581.39 724.08,581.6 C724.14,581.86 724.15,582.13 724.15,582.4 C724.15,582.67 724.14,582.94 724.08,583.2 C724.04,583.41 723.92,583.6 723.85,583.8 L723,584.62 C722.6,584.75 722.22,584.98 721.8,585.02 Z M602.4,586.26 L597.6,586.3 L597.48,586.2 C598.17,584.4 598.83,582.59 599.55,580.8 C599.67,580.51 599.85,580.25 600,579.97 L602.4,586.26 Z M842.2,586.3 L837.6,586.3 L837.37,586.2 L839.8,579.98 C839.87,580.05 839.97,580.11 840.01,580.2 C840.73,581.92 841.38,583.66 842.05,585.4 C842.16,585.66 842.24,585.93 842.33,586.2 L842.2,586.3 Z M505.2,586.3 L500.6,586.3 L500.44,586.2 L502.8,580.08 L503,580.07 C503.02,580.12 503.05,580.16 503.06,580.2 C503.8,582.07 504.53,583.93 505.25,585.8 C505.31,585.93 505.35,586.07 505.39,586.2 L505.2,586.3 Z M622.6,590.23 C622.07,590.32 621.53,590.32 621,590.28 C620.72,590.26 620.45,590.19 620.2,590.07 C619.94,589.96 619.69,589.8 619.49,589.6 C619.26,589.37 619.11,589.07 618.91,588.8 C618.86,588.53 618.76,588.27 618.76,588 C618.77,587.66 618.86,587.33 618.95,587 C618.99,586.86 619.05,586.71 619.14,586.6 C619.4,586.28 619.68,585.97 620,585.71 C620.37,585.42 620.8,585.21 621.2,584.96 L621.4,585 L624.47,588.8 L624.52,589 C624.41,589.14 624.33,589.3 624.2,589.41 C624.02,589.58 623.82,589.72 623.6,589.84 C623.28,590 622.95,590.17 622.6,590.23 Z" fill="currentColor" fill-rule="evenodd"/></symbol></svg>
+<div class="app">
+  <header class="top"><div class="in">
+    <div>
+      <div class="eyebrow" id="role-label">Acesso</div>
+      <h1 id="h-title">SiAGE | Sistema de Agendamento e Gestão Emotiss</h1>
+      <p class="sub" id="sub">Entre com seu código ou faça o primeiro acesso.</p>
+    </div>
+    <div class="hdr"><svg class="logo" role="img" aria-label="Emotiss. Psicologia Clínica e Neuropsicologia"><use href="#logo"/></svg><div class="actions" id="top-actions"></div></div>
+  </div></header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Seções" hidden></nav>
+  <main id="main"></main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- utilidades ---------- */
+function h(tag, props){
+  var e=document.createElement(tag), after=null;
+  props=props||{};
+  Object.keys(props).forEach(function(k){
+    var v=props[k]; if(v==null||v===false) return;
+    if(k==='class') e.className=v;
+    else if(k==='value'||k==='disabled'||k==='hidden'){ after=after||{}; after[k]=v; }
+    else if(k.slice(0,2)==='on') e.addEventListener(k.slice(2),v);
+    else e.setAttribute(k, v===true?'':v);
+  });
+  for(var i=2;i<arguments.length;i++) add(e,arguments[i]);
+  if(after) Object.keys(after).forEach(function(k){ e[k]=after[k]; });
+  return e;
+}
+function add(e,kid){
+  if(kid==null||kid===false) return;
+  if(Array.isArray(kid)) return kid.forEach(function(k){add(e,k)});
+  e.append(kid.nodeType?kid:document.createTextNode(String(kid)));
+}
+function pad(n){return n<10?'0'+n:''+n}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parse(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function addDays(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n)}
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());return addDays(x,-((x.getDay()+6)%7))}
+var fWd=new Intl.DateTimeFormat('pt-BR',{weekday:'short'}), fMon=new Intl.DateTimeFormat('pt-BR',{month:'short'});
+function wd(d){return fWd.format(d).replace('.','')}
+function mon(d){return fMon.format(d).replace('.','')}
+function longDay(s){var d=parse(s);return wd(d)+', '+d.getDate()+' '+mon(d)}
+function brDate(iso){try{return new Date(iso).toLocaleDateString('pt-BR')}catch(e){return ''}}
+function isHttp(u){return /^https?:\/\//i.test(u||'')}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var ACCEPT='.pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+var MAX_BYTES=5*1024*1024;
+var STATUS={agendada:'Agendada',confirmada:'Confirmada',realizada:'Realizada',faltou:'Faltou',cancelada:'Cancelada'};
+var todayKey=ymd(new Date());
+
+var toastTimer=null;
+function toast(msg){var t=document.getElementById('toast');t.replaceChildren(h('span',{},msg));clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.replaceChildren()},4500)}
+function btn(label,onclick,cls,attrs){return h('button',Object.assign({type:'button',class:'btn '+(cls||''),onclick:onclick},attrs||{}),label)}
+function confirmBtn(label,onGo,armed){
+  var b=h('button',{type:'button',class:'btn small danger'},label), t=null;
+  b.addEventListener('click',function(){
+    if(b.dataset.armed){clearTimeout(t);onGo();return}
+    b.dataset.armed='1';b.textContent=armed||'Confirmar exclusão';
+    t=setTimeout(function(){delete b.dataset.armed;b.textContent=label},4000);
+  });
+  return b;
+}
+function field(label,input,wide){return h('label',{class:'f'+(wide?' wide':'')},h('span',{},label),input)}
+function profs(){return (S.d&&S.d.profissionais)||[]}
+function profPor(n){return profs().filter(function(p){return p.nome===n})[0]}
+function corProf(n){var p=profPor(n);return p&&p.cor?p.cor:'#6b6358'}
+function profServ(p){return String(p.servicos||'').split(',').filter(Boolean)}
+function profsAtivos(){return profs().filter(function(p){return p.ativo!=='nao'})}
+function profsDe(sid){return profsAtivos().filter(function(p){return profServ(p).indexOf(sid)>=0})}
+function dot(cor){return h('span',{class:'dot',style:'background:'+cor})}
+function avatar(p,tam){
+  var st='width:'+tam+'px;height:'+tam+'px';
+  if(p.foto)return h('img',{class:'av',src:p.foto,alt:'',style:st});
+  return h('span',{class:'av','aria-hidden':'true',style:st+';font-size:'+Math.round(tam*.4)+'px'},(p.nome||'?').charAt(0).toUpperCase());
+}
+function chipBar(titulo,ops,atual,onPick){
+  return h('div',{class:'frow'},h('span',{class:'eyebrow'},titulo),h('div',{class:'chips'},ops.map(function(o){
+    return h('button',{type:'button',class:'chip','aria-pressed':atual===o.v?'true':'false',onclick:function(){onPick(o.v)}},o.cor?dot(o.cor):null,o.l)})));
+}
+function empty(title,text){return h('div',{class:'empty'},h('b',{},title),text)}
+function opt(v,l){return h('option',{value:v},l)}
+
+/* ---------- servidor (Apps Script como API) ---------- */
+// Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
+var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+async function api(fn){
+  var args=[].slice.call(arguments,1);
+  var r;
+  try{
+    r=await fetch(API_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args})});
+  }catch(e){throw new Error('Sem conexão com o servidor. Verifique a internet e tente de novo.')}
+  var j;
+  try{j=await r.json()}catch(e){throw new Error('Resposta inválida do servidor. Tente novamente.')}
+  if(!j||!j.ok)throw new Error(String((j&&j.erro)||'Erro no servidor.').replace(/^Error:\s*/,''));
+  return j.data;
+}
+var S={modo:null,token:'',codigo:'',tab:'agenda',semana:mondayOf(new Date()),
+  d:{config:null,pacientes:[],agenda:[],materiais:[],mensagens:[],disponibilidade:[],contratos:[],fichas:[],ficha:null,perfil:null},timer:null,editPac:null,slots:{},bk:null};
+function ctx(){return S.modo==='gestao'?{modo:'gestao',token:S.token}:{modo:'paciente',codigo:S.codigo,token:S.ptoken}}
+function falha(e){
+  if(/SESSAO_EXPIRADA/.test(e.message)){sair('Sua sessão expirou. Entre de novo.');return}
+  toast(e.message);
+}
+async function recarregar(silencioso){
+  try{S.d=await api('getEstado',ctx());renderDados()}
+  catch(e){if(!silencioso||/SESSAO_EXPIRADA/.test(e.message))falha(e)}
+}
+function lerArquivo(f){
+  return new Promise(function(ok,fail){
+    if(!f) return ok(null);
+    if(f.size>MAX_BYTES) return fail(new Error('O arquivo passa de 5 MB.'));
+    var r=new FileReader();
+    r.onload=function(){ok({nome:f.name,mime:f.type||'',base64:String(r.result).split(',')[1]||''})};
+    r.onerror=function(){fail(new Error('Não foi possível ler o arquivo.'))};
+    r.readAsDataURL(f);
+  });
+}
+async function abrirArquivo(id,nome,botao){
+  botao.disabled=true;
+  try{
+    var r=await api('baixarArquivo',ctx(),id);
+    var bin=atob(r.base64),u8=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+    var url=URL.createObjectURL(new Blob([u8],{type:r.mime}));
+    var a=h('a',{href:url,download:r.nome||nome});
+    document.body.append(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},30000);
+  }catch(e){falha(e)}
+  botao.disabled=false;
+}
+
+/* ---------- dados derivados ---------- */
+function porCodigo(){var m={};S.d.pacientes.forEach(function(p){m[p.codigo]=p});return m}
+function nomeDe(codigo,iniciais){var p=porCodigo()[codigo];return p?p.nome:(iniciais||codigo)}
+function avisoRef(){return S.avRef!=null?S.avRef:((S.d.perfil&&S.d.perfil.vistoEm)||'')}
+function avisoNovo(a){return (a.criadoEm||'')>avisoRef()}
+function novosAvisos(){return (S.d.avisos||[]).filter(function(a){return (a.criadoEm||'')>((S.d.perfil&&S.d.perfil.vistoEm)||'')}).length}
+function naoLidas(){return S.d.mensagens.filter(function(m){return m.situacao==='nova'}).length}
+function arquivosDe(m){
+  var out=[];
+  if(m.arquivoId) out.push(h('button',{type:'button',class:'btn small',onclick:function(ev){abrirArquivo(m.arquivoId,m.arquivoNome,ev.currentTarget)}},'Baixar '+(m.arquivoNome||'arquivo')));
+  if(isHttp(m.link)) out.push(h('a',{class:'file',href:m.link,target:'_blank',rel:'noopener noreferrer'},'Abrir link'));
+  return out;
+}
+function materialCard(m,gestao){
+  var aud=(({fatura:'Fatura/recibo',documento:'Documento psicológico',contrato:'Contrato'})[m.categoria]||'Material de apoio')+' · '+(m.para==='todos'?'Todos os pacientes':'Para '+nomeDe(m.para,m.para));
+  return h('article',{class:'item'},
+    h('div',{class:'row'},h('h3',{},m.titulo||'Sem título'),gestao?h('span',{class:'pill tag'},aud):null),
+    m.descricao?h('p',{class:'body'},m.descricao):null,
+    h('div',{class:'row'},h('div',{class:'actions'},arquivosDe(m)),h('span',{class:'meta'},brDate(m.criadoEm)),
+      gestao?confirmBtn('Excluir',function(){excluir('Materiais',m.id)}):null));
+}
+async function excluir(tabela,id){
+  try{await api('excluir',ctx(),tabela,id);await recarregar()}catch(e){falha(e)}
+}
+
+/* ================= ENTRADA ================= */
+var PANELS={}, patientSelects=[], profSelects=[], P={};
+function buildGate(){
+  var senha=h('input',{id:'gt-senha',type:'password',required:true,autocomplete:'current-password'});
+  var codigo=h('input',{id:'gt-codigo',type:'text',required:true,placeholder:'PAC-XXXXXXXX',autocomplete:'off',value:lsGet('siage-codigo-lembrado')||''});
+  try{localStorage.removeItem('clinica-codigo')}catch(e){}
+  var lembrar=h('input',{id:'gt-lembrar',type:'checkbox'});lembrar.checked=!!lsGet('siage-codigo-lembrado');
+  var fLembrar=h('label',{class:'f check'},lembrar,h('span',{},'Lembrar meu código neste aparelho (não use em computadores compartilhados)'));
+  var otp=h('input',{id:'gt-otp',type:'text',inputmode:'numeric',maxlength:6,autocomplete:'one-time-code',placeholder:'000000'});
+  var fO=field('Código de 6 números enviado ao seu e-mail',otp);fO.hidden=true;var et=0;
+  var m1=h('p',{class:'meta'}), m2=h('p',{class:'meta'}), m3=h('p',{class:'meta'});
+  var b1=h('button',{type:'submit',class:'btn primary'},'Entrar na gestão');
+  var b2=h('button',{type:'submit',class:'btn primary'},'Entrar como paciente');
+  var f1=h('form',{class:'card panel-form'},h('div',{class:'eyebrow'},'Equipe Emotiss'),h('h2',{},'Gestão'),field('Senha da gestão',senha),m1,h('div',{class:'actions'},b1));
+  var f2=h('form',{class:'panel-form pform'},h('h2',{},'Já tenho o código'),h('p',{class:'meta'},'Digite o código de paciente. Por segurança, vamos enviar um código de confirmação ao seu e-mail.'),field('Código do paciente',codigo),fO,fLembrar,m2,h('div',{class:'actions'},b2));
+  var cn=h('input',{id:'cd-nome',type:'text',required:true,autocomplete:'name',placeholder:'Nome completo'});
+  var ce=h('input',{id:'cd-email',type:'email',required:true,autocomplete:'email',placeholder:'voce@exemplo.com'});
+  var ct=h('input',{id:'cd-tel',type:'tel',autocomplete:'tel',placeholder:'(31) 90000-0000'});
+  var cc=h('input',{id:'cd-aceite',type:'checkbox'});
+  var re=false;
+  var fN=field('Nome completo',cn), fT=field('Telefone (opcional)',ct);
+  var fC=h('label',{class:'f check wide'},cc,h('span',{},'Autorizo a clínica a guardar meus dados e a me enviar por e-mail o código de acesso e avisos sobre meus agendamentos.'));
+  var b3=h('button',{type:'submit',class:'btn primary'},'Receber código por e-mail');
+  var tg=h('button',{type:'button',class:'btn small'},'Já tenho cadastro: reenviar meu código');
+  tg.addEventListener('click',function(){
+    re=!re;[fN,fT,fC].forEach(function(x){x.hidden=re});cn.required=!re;
+    tg.textContent=re?'Sou novo: fazer cadastro':'Já tenho cadastro: reenviar meu código';
+    b3.textContent=re?'Reenviar código':'Receber código por e-mail';m3.textContent='';
+  });
+  var f3=h('form',{class:'panel-form pform',hidden:true},h('h2',{},'Primeiro acesso'),h('p',{class:'meta'},'Cadastre-se para agendar. Enviaremos o código de acesso para o seu e-mail.'),
+    h('div',{class:'fields'},fN,field('E-mail',ce),fT,fC),m3,h('div',{class:'actions'},b3,tg));
+  var tA=h('button',{type:'button',role:'tab','aria-selected':'true'},'Já tenho o código');
+  var tB=h('button',{type:'button',role:'tab','aria-selected':'false'},'Primeiro acesso');
+  function aba(n){f2.hidden=n!==0;f3.hidden=n!==1;tA.setAttribute('aria-selected',n===0?'true':'false');tB.setAttribute('aria-selected',n===1?'true':'false')}
+  tA.addEventListener('click',function(){aba(0)});tB.addEventListener('click',function(){aba(1)});
+  var pac=h('div',{class:'card panel-form hl'},h('div',{class:'eyebrow'},'Área do paciente'),h('div',{class:'ptabs',role:'tablist','aria-label':'Acesso do paciente'},tA,tB),f2,f3);
+  f1.addEventListener('submit',async function(ev){
+    ev.preventDefault();b1.disabled=true;m1.textContent='Entrando…';
+    try{var r=await api('loginGestao',senha.value);S.modo='gestao';S.token=r.token;senha.value='';m1.textContent='';await entrar()}
+    catch(e){m1.textContent=e.message}
+    b1.disabled=false;
+  });
+  f2.addEventListener('submit',async function(ev){
+    ev.preventDefault();b2.disabled=true;m2.textContent=et?'Verificando…':'Enviando código…';
+    try{
+      var cod=codigo.value.trim().toUpperCase(),tok;
+      if(et===0){
+        var r0=await api('iniciarLoginPaciente',cod);
+        if(r0.token){tok=r0.token}
+        else{et=1;fO.hidden=false;codigo.readOnly=true;b2.textContent='Confirmar e entrar';m2.textContent='Enviamos um código de 6 números para '+r0.email+'. Se não chegar em alguns minutos, olhe o spam. Para pedir outro, recarregue a página.';otp.focus();return}
+      }else{
+        tok=(await api('verificarLoginPaciente',cod,otp.value.trim())).token;
+      }
+      S.modo='paciente';S.codigo=cod;S.ptoken=tok;
+      S.d=await api('getEstado',ctx());
+      if(lembrar.checked)lsSet('siage-codigo-lembrado',S.codigo);else{try{localStorage.removeItem('siage-codigo-lembrado')}catch(e){}codigo.value=''}
+      m2.textContent='';otp.value='';fO.hidden=true;et=0;codigo.readOnly=false;b2.textContent='Entrar como paciente';
+      await entrar(true);
+    }catch(e){S.modo=null;m2.textContent=e.message}
+    finally{b2.disabled=false}
+  });
+  f3.addEventListener('submit',async function(ev){
+    ev.preventDefault();b3.disabled=true;m3.textContent='Enviando…';
+    try{
+      await api('cadastrarPaciente',{nome:cn.value,email:ce.value,telefone:ct.value,aceite:cc.checked,reenviar:re});
+      m3.textContent='Se os dados estiverem corretos, o código foi enviado ao seu e-mail (veja também o spam). Depois é só digitá-lo em "Já tenho o código".';
+      if(!re){cn.value='';ct.value='';cc.checked=false}
+    }catch(e){m3.textContent=e.message}
+    b3.disabled=false;
+  });
+  return h('div',{class:'gates'},pac,f1);
+}
+async function entrar(jaCarregado){
+  if(!jaCarregado) await recarregar();
+  PANELS.gate.hidden=true;
+  Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true});
+  S.tab=S.modo==='gestao'?'agenda':'sessoes';
+  S.slots={};S.bk=novoBk();P.bkInit=0;if(P.fxReset)P.fxReset();
+  renderShell();
+  clearInterval(S.timer);
+  S.timer=setInterval(function(){if(!document.hidden&&!S.editPac&&!document.querySelector('details.pedido[open]'))recarregar(true)},60000);
+}
+function sair(msg){
+  clearInterval(S.timer);if(P.fxReset)P.fxReset();S.modo=null;S.token='';S.ptoken='';S.d={config:S.d.config,pacientes:[],agenda:[],materiais:[],mensagens:[],disponibilidade:[],contratos:[],fichas:[],ficha:null,perfil:null};
+  PANELS.gate.hidden=false;
+  Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true});
+  document.getElementById('tabs').hidden=true;
+  document.getElementById('role-label').textContent='Acesso';document.getElementById('h-title').textContent='SiAGE | Sistema de Agendamento e Gestão Emotiss';document.querySelector('.top').classList.remove('pac');
+  document.getElementById('sub').textContent='Entre com seu código ou faça o primeiro acesso.';
+  document.getElementById('top-actions').replaceChildren();
+  if(msg) toast(msg);
+}
+
+/* ================= GESTÃO ================= */
+function buildAgenda(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.weekLabel=h('strong',{class:'weeklabel'});
+  P.stats=h('div',{class:'tiles'});
+  P.filters=h('div',{class:'filters'});
+  P.ag=buildAgendaForm();
+  P.week=h('div',{class:'week'});
+  el.append(
+    h('div',{class:'bar'},
+      h('div',{class:'seg'},btn('‹',function(){S.semana=addDays(S.semana,-7);renderAgenda()},'',{'aria-label':'Semana anterior'}),
+        btn('Hoje',function(){S.semana=mondayOf(new Date());renderAgenda()}),
+        btn('›',function(){S.semana=addDays(S.semana,7);renderAgenda()},'',{'aria-label':'Próxima semana'})),
+      P.weekLabel,btn('Nova sessão',function(){toggleAgForm()},'primary')),
+    P.stats,P.filters,P.ag.box,P.week);
+  return el;
+}
+function buildAgendaForm(){
+  var f={};
+  f.patient=h('select',{id:'ag-paciente',required:true});patientSelects.push({sel:f.patient,todos:false});
+  f.svc=h('select',{id:'ag-servico'},opt('','Sem serviço específico'));
+  f.date=h('input',{id:'ag-data',type:'date',required:true,value:todayKey});
+  f.time=h('input',{id:'ag-hora',type:'time',required:true,value:'14:00'});
+  f.dur=h('select',{id:'ag-duracao'},opt('50','50 min'),opt('30','30 min'),opt('60','60 min'),opt('90','90 min'));
+  f.mode=h('select',{id:'ag-modo'},opt('Presencial','Presencial'),opt('Online','Online'));
+  f.psy=h('select',{id:'ag-profissional'});profSelects.push({sel:f.psy,vazio:'Sem profissional'});
+  f.place=h('input',{id:'ag-local',type:'text',placeholder:'Sala ou link da chamada'});
+  f.svc.addEventListener('change',function(){var sv=svcs().filter(function(x){return x.id===f.svc.value})[0];if(sv)f.dur.value=String(sv.duracao)});
+  f.msg=h('p',{class:'meta'});
+  var salvar=h('button',{type:'submit',class:'btn primary'},'Salvar sessão');
+  f.box=h('form',{class:'card panel-form',hidden:true},h('h2',{},'Nova sessão'),
+    h('div',{class:'fields'},field('Paciente',f.patient),field('Serviço',f.svc),field('Profissional',f.psy),field('Data',f.date),field('Horário',f.time),field('Duração',f.dur),field('Modalidade',f.mode),field('Sala ou link',f.place)),
+    f.msg,h('div',{class:'actions'},salvar,btn('Fechar',function(){f.box.hidden=true})));
+  f.box.addEventListener('submit',async function(ev){
+    ev.preventDefault();
+    if(!f.patient.value){f.msg.textContent='Cadastre um paciente antes de agendar.';return}
+    salvar.disabled=true;f.msg.textContent='Salvando…';
+    try{
+      await api('salvarSessao',ctx(),{codigo:f.patient.value,servico:f.svc.value,data:f.date.value,hora:f.time.value,duracao:f.dur.value,modalidade:f.mode.value,profissional:f.psy.value,local:f.place.value});
+      f.msg.textContent='';f.box.hidden=true;S.semana=mondayOf(parse(f.date.value));await recarregar();toast('Sessão salva.');
+    }catch(e){f.msg.textContent=e.message}
+    salvar.disabled=false;
+  });
+  return f;
+}
+function toggleAgForm(pre){
+  var f=P.ag;f.box.hidden=pre?false:!f.box.hidden;
+  if(pre){if(pre.codigo)f.patient.value=pre.codigo;if(pre.data)f.date.value=pre.data;if(pre.profissional)f.psy.value=pre.profissional;if(pre.servico)f.svc.value=pre.servico}
+  if(!f.box.hidden)f.box.scrollIntoView({block:'nearest'});
+}
+function sessaoItem(a){
+  var sel=h('select',{class:'st','aria-label':'Situação da sessão'},Object.keys(STATUS).map(function(k){return opt(k,STATUS[k])}));
+  sel.value=a.status||'agendada';
+  sel.addEventListener('change',async function(){
+    try{await api('atualizarSessao',ctx(),a.id,sel.value);await recarregar()}catch(e){falha(e);sel.value=a.status}
+  });
+  var cor=corProf(a.profissional);
+  return h('li',{class:'sess',style:'--c:'+(a.profissional?cor:'var(--line)')},
+    h('div',{class:'row'},h('span',{class:'t'},a.hora),a.profissional?h('span',{class:'pchip',style:'--c:'+cor},dot(cor),a.profissional):h('span',{class:'meta'},'Sem profissional')),
+    h('div',{class:'who'},nomeDe(a.codigo,a.iniciais)),
+    h('div',{class:'meta'},[svcNome(a.servico),a.aceiteEm?'Aceite registrado (enviar contrato)':'',a.modalidade,a.duracao?a.duracao+' min':'',a.local].filter(Boolean).join(' · ')),
+    h('div',{class:'row'},sel,confirmBtn('Excluir',function(){excluir('Agenda',a.id)})));
+}
+function janelaVisivel(j,fp,fs){
+  if(fp&&j.profissional&&j.profissional!==fp)return false;
+  if(fp&&!j.profissional)return true;
+  if(fs&&j.profissional){var p=profPor(j.profissional);if(!p||profServ(p).indexOf(fs)<0)return false}
+  return true;
+}
+function janelaItem(j){
+  var cor=j.profissional?corProf(j.profissional):'#6b6358';
+  return h('li',{class:'win',style:'--c:'+cor},h('b',{},j.inicio+'–'+j.fim),h('span',{},j.profissional||'Todos os profissionais'));
+}
+function renderAgenda(){
+  S.fProf=S.fProf||'';S.fServ=S.fServ||'';
+  var ws=S.semana,we=addDays(ws,6),kws=ymd(ws),kwe=ymd(we);
+  P.weekLabel.textContent=ws.getDate()+' '+mon(ws)+' – '+we.getDate()+' '+mon(we)+' '+we.getFullYear();
+  var passa=function(a){return (!S.fProf||a.profissional===S.fProf)&&(!S.fServ||a.servico===S.fServ)};
+  var vivas=S.d.agenda.filter(function(a){return a.status!=='cancelada'&&passa(a)});
+  var hoje=vivas.filter(function(a){return a.data===todayKey}).length;
+  var sem=vivas.filter(function(a){return a.data>=kws&&a.data<=kwe}).length;
+  var pend=S.d.agenda.filter(function(a){return a.status==='agendada'&&a.data>=todayKey&&passa(a)}).length;
+  P.stats.replaceChildren.apply(P.stats,tiles([{l:'Hoje',v:hoje},{l:'Nesta semana',v:sem},{l:'A confirmar',v:pend},{l:'Atualizações novas',v:naoLidas()}]));
+  var semana=S.d.agenda.filter(function(a){return a.status!=='cancelada'&&a.data>=kws&&a.data<=kwe});
+  var opsP=[{v:'',l:'Todos'}].concat(profsAtivos().map(function(p){return {v:p.nome,l:p.nome+' ('+semana.filter(function(a){return a.profissional===p.nome}).length+')',cor:p.cor}}));
+  var opsS=[{v:'',l:'Todos'}].concat(svcs().map(function(x){return {v:x.id,l:x.nome}}));
+  P.filters.replaceChildren(
+    chipBar('Profissional',opsP,S.fProf,function(v){S.fProf=v;renderAgenda()}),
+    chipBar('Serviço',opsS,S.fServ,function(v){S.fServ=v;renderAgenda()}),
+    chipBar('Exibir',[{v:'1',l:'Horários de atendimento'}],S.semDisp?'':'1',function(){S.semDisp=!S.semDisp;renderAgenda()}));
+  P.week.replaceChildren();
+  var disp=S.d.disponibilidade||[];
+  for(var i=0;i<7;i++){(function(d,key){
+    var itens=S.d.agenda.filter(function(a){return a.data===key&&passa(a)}).sort(function(a,b){return (a.hora||'').localeCompare(b.hora||'')});
+    var wins=S.semDisp?[]:disp.filter(function(j){return +j.diaSemana===d.getDay()&&janelaVisivel(j,S.fProf,S.fServ)}).sort(function(a,b){return a.inicio.localeCompare(b.inicio)});
+    P.week.append(h('section',{class:'day'+(key===todayKey?' today':'')},
+      h('header',{},h('span',{class:'dw'},wd(d)),h('span',{class:'dn'},d.getDate()+' '+mon(d)),
+        h('button',{type:'button',class:'btn small add','aria-label':'Nova sessão em '+longDay(key),onclick:function(){toggleAgForm({data:key,profissional:S.fProf,servico:S.fServ})}},'+')),
+      wins.length?h('ul',{class:'wins','aria-label':'Horários de atendimento'},wins.map(janelaItem)):null,
+      itens.length?h('ul',{class:'clean'},itens.map(sessaoItem)):h('p',{class:'none'},'Sem sessões')));
+  })(addDays(ws,i),ymd(addDays(ws,i)))}
+}
+
+function buildPacientes(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var nome=h('input',{id:'pc-nome',type:'text',required:true,placeholder:'Nome completo'});
+  var tel=h('input',{id:'pc-telefone',type:'tel',placeholder:'(31) 90000-0000'});
+  var email=h('input',{id:'pc-email',type:'email',placeholder:'paciente@exemplo.com',autocomplete:'off'});
+  var avisos=h('input',{id:'pc-avisos',type:'checkbox'});
+  var msg=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn primary'},'Cadastrar');
+  var form=h('form',{class:'panel-form',style:'margin-top:12px'},
+    h('div',{class:'fields'},field('Nome',nome),field('Telefone',tel),field('E-mail (opcional)',email),
+      h('label',{class:'f check wide'},avisos,h('span',{},'O paciente autorizou receber avisos por e-mail quando houver novo material. O aviso não mostra o conteúdo.'))),
+    h('p',{class:'meta'},'O sistema gera um código. Se houver e-mail, o código é enviado automaticamente ao paciente; sem e-mail, entregue o código a ele. Pacientes também podem se cadastrar sozinhos pela tela inicial.'),
+    msg,h('div',{class:'actions'},ok));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;msg.textContent='Salvando…';
+    try{var p=await api('salvarPaciente',ctx(),{nome:nome.value,telefone:tel.value,email:email.value,avisos:avisos.checked});nome.value='';tel.value='';email.value='';avisos.checked=false;msg.textContent='';await recarregar();toast('Paciente cadastrado. Código: '+p.codigo)}
+    catch(e){msg.textContent=e.message}
+    ok.disabled=false;
+  });
+  P.patList=h('div',{class:'list'});
+  el.append(h('details',{class:'card fold'},h('summary',{},'+ Cadastrar paciente'),form),P.patList);
+  return el;
+}
+function renderPacientes(){
+  var lista=S.d.pacientes.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
+  if(!lista.length){P.patList.replaceChildren(empty('Nenhum paciente cadastrado','Cadastre o primeiro paciente acima para começar a agendar.'));return}
+  P.patList.replaceChildren.apply(P.patList,lista.map(function(p){
+    var prox=S.d.agenda.filter(function(a){return a.codigo===p.codigo&&a.data>=todayKey&&(a.status==='agendada'||a.status==='confirmada')}).sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})[0];
+    var avisosOn=p.avisos==='sim'&&p.email;var fi=(S.d.fichas||[]).filter(function(x){return x.codigo===p.codigo})[0];
+    return h('article',{class:'item'},
+      h('div',{class:'row'},h('h3',{},p.nome),h('span',{class:'code'},p.codigo)),
+      h('div',{class:'meta'},[p.telefone||'Sem telefone',avisosOn?'Avisos por e-mail ativos':(p.email?'E-mail cadastrado, avisos desativados':'Sem e-mail'),fi?'Ficha enviada':'Ficha pendente',prox?'Próxima sessão: '+longDay(prox.data)+' às '+prox.hora:'Sem sessão marcada'].join(' · ')),
+      S.editPac===p.id?editorEmail(p):null,
+      (S.verFicha===p.id&&fi)?fichaView(fi):null,
+      h('div',{class:'actions'},
+        btn('Agendar sessão',function(){go('agenda');toggleAgForm({codigo:p.codigo})},'small'),
+        btn('Enviar material',function(){go('materiais');P.lib.para.value=p.codigo;P.lib.titulo.focus()},'small'),
+        fi?btn(S.verFicha===p.id?'Ocultar ficha':'Ver ficha',function(){S.verFicha=S.verFicha===p.id?null:p.id;renderPacientes()},'small'):null,
+        btn('E-mail e avisos',function(){S.editPac=S.editPac===p.id?null:p.id;renderPacientes()},'small'),
+        confirmBtn('Excluir',function(){excluir('Pacientes',p.id)})));
+  }));
+}
+function editorEmail(p){
+  var em=h('input',{id:'pe-email-'+p.id,type:'email',value:p.email||'',autocomplete:'off',placeholder:'paciente@exemplo.com'});
+  var av=h('input',{id:'pe-avisos-'+p.id,type:'checkbox'});av.checked=p.avisos==='sim';
+  var msg=h('p',{class:'meta'});
+  var salvar=h('button',{type:'submit',class:'btn primary small'},'Salvar');
+  var f=h('form',{class:'panel-form'},
+    h('div',{class:'fields'},field('E-mail do paciente',em),
+      h('label',{class:'f check'},av,h('span',{},'O paciente autorizou receber avisos por e-mail.'))),
+    msg,h('div',{class:'actions'},salvar,btn('Cancelar',function(){S.editPac=null;renderPacientes()},'small')));
+  f.addEventListener('submit',async function(ev){
+    ev.preventDefault();salvar.disabled=true;msg.textContent='Salvando…';
+    try{await api('atualizarPaciente',ctx(),p.id,{email:em.value,avisos:av.checked});S.editPac=null;await recarregar();toast('E-mail atualizado.')}
+    catch(e){msg.textContent=e.message;salvar.disabled=false}
+  });
+  return f;
+}
+
+function buildMateriais(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f={};
+  f.para=h('select',{id:'mt-para'});patientSelects.push({sel:f.para,todos:true});
+  f.cat=h('select',{id:'mt-categoria'},opt('contrato','Contrato (para assinatura)'),opt('documento','Documento psicológico'),opt('fatura','Fatura ou recibo'),opt('material','Material de apoio'));
+  f.titulo=h('input',{id:'mt-titulo',type:'text',required:true,placeholder:'Ex.: Registro de pensamentos'});
+  f.desc=h('textarea',{id:'mt-descricao',placeholder:'Orientações para o paciente'});
+  f.link=h('input',{id:'mt-link',type:'url',placeholder:'https://'});
+  f.file=h('input',{id:'mt-arquivo',type:'file',accept:ACCEPT});
+  f.msg=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn primary'},'Publicar material');
+  var form=h('form',{class:'card panel-form'},h('h2',{},'Enviar documento ou material'),
+    h('div',{class:'fields'},field('Para',f.para),field('Tipo',f.cat),field('Título',f.titulo),field('Link (opcional)',f.link),field('Arquivo (opcional)',f.file),field('Orientações',f.desc,true)),
+    h('p',{class:'meta'},'Arquivos aceitos: PDF, imagem, texto ou documento do Office, até 5 MB.'),f.msg,h('div',{class:'actions'},ok));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;f.msg.textContent='Enviando…';
+    try{
+      var arq=await lerArquivo(f.file.files[0]);
+      await api('salvarMaterial',ctx(),{titulo:f.titulo.value,descricao:f.desc.value,para:f.para.value||'todos',link:f.link.value,categoria:f.cat.value},arq);
+      f.titulo.value='';f.desc.value='';f.link.value='';f.file.value='';f.msg.textContent='';await recarregar();P.recMat.d.open=true;toast('Material publicado.');
+    }catch(e){f.msg.textContent=e.message}
+    ok.disabled=false;
+  });
+  P.lib=f;P.libList=h('div',{class:'list'});
+  var g={};
+  g.para=h('select',{id:'av-para'});patientSelects.push({sel:g.para,todos:true});
+  g.titulo=h('input',{id:'av-titulo',type:'text',required:true,placeholder:'Ex.: Recesso de fim de ano'});
+  g.msg=h('textarea',{id:'av-msg',placeholder:'Mensagem para o paciente'});
+  g.st=h('p',{class:'meta'});
+  var okA=h('button',{type:'submit',class:'btn primary'},'Publicar aviso');
+  var formA=h('form',{class:'card panel-form'},h('h2',{},'Publicar aviso'),
+    h('p',{class:'meta'},'Aparece na aba Avisos. Escolha "Todos os pacientes" para uma publicação geral.'),
+    h('div',{class:'fields'},field('Para',g.para),field('Título',g.titulo),field('Mensagem',g.msg,true)),g.st,h('div',{class:'actions'},okA));
+  formA.addEventListener('submit',async function(ev){
+    ev.preventDefault();okA.disabled=true;g.st.textContent='Publicando…';
+    try{await api('publicarAviso',ctx(),{para:g.para.value||'todos',titulo:g.titulo.value,mensagem:g.msg.value});g.titulo.value='';g.msg.value='';cont.textContent='0/2000';g.st.textContent='';await recarregar();P.recAv.d.open=true;toast('Aviso publicado.')}
+    catch(e){g.st.textContent=e.message}
+    okA.disabled=false;
+  });
+  P.avPub=h('div',{class:'list'});
+  g.msg.maxLength=2000;
+  var cont=h('span',{class:'meta'},'0/2000');g.msg.addEventListener('input',function(){cont.textContent=g.msg.value.length+'/2000'});
+  formA.querySelector('.actions').append(cont);
+  function recolhivel(titulo,lista,idBusca){
+    var busca=h('input',{type:'search',placeholder:'Buscar…',class:'busca','aria-label':'Buscar em '+titulo});
+    var sum=h('summary',{},titulo);
+    var d=h('details',{class:'card fold lista-rec'},sum,h('div',{style:'margin-top:10px',class:'stack'},busca,lista));
+    busca.addEventListener('input',function(){
+      var q=busca.value.trim().toLowerCase();
+      Array.prototype.forEach.call(lista.children,function(c){c.hidden=!!q&&c.textContent.toLowerCase().indexOf(q)<0});
+    });
+    return {d:d,sum:sum,titulo:titulo};
+  }
+  P.recMat=recolhivel('Materiais publicados',P.libList);P.recAv=recolhivel('Avisos publicados',P.avPub);
+  el.append(h('div',{class:'cols two'},form,formA),P.recMat.d,P.recAv.d);
+  return el;
+}
+function renderAvisosGestao(){
+  if(!P.avPub)return;
+  var l=(S.d.avisos||[]).filter(function(a){return a.tipo==='geral'}).sort(byNew);
+  P.recAv.sum.textContent='Avisos publicados ('+l.length+')';
+  P.avPub.replaceChildren.apply(P.avPub,l.length?l.map(function(a){
+    return h('article',{class:'item'},h('div',{class:'row'},h('h3',{},a.titulo),h('span',{class:'pill tag'},a.codigo==='todos'?'Todos os pacientes':nomeDe(a.codigo,a.codigo))),
+      a.mensagem?h('p',{class:'body'},a.mensagem):null,h('p',{class:'meta'},brDate(a.criadoEm)),h('div',{class:'actions'},confirmBtn('Excluir',function(){excluir('Avisos',a.id)})));
+  }):[empty('Nenhum aviso publicado','Avisos gerais e individuais publicados por aqui ficam listados.')]);
+}
+function renderMateriais(){
+  var l=S.d.materiais.slice().sort(function(a,b){return (b.criadoEm||'').localeCompare(a.criadoEm||'')});
+  P.recMat.sum.textContent='Materiais publicados ('+l.length+')';
+  P.libList.replaceChildren.apply(P.libList,l.length?l.map(function(m){return materialCard(m,true)}):[empty('Nenhum material publicado','Publique um texto, exercício ou formulário para todos os pacientes ou para um paciente específico.')]);
+}
+
+function buildEntrada(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.inAg=h('div',{class:'list'});P.inDoc=h('div',{class:'list'});
+  P.inAgH=h('h2',{});P.inDocH=h('h2',{});
+  el.append(h('p',{class:'meta'},'Pedidos de horário, cancelamentos e novos agendamentos ficam separados dos documentos enviados pelos pacientes.'),
+    h('div',{class:'cols two'},h('div',{class:'stack'},P.inAgH,P.inAg),h('div',{class:'stack'},P.inDocH,P.inDoc)));
+  return el;
+}
+async function situacao(id,s){try{await api('definirSituacao',ctx(),id,s);await recarregar()}catch(e){falha(e)}}
+var TIPO_ROT={solicitacao:'Pedido de horário',cancelamento:'Cancelamento',agendamento:'Novo agendamento',material:'Documento'};
+function itemAtualizacao(m){
+  var nova=m.situacao==='nova',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
+  var rot=TIPO_ROT[m.tipo]||'Atualização';
+  return h('article',{class:'item'+(nova?' unread':'')},
+    h('div',{class:'row'},h('h3',{},nomeDe(m.codigo,m.iniciais)+' · '+(m.titulo||rot)),
+      h('div',{class:'actions'},h('span',{class:'pill '+(nova?'nova':'tag')},nova?'Nova':'Lida'),h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
+    m.mensagem?h('p',{class:'body'},m.mensagem):null,
+    m.tipo==='solicitacao'&&m.dataPreferida?h('p',{class:'meta'},'Data preferida: '+longDay(m.dataPreferida)):null,
+    h('div',{class:'actions'},arquivosDe(m)),
+    h('div',{class:'row'},h('span',{class:'meta'},brDate(m.criadoEm)),
+      h('div',{class:'actions'},
+        nova?btn('Marcar como lida',function(){situacao(m.id,'lida')},'small'):null,
+        req?btn('Reagendar',function(){situacao(m.id,'lida');go('agenda');toggleAgForm({codigo:m.codigo,data:m.dataPreferida})},'small'):null,
+        btn('Enviar retorno',function(){situacao(m.id,'lida');go('materiais');P.lib.para.value=m.codigo;P.lib.titulo.value='Retorno: '+(m.titulo||rot);P.lib.titulo.focus()},'small'),
+        confirmBtn('Arquivar',function(){situacao(m.id,'arquivada')}))));
+}
+function renderEntrada(){
+  var l=S.d.mensagens.filter(function(m){return m.situacao!=='arquivada'}).sort(function(a,b){return (b.criadoEm||'').localeCompare(a.criadoEm||'')});
+  var docs=l.filter(function(m){return m.tipo==='material'}),ag=l.filter(function(m){return m.tipo!=='material'});
+  var nv=function(x){return x.filter(function(m){return m.situacao==='nova'}).length};
+  P.inAgH.textContent='Agenda'+(nv(ag)?' · '+nv(ag)+' nova(s)':'');
+  P.inDocH.textContent='Documentos'+(nv(docs)?' · '+nv(docs)+' nova(s)':'');
+  P.inAg.replaceChildren.apply(P.inAg,ag.length?ag.map(itemAtualizacao):[empty('Sem atualizações de agenda','Pedidos de horário, cancelamentos e novos agendamentos aparecem aqui.')]);
+  P.inDoc.replaceChildren.apply(P.inDoc,docs.length?docs.map(itemAtualizacao):[empty('Sem documentos novos','Materiais e documentos enviados pelos pacientes aparecem aqui.')]);
+}
+
+/* ================= PACIENTE ================= */
+function svcs(){return (S.d.config&&S.d.config.servicos)||[]}
+function svcNome(id){var s=svcs().filter(function(x){return x.id===id})[0];return s?s.nome:''}
+function novoBk(){return {passo:1,servico:'',prof:'',mod:'',mes:null,data:'',hora:'',aceite:false,busy:false,ok:''}}
+function byNew(a,b){return (b.criadoEm||'').localeCompare(a.criadoEm||'')}
+
+function buildPSessoes(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.pTiles=h('div',{class:'tiles'});P.pNudge=h('div',{class:'nudge'});
+  P.pSess=h('div',{class:'list'});P.pHist=h('div',{class:'list'});
+  P.bkBox=h('div',{class:'card panel-form wiz'});
+  el.append(P.pTiles,P.pNudge,h('div',{class:'stack'},h('h2',{},'Próximas sessões'),h('p',{class:'meta'},'Você pode cancelar uma sessão por aqui até 24 horas antes do horário marcado.'),P.pSess),P.bkBox,
+    h('details',{class:'card fold'},h('summary',{},'Histórico'),h('div',{style:'margin-top:10px'},P.pHist)));
+  return el;
+}
+var CANCEL_HORAS=24;
+function podeCancelar(a){var d=parse(a.data),p=String(a.hora||'0:0').split(':');return new Date(d.getFullYear(),d.getMonth(),d.getDate(),+p[0],+p[1]).getTime()-Date.now()>=CANCEL_HORAS*3600000}
+function pedidoForm(a){
+  var ta=h('textarea',{placeholder:'Conte qual dia ou horário você prefere, ou o motivo.',maxlength:'500'});
+  var dt=h('input',{type:'date',min:todayKey});
+  var msg=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn small primary'},'Enviar pedido');
+  var f=h('form',{class:'panel-form',style:'margin-top:8px'},field('Data preferida (opcional)',dt),field('Recado',ta),msg,h('div',{class:'actions'},ok));
+  var d=h('details',{class:'pedido'},h('summary',{},'Pedir alteração de horário'),f);
+  f.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;msg.textContent='Enviando…';
+    try{
+      await api('enviarMensagem',ctx(),{tipo:'solicitacao',titulo:'Pedido de alteração de horário',
+        mensagem:'Sessão de '+longDay(a.data)+' às '+a.hora+(a.profissional?' com '+a.profissional:'')+'. '+ta.value.trim(),dataPreferida:dt.value,link:''},null);
+      ta.value='';dt.value='';msg.textContent='';d.open=false;toast('Pedido enviado à clínica.');
+    }catch(e){msg.textContent=e.message}
+    ok.disabled=false;
+  });
+  return d;
+}
+function sessCard(a,cancelavel){
+  var dt=parse(a.data),aberta=cancelavel&&(a.status==='agendada'||a.status==='confirmada');
+  return h('article',{class:'item sc'},h('div',{class:'dbadge','aria-hidden':'true'},h('b',{},dt.getDate()),h('small',{},mon(dt))),
+    h('div',{class:'stack',style:'flex:1;gap:4px'},h('div',{class:'row'},h('h3',{},longDay(a.data)+' às '+a.hora),h('span',{class:'pill '+a.status},STATUS[a.status]||a.status)),
+    h('p',{class:'meta'},[svcNome(a.servico),a.modalidade,a.duracao?a.duracao+' min':'',a.profissional,a.local].filter(Boolean).join(' · ')),
+    aberta?(podeCancelar(a)
+      ?h('div',{class:'actions'},confirmBtn('Cancelar sessão',function(){cancelarMinhaSessao(a)},'Confirmar cancelamento'))
+      :h('p',{class:'meta'},'O cancelamento pelo painel é permitido até '+CANCEL_HORAS+' h antes da sessão. Para alterar, use o pedido abaixo ou fale com a clínica.')):null,
+    aberta?pedidoForm(a):null));
+}
+async function cancelarMinhaSessao(a){
+  try{
+    await api('cancelarSessao',ctx(),a.id);
+    S.slots={};await recarregar();
+    if(S.bk&&S.bk.servico&&S.bk.passo===2)carregarSlots();
+    toast('Sessão cancelada.');
+  }catch(e){
+    if(/not a function|undefined/i.test(e.message))toast('O cancelamento ainda não está habilitado no servidor. Fale com a clínica.');
+    else falha(e);
+  }
+}
+function chaveSlots(b){return b.servico+'|'+(b.prof||'')}
+function carregarSlots(){
+  var b=S.bk,k=chaveSlots(b);
+  S.slots[k]='carregando';
+  return api('getHorarios',ctx(),b.servico,b.prof||'').then(function(r){S.slots[k]=r;renderBooking()}).catch(function(e){delete S.slots[k];falha(e);renderBooking()});
+}
+function escolherServico(id){
+  var b=S.bk,sv=svcs().filter(function(s){return s.id===id})[0],lp=profsDe(id);
+  b.passo=1;b.servico=id;b.mod=sv.modalidades.length===1?sv.modalidades[0]:'';b.prof=lp.length===1?lp[0].nome:'';b.data='';b.hora='';b.aceite=false;b.ok='';b.mes=null;
+  renderBooking();
+}
+function syncConfirm(){var b=S.bk;if(P.bkConfirm)P.bkConfirm.disabled=b.busy||!(b.servico&&b.mod&&b.data&&b.hora&&b.aceite)}
+function calendario(slots){
+  var b=S.bk,m=b.mes,y=m.getFullYear(),mo=m.getMonth(),cells=[];
+  ['D','S','T','Q','Q','S','S'].forEach(function(l){cells.push(h('span',{class:'dh','aria-hidden':'true'},l))});
+  for(var i=0;i<new Date(y,mo,1).getDay();i++)cells.push(h('span',{}));
+  for(var d=1;d<=new Date(y,mo+1,0).getDate();d++)(function(d){
+    var key=ymd(new Date(y,mo,d)),ok=!!slots[key];
+    cells.push(h('button',{type:'button',class:(ok?'avail':'')+(b.data===key?' sel':'')+(key===todayKey?' today':''),disabled:!ok,
+      'aria-label':longDay(key)+(ok?' – há horários':' – indisponível'),'aria-pressed':b.data===key?'true':'false',
+      onclick:function(){b.data=key;b.hora='';renderBooking()}},d));
+  })(d);
+  return h('div',{},h('div',{class:'row'},btn('‹',function(){b.mes=new Date(y,mo-1,1);renderBooking()},'small',{'aria-label':'Mês anterior'}),
+    h('strong',{class:'weeklabel cap'},new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(m)),
+    btn('›',function(){b.mes=new Date(y,mo+1,1);renderBooking()},'small',{'aria-label':'Próximo mês'})),h('div',{class:'cal'},cells));
+}
+async function confirmarAgendamento(){
+  var b=S.bk;b.busy=true;syncConfirm();
+  try{
+    await api('agendarSessao',ctx(),{servico:b.servico,profissional:b.prof,data:b.data,hora:b.hora,modalidade:b.mod,aceite:true});
+    var info=longDay(b.data)+' às '+b.hora;
+    S.bk=novoBk();S.bk.ok='Sessão agendada para '+info+'. Seu contrato está sendo emitido e será enviado a você para assinatura.';S.slots={};
+    await recarregar();renderBooking();toast('Sessão agendada.');
+  }catch(e){
+    b.busy=false;b.hora='';b.passo=2;falha(e);
+    if(b.servico)await carregarSlots();else renderBooking();
+  }
+}
+var PASSOS=['Serviço','Dia e horário','Confirmação'];
+function trilha(b){
+  return h('ol',{class:'trail','aria-label':'Etapas do agendamento'},PASSOS.map(function(n,i){
+    var k=i+1,cls=k<b.passo?'done':(k===b.passo?'cur':'');
+    var inner=[h('span',{class:'n','aria-hidden':'true'},k<b.passo?'✓':k),h('span',{},n)];
+    var conteudo=k<b.passo?h('button',{type:'button','aria-label':'Voltar para '+n,onclick:function(){b.passo=k;b.ok='';renderBooking()}},inner):h('div',{class:'tl-in'},inner);
+    var li=h('li',{class:cls},conteudo);if(k===b.passo)li.setAttribute('aria-current','step');return li;
+  }));
+}
+function guia(b,txt){return h('p',{class:'guide'},h('b',{},'Passo '+b.passo+' de '+PASSOS.length+' · '),txt)}
+function nav(voltar,avancar){return h('div',{class:'wiz-nav'},voltar||h('span',{}),avancar)}
+function renderBooking(){
+  var b=S.bk,lista=svcs(),sv=lista.filter(function(s){return s.id===b.servico})[0];
+  if(!sv&&b.passo>1)b.passo=1;
+  var kids=[h('h2',{},'Novo agendamento')];
+  if(b.ok)kids.push(h('div',{class:'ok-box',role:'status'},b.ok));
+  kids.push(trilha(b));
+  P.bkConfirm=null;
+  var slots=sv?S.slots[chaveSlots(b)]:null,pronto=slots&&slots!=='carregando';
+
+  if(b.passo===1){
+    kids.push(guia(b,'Escolha o serviço desejado'+(sv&&sv.modalidades.length>1?' e como prefere ser atendido.':'.')));
+    kids.push(h('div',{class:'svc-grid'},lista.map(function(s){
+      return h('button',{type:'button',class:'svc'+(s.id===b.servico?' sel':''),'aria-pressed':s.id===b.servico?'true':'false',onclick:function(){escolherServico(s.id)}},
+        h('strong',{},s.nome),h('span',{class:'body'},s.descricao),
+        h('span',{class:'kv'},h('b',{},'Valor: '),s.valor),
+        h('span',{class:'kv'},h('b',{},'Profissional: '),profsDe(s.id).map(function(p){return p.nome}).join(', ')||s.profissional||'Definido pela clínica'),
+        h('span',{class:'kv'},h('b',{},'Duração: '),s.duracao+' min'),
+        h('span',{class:'kv'},h('b',{},'Modalidade: '),s.modalidades.length>1?s.modalidades.join(' ou '):'somente '+s.modalidades[0].toLowerCase()));
+    })));
+    if(sv)kids.push(h('div',{class:'step'},h('h3',{},'Modalidade'),
+      sv.modalidades.length>1?h('div',{class:'seg'},sv.modalidades.map(function(m){
+        return h('button',{type:'button',class:'btn pillb'+(b.mod===m?' primary':''),'aria-pressed':b.mod===m?'true':'false',onclick:function(){b.mod=m;renderBooking()}},m)}))
+      :h('p',{class:'meta'},sv.nome+': somente presencial.')));
+    if(sv){var lp=profsDe(sv.id);
+      if(lp.length>1)kids.push(h('div',{class:'step'},h('h3',{},'Com quem prefere atender?'),h('div',{class:'svc-grid'},lp.map(function(p){
+        return h('button',{type:'button',class:'svc'+(p.nome===b.prof?' sel':''),'aria-pressed':p.nome===b.prof?'true':'false',onclick:function(){b.prof=p.nome;b.data='';b.hora='';b.mes=null;renderBooking()}},
+          h('span',{class:'prof'},avatar(p,48),h('span',{class:'stack',style:'gap:2px'},h('strong',{},p.nome),p.descricao?h('span',{class:'body'},p.descricao):null)));
+      }))));
+      else if(lp.length===1)kids.push(h('div',{class:'step'},h('h3',{},'Profissional'),h('div',{class:'prof'},avatar(lp[0],48),h('div',{},h('strong',{},lp[0].nome),lp[0].descricao?h('p',{class:'meta'},lp[0].descricao):null))));
+    }
+    kids.push(nav(null,btn('Continuar →',function(){b.passo=2;b.data='';b.hora='';b.mes=null;if(!S.slots[chaveSlots(b)])carregarSlots();renderBooking()},'primary pillb',{disabled:!(sv&&b.mod&&(profsDe(sv.id).length<2||b.prof))})));
+  }
+
+  else if(b.passo===2){
+    kids.push(guia(b,'Toque num dia destacado e depois no horário. Serviço: '+sv.nome+(b.mod?' ('+b.mod.toLowerCase()+')':'')+'.'));
+    if(pronto&&!b.mes){var k=Object.keys(slots).sort()[0],d0=k?parse(k):new Date();b.mes=new Date(d0.getFullYear(),d0.getMonth(),1)}
+    var hs=(pronto&&b.data&&slots[b.data])||[];
+    kids.push(!pronto?(slots==='carregando'?h('p',{class:'meta'},'Carregando horários…'):h('div',{class:'stack'},h('p',{class:'meta'},'Não foi possível carregar os horários.'),btn('Tentar novamente',function(){carregarSlots()},'pillb')))
+      :Object.keys(slots).length?h('div',{class:'cols two'},calendario(slots),
+        h('div',{},h('strong',{class:'weeklabel'},b.data?longDay(b.data):'Horários'),
+          b.data?h('div',{class:'hours',style:'margin-top:8px'},hs.map(function(x){return h('button',{type:'button',class:'btn pillb'+(b.hora===x?' primary':''),'aria-pressed':b.hora===x?'true':'false',onclick:function(){b.hora=x;renderBooking()}},x)}))
+          :h('p',{class:'none',style:'margin-top:8px'},'Escolha um dia destacado no calendário.')))
+      :empty('Sem horários disponíveis','No momento não há horários abertos para este serviço. Tente novamente em breve ou fale com a clínica.'));
+    kids.push(nav(btn('← Voltar',function(){b.passo=1;renderBooking()},'pillb'),btn('Continuar →',function(){b.passo=3;renderBooking()},'primary pillb',{disabled:!(b.data&&b.hora)})));
+  }
+
+  else{
+    kids.push(guia(b,'Confira os dados e confirme o aceite.'));
+    var linha=function(l,v){return [h('dt',{},l),h('dd',{},v)]};
+    kids.push(h('dl',{class:'fv resumo'},
+      linha('Serviço',sv.nome),linha('Valor',sv.valor),linha('Profissional',b.prof||sv.profissional||'Definido pela clínica'),
+      linha('Duração',sv.duracao+' min'),linha('Modalidade',b.mod),linha('Data',longDay(b.data)),linha('Horário',b.hora)));
+    kids.push(h('div',{class:'actions'},btn('Alterar serviço',function(){b.passo=1;renderBooking()},'small pillb'),btn('Alterar dia e horário',function(){b.passo=2;renderBooking()},'small pillb')));
+    var chk=h('input',{id:'bk-aceite',type:'checkbox'});chk.checked=b.aceite;
+    chk.addEventListener('change',function(){b.aceite=chk.checked;syncConfirm()});
+    kids.push(h('div',{class:'notice',role:'note'},h('div',{class:'ttl'},'Aceite'),
+      h('p',{},(S.d.config&&S.d.config.contrato)||''),h('p',{class:'meta'},'Este sistema não emite contrato: o profissional o envia a você para assinatura.'),
+      h('label',{class:'f check'},chk,h('span',{},'Li e aceito as informações, os valores e as condições do serviço escolhido.'))));
+    P.bkConfirm=h('button',{type:'button',class:'btn primary pillb',onclick:confirmarAgendamento},'Confirmar agendamento');
+    kids.push(nav(btn('← Voltar',function(){b.passo=2;renderBooking()},'pillb'),P.bkConfirm));
+    syncConfirm();
+  }
+  P.bkBox.replaceChildren.apply(P.bkBox,kids);
+}
+
+function buildPDocs(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f={};
+  f.titulo=h('input',{id:'en-titulo',type:'text',required:true,placeholder:'Ex.: Exame, laudo anterior, diário da semana'});
+  f.msg=h('textarea',{id:'en-mensagem',placeholder:'Recado para a clínica (opcional)'});
+  f.link=h('input',{id:'en-link',type:'url',placeholder:'https://'});
+  f.file=h('input',{id:'en-arquivo',type:'file',accept:ACCEPT,multiple:true});
+  f.status=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn primary'},'Enviar à clínica');
+  var form=h('form',{class:'card panel-form'},h('h2',{},'Área de envios'),
+    h('div',{class:'fields'},field('Assunto',f.titulo),field('Arquivos (pode selecionar vários)',f.file),field('Link (opcional)',f.link),field('Recado',f.msg,true)),
+    h('p',{class:'meta'},'Arquivos aceitos: PDF, imagem, texto ou documento do Office, até 5 MB.'),f.status,h('div',{class:'actions'},ok));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;f.status.textContent='Enviando…';
+    try{
+      var arqs=Array.prototype.slice.call(f.file.files);
+      if(!arqs.length)arqs=[null];
+      for(var i=0;i<arqs.length;i++){
+        f.status.textContent=arqs.length>1?'Enviando '+(i+1)+' de '+arqs.length+'…':'Enviando…';
+        var arq=await lerArquivo(arqs[i]);
+        await api('enviarMensagem',ctx(),{tipo:'material',titulo:f.titulo.value,mensagem:i===0?f.msg.value:'',link:i===0?f.link.value:''},arq);
+      }
+      f.titulo.value='';f.msg.value='';f.link.value='';f.file.value='';f.status.textContent='';await recarregar();toast('Enviado à clínica.');
+    }catch(e){f.status.textContent=e.message}
+    ok.disabled=false;
+  });
+  P.dMine=h('div',{class:'list'});P.dFat=h('div',{class:'list'});P.dDoc=h('div',{class:'list'});P.dMat=h('div',{class:'list'});P.dMatBox=h('div',{class:'stack'},h('h2',{},'Materiais de apoio'),P.dMat);
+  el.append(h('div',{class:'cols two'},
+    h('div',{class:'stack'},form,h('h3',{},'Enviados por você'),P.dMine),
+    h('div',{class:'stack'},h('h2',{},'Faturas e recibos'),P.dFat,h('h2',{},'Documentos psicológicos'),P.dDoc,P.dMatBox)));
+  return el;
+}
+function renderDocs(){
+  function fill(box,list,vazioT,vazioD){box.replaceChildren.apply(box,list.length?list.map(function(m){return materialCard(m,false)}):[empty(vazioT,vazioD)])}
+  var ms=S.d.materiais.slice().sort(byNew);
+  fill(P.dFat,ms.filter(function(m){return m.categoria==='fatura'}),'Nenhuma fatura ou recibo','Quando a clínica emitir, o documento aparece aqui.');
+  fill(P.dDoc,ms.filter(function(m){return m.categoria==='documento'}),'Nenhum documento psicológico','Laudos, relatórios e declarações liberados pela clínica aparecem aqui.');
+  var ap=ms.filter(function(m){return m.categoria!=='fatura'&&m.categoria!=='documento'&&m.categoria!=='contrato'});
+  P.dMatBox.hidden=!ap.length;fill(P.dMat,ap,'','');
+  var mine=S.d.mensagens.filter(function(m){return m.tipo==='material'}).sort(byNew);
+  P.dMine.replaceChildren.apply(P.dMine,mine.length?mine.map(function(m){
+    return h('article',{class:'item'},h('div',{class:'row'},h('h3',{},m.titulo||'Sem assunto'),h('span',{class:'meta'},brDate(m.criadoEm))),
+      m.mensagem?h('p',{class:'body'},m.mensagem):null,h('div',{class:'actions'},arquivosDe(m)));
+  }):[empty('Nada enviado ainda','O que você enviar à clínica fica listado aqui.')]);
+}
+
+/* ---------- avisos do paciente ---------- */
+var AV_TIPOS=[['todos','Todos'],['sessao','Sessões'],['documento','Documentos'],['contrato','Contrato'],['material','Materiais'],['ficha','Ficha'],['geral','Gerais']];
+var AV_ROT={sessao:'Sessão',documento:'Documento',contrato:'Contrato',material:'Material',ficha:'Ficha',geral:'Aviso geral'};
+function buildPAvisos(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  S.avFiltro='todos';
+  P.avChips=h('div',{class:'chips'});P.avList=h('div',{class:'list'});
+  el.append(h('h2',{},'Avisos'),h('p',{class:'meta'},'Tudo o que muda no seu acompanhamento aparece aqui: sessões, documentos, contrato, materiais e comunicados da clínica.'),P.avChips,P.avList);
+  return el;
+}
+function renderAvisos(){
+  if(!P.avList)return;
+  var todos=(S.d.avisos||[]).slice().sort(byNew);
+  P.avChips.replaceChildren.apply(P.avChips,AV_TIPOS.map(function(t){
+    var q=todos.filter(function(a){return t[0]==='todos'||a.tipo===t[0]});
+    if(t[0]!=='todos'&&!q.length)return null;
+    var nv=q.filter(avisoNovo).length;
+    return h('button',{type:'button',class:'chip'+(S.avFiltro===t[0]?' on':''),onclick:function(){S.avFiltro=t[0];renderAvisos()}},t[1]+(q.length?' ('+q.length+')':''),nv?h('span',{class:'badge'},nv):null);
+  }).filter(Boolean));
+  var l=todos.filter(function(a){return S.avFiltro==='todos'||a.tipo===S.avFiltro});
+  P.avList.replaceChildren.apply(P.avList,l.length?l.map(function(a){
+    var nv=avisoNovo(a);
+    return h('article',{class:'item av av-'+a.tipo+(nv?' unread':'')},
+      h('div',{class:'row'},h('h3',{},a.titulo||'Aviso'),h('div',{class:'actions'},nv?h('span',{class:'pill nova'},'Novo'):null,h('span',{class:'pill tag'},AV_ROT[a.tipo]||'Aviso'))),
+      a.mensagem?h('p',{class:'body'},a.mensagem):null,
+      h('p',{class:'meta'},brDate(a.criadoEm)+' às '+new Date(a.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})));
+  }):[empty('Nenhum aviso','Quando houver novidades, elas aparecem aqui.')]);
+}
+
+function buildPContratos(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.cList=h('div',{class:'stack'});
+  el.append(P.cList);
+  return el;
+}
+function renderContratos(){
+  var docs=S.d.materiais.filter(function(m){return m.categoria==='contrato'}).sort(byNew);
+  var visto={},acs=[];
+  S.d.agenda.filter(function(a){return a.aceiteEm&&a.servico&&a.status!=='cancelada'}).sort(function(a,b){return a.aceiteEm.localeCompare(b.aceiteEm)}).forEach(function(a){if(!visto[a.servico]){visto[a.servico]=1;acs.push(a)}});
+  var kids=[h('h2',{},'Contrato para assinatura')];
+  if(docs.length)docs.forEach(function(m){kids.push(materialCard(m,false))});
+  else kids.push(empty('Nenhum contrato recebido ainda','O contrato é emitido e enviado a você pelo profissional. Assim que estiver disponível, aparece aqui.'));
+  kids.push(h('h2',{class:'aceite-h'},'Aceite do serviço'));
+  if(acs.length)acs.forEach(function(a){
+    kids.push(h('article',{class:'item aceite'},h('div',{class:'row'},h('h3',{},svcNome(a.servico)),h('span',{class:'pill aceite-ok'},'Aceite registrado')),
+      h('p',{class:'meta'},'Aceite em '+brDate(a.aceiteEm)),
+      h('p',{class:'body'},'O contrato de serviço é emitido pelo profissional e enviado a você para assinatura. Para desistir do início ou da continuidade do acompanhamento, informe pelos canais oficiais (e-mail).')));
+  });
+  else kids.push(empty('Nenhum aceite ainda','O aceite é registrado quando você agenda uma sessão.'));
+  P.cList.replaceChildren.apply(P.cList,kids);
+}
+function tiles(a){return a.map(function(t){return h('div',{class:'tile'+(t.big?' big':'')},h('span',{class:'tl'},t.l),h('b',{},t.v),t.s?h('span',{class:'ts'},t.s):null)})}
+function saudacao(){var x=new Date().getHours();return x>=5&&x<12?'Bom dia':x<18?'Boa tarde':'Boa noite'}
+function primeiroNome(){var n=String((S.d.perfil&&S.d.perfil.nome)||'').replace(/\s*\(.*?\)/g,'').trim().split(/\s+/)[0]||'';return n?n.charAt(0).toUpperCase()+n.slice(1).toLowerCase():''}
+function renderHeader(){
+  var pn=primeiroNome();document.getElementById('h-title').replaceChildren(saudacao()+(pn?', ':''),pn?h('span',{class:'nm'},pn):'','!');
+  document.getElementById('sub').replaceChildren(h('span',{class:'meta'},'Seu código'),h('span',{class:'code'},S.codigo));
+}
+function renderPaciente(){
+  renderHeader();
+  var aberta=function(a){return a.status==='agendada'||a.status==='confirmada'};
+  var prox=S.d.agenda.filter(function(a){return a.data>=todayKey&&aberta(a)}).sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)});
+  var hist=S.d.agenda.filter(function(a){return prox.indexOf(a)<0}).sort(function(a,b){return (b.data+b.hora).localeCompare(a.data+a.hora)});
+  var p0=prox[0];
+  P.pTiles.replaceChildren.apply(P.pTiles,tiles([
+    {l:'Próxima sessão',v:p0?longDay(p0.data):'—',s:p0?p0.hora+' · '+(svcNome(p0.servico)||p0.modalidade):'Nenhuma marcada',big:1},
+    {l:'Agendadas',v:prox.length},{l:'Realizadas',v:S.d.agenda.filter(function(a){return a.status==='realizada'}).length}]));
+  P.pNudge.hidden=!!S.d.ficha;
+  P.pNudge.replaceChildren(h('div',{},h('b',{},'Falta preencher a sua ficha cadastral'),h('p',{class:'meta'},'Ela prepara o primeiro encontro e leva cerca de 5 minutos.')),btn('Preencher ficha',function(){go('ficha')},'primary'));
+  P.pSess.replaceChildren.apply(P.pSess,prox.length?prox.map(function(a){return sessCard(a,true)}):[empty('Nenhuma sessão marcada','Use "Novo agendamento" para escolher serviço, dia e horário.')]);
+  P.pHist.replaceChildren.apply(P.pHist,hist.length?hist.map(function(a){return sessCard(a,false)}):[h('p',{class:'none'},'Sem histórico ainda.')]);
+  if(!P.bkInit){P.bkInit=1;renderBooking()}
+  P.fxRender();renderDocs();renderContratos();renderAvisos();
+}
+
+/* ================= FICHA DE INSCRIÇÃO (dentro do sistema: o e-mail já foi confirmado pelo código) ================= */
+var SN=['SIM','NÃO'];
+var DUR=['Menos de 1 mês','1 a 3 meses','3 a 6 meses','6 meses a 1 ano','1 a 2 anos','2 a 5 anos','5 a 10 anos','Mais de 10 anos'];
+var SEXO=['Feminino','Masculino','Intersexo','Prefiro não informar'];
+var CIVIL=['Solteiro(a)','Casado(a)','União estável','Separado(a)','Divorciado(a)','Viúvo(a)'];
+var ESCOL=['Sem escolaridade','Ensino fundamental incompleto','Ensino fundamental completo','Ensino médio incompleto','Ensino médio completo','Ensino técnico','Ensino superior incompleto','Ensino superior completo','Pós-graduação','Mestrado','Doutorado'];
+var ORIENT=['Heterossexual','Homossexual','Bissexual','Pansexual','Assexual','Outra','Prefiro não informar'];
+var RACA=['Preta','Parda','Branca','Indígena','Amarela','Prefiro não informar'];
+var UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+var TIT=['Para mim mesmo','Para outra pessoa maior de idade','Para um filho menor de idade'];
+var REC=['Meu próprio nome','No nome de outra pessoa'];
+var T=function(k,l,o){o=o||{};o.t='text';o.k=k;o.l=l;return o};
+var SEC=[
+  {h:'Atendimento',f:[
+    {t:'sel',k:'titular',l:'Titular: para quem é o atendimento?',o:TIT,req:1,resp:[T('resp_nome','Nome completo do responsável',{req:1,ac:'name'}),T('resp_cpf','CPF do responsável',{req:1,mask:'cpf',im:'numeric'})]},
+    {t:'sel',k:'servico',l:'O que você procura?',o:['Psicoterapia','Avaliação neuropsicológica']},
+    {t:'sel',k:'modalidade',l:'Modalidade preferida',o:['Presencial','Online']},
+    {t:'sel',k:'recibo',l:'Em nome de quem será emitido o recibo?',o:REC,req:1,
+      desc:'O recibo (Receita Saúde) emitido pelo site da Receita Federal é vinculado ao CPF do pagador para fins de dedução do imposto de renda, comprovante de serviço para planos de saúde, etc. Saiba mais pelo site:',href:'https://www.gov.br/receitafederal/pt-br',
+      rec:[T('recibo_nome','Nome completo do pagador',{req:1,ac:'off'}),T('recibo_cpf','CPF do pagador',{req:1,mask:'cpf',im:'numeric'})]}
+  ]},
+  {h:'Dados do paciente',f:[
+    T('paciente','Nome completo',{req:1,ac:'name'}),
+    {row:[T('nascimento','Data de nascimento',{req:1,mask:'date',ph:'dd/mm/aaaa',im:'numeric'}),T('cpf','CPF',{req:1,mask:'cpf',im:'numeric'})]},
+    {row:[T('telefone','Telefone (WhatsApp)',{req:1,mask:'tel',ac:'tel',type:'tel'}),T('email','E-mail',{req:1,ac:'email',type:'email',im:'email',ph:'nome@exemplo.com'})]},
+    {row:[T('telefone_ref','Telefone de uma pessoa de referência (opcional)',{mask:'tel',type:'tel',hint:'Pessoas de referência são aquelas que você pode acionar e que podem te oferecer apoio.'})]}
+  ]},
+  {h:'Dados sociodemográficos',f:[
+    {row:[{t:'sel',k:'sexo',l:'Sexo',o:SEXO},{t:'sel',k:'orientacao',l:'Orientação sexual',o:ORIENT}]},
+    {row:[{t:'sel',k:'estado_civil',l:'Estado civil',o:CIVIL},{t:'sel',k:'raca',l:'Cor (autodeclaração racial)',o:RACA}]},
+    {row:[{t:'sel',k:'escolaridade',l:'Escolaridade',o:ESCOL},T('ocupacao','Ocupação')]},
+    {t:'yn',k:'religiao',l:'Possui alguma religião?',sub:[T('religiao_qual','Qual?')]},
+    {row:[T('mae','Nome da mãe'),T('pai','Nome do pai')]}
+  ]},
+  {h:'Endereço',f:[
+    {row:[T('cep','CEP',{mask:'cep',im:'numeric',ac:'postal-code'}),T('numero','Número')]},
+    T('logradouro','Rua / Avenida',{ac:'street-address'}),
+    {row:[T('complemento','Complemento'),T('bairro','Bairro')]},
+    {row:[T('cidade','Cidade'),{t:'sel',k:'uf',l:'UF',o:UFS}]}
+  ]},
+  {h:'Queixa principal',f:[{t:'area',k:'demanda',l:'Conte o que o trouxe até aqui',req:1,hint:'O que sente · quando começou · como se apresenta · em quais circunstâncias acontece.'}]},
+  {h:'História clínica pregressa',f:[
+    {t:'yn',k:'doenca_fisica',l:'1) Possui alguma doença física?',sub:[T('doenca_fisica_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'transtorno',l:'2) Tem algum transtorno mental diagnosticado por algum profissional?',sub:[T('transtorno_qual','Se sim, qual(is)?')]}
+  ]},
+  {h:'Acompanhamento psicológico e/ou psiquiátrico',f:[
+    {t:'yn',k:'psico_ja',l:'3) Já fez acompanhamento psicológico alguma vez?',sub:[{t:'sel',k:'psico_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
+    {t:'yn',k:'psico_atual',l:'4) Está em acompanhamento psicológico atualmente com outro profissional?',sub:[T('psico_prof_nome','Nome do profissional'),T('psico_prof_contato','Contato')]},
+    {t:'yn',k:'psiq_ja',l:'5) Já fez acompanhamento psiquiátrico?',sub:[{t:'sel',k:'psiq_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
+    {t:'yn',k:'psiq_atual',l:'6) Você está em acompanhamento psiquiátrico atualmente?',sub:[{t:'yn',k:'psiq_informar',l:'Poderia informar o nome e um contato do profissional?',sub:[T('psiq_prof','Nome e contato')]}]},
+    {t:'chk',k:'ciente',l:'7) Caso seja necessário, entraremos em contato com o profissional. Estou ciente e de acordo (informaremos quando e se isso for necessário). Nenhuma informação será compartilhada, exceto o estritamente necessário e o que tiver sido pactuado com você.',v:'CIENTE E DE ACORDO'}
+  ]},
+  {h:'Medicamentos',f:[
+    {t:'yn',k:'med_psiq',l:'8) Atualmente faz uso de alguma medicação prescrita por algum médico psiquiatra?',sub:[T('med_psiq_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'med_outras',l:'9) Faz uso de outras medicações prescritas por médicos de outras especialidades?',sub:[T('med_outras_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'profilatico',l:'10) Faz uso de algum profilático não medicamentoso? (chás, conserva, jejum etc.)',sub:[T('profilatico_qual','Se sim, qual(is)?')]}
+  ]},
+  {h:'Consentimento',f:[{t:'chk',k:'lgpd',req:1,v:'SIM',l:'Autorizo a Emotiss a tratar os dados informados nesta ficha (inclusive dados de saúde, que são sensíveis) para fins de avaliação e acompanhamento psicológico, conforme a LGPD (Lei 13.709/2018). Posso solicitar a correção ou a exclusão dos meus dados a qualquer momento.'}]}
+];
+var STEPS=[
+  {n:'Atendimento',s:[0],lead:'Comece nos contando para quem é o acompanhamento.'},
+  {n:'Seus dados',s:[1,2,3],lead:'Informe os dados de quem será atendido.'},
+  {n:'Saúde',s:[4,5,6,7],lead:'Estas informações ajudam a preparar o seu primeiro encontro.'},
+  {n:'Consentimento',s:[8],lead:'Falta pouco: revise e autorize o uso dos seus dados.'}
+];
+var dig=function(s){return String(s).replace(/\D/g,'')};
+var MASK={
+  date:function(s){var d=dig(s).slice(0,8);return d.replace(/^(\d{2})(\d)/,'$1/$2').replace(/^(\d{2})\/(\d{2})(\d)/,'$1/$2/$3')},
+  cpf:function(s){var d=dig(s).slice(0,11);return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2')},
+  cep:function(s){return dig(s).slice(0,8).replace(/^(\d{5})(\d)/,'$1-$2')},
+  tel:function(s){var d=dig(s).slice(0,11);return d.length>10?d.replace(/^(\d{2})(\d{5})(\d)/,'($1) $2-$3'):d.replace(/^(\d{2})(\d{4})(\d)/,'($1) $2-$3')}
+};
+MASK.datef=MASK.date;
+function cpfOk(c){c=dig(c);if(c.length!==11||/^(\d)\1+$/.test(c))return false;for(var t=9;t<11;t++){var s=0;for(var i=0;i<t;i++)s+=+c[i]*(t+1-i);if(((s*10)%11)%10!==+c[t])return false}return true}
+function dataOk(d){var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);if(!m)return false;var dt=new Date(+m[3],+m[2]-1,+m[1]);return dt.getFullYear()===+m[3]&&dt.getMonth()===+m[2]-1&&dt.getDate()===+m[1]&&dt<=new Date()&&+m[3]>1900}
+function futOk(d){var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);if(!m)return false;var dt=new Date(+m[3],+m[2]-1,+m[1]),x=new Date();x.setHours(0,0,0,0);return dt.getFullYear()===+m[3]&&dt.getMonth()===+m[2]-1&&dt.getDate()===+m[1]&&dt>=x&&+m[3]<2100}
+function emailOk(e){e=String(e||'').trim();return e.length<=120&&/^[^\s@,;:<>()\[\]"\\]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/.test(e)&&!/\.\./.test(e)}
+var CHECKS={cpf:cpfOk,date:dataOk,datef:futOk,email:emailOk,tel:function(s){return dig(s).length>=10}};
+function tick(el){var m=el.dataset&&el.dataset.mask;if(m&&CHECKS[m])el.classList.toggle('valid',!!el.value&&CHECKS[m](el.value))}
+
+/* ordem e rótulos para a gestão ler a ficha */
+function fichaFlat(fs,out){fs.forEach(function(f){if(f.row)return fichaFlat(f.row,out);if(f.k)out.push(f);['resp','dt','rec','sub'].forEach(function(n){if(f[n])fichaFlat(f[n],out)})});return out}
+function fichaView(fi){
+  var d={};try{d=JSON.parse(fi.dados||'{}')}catch(e){}
+  var kids=[];
+  SEC.forEach(function(sc){
+    var itens=fichaFlat(sc.f,[]).filter(function(f){return d[f.k]});
+    if(!itens.length)return;
+    kids.push(h('h4',{},sc.h));
+    itens.forEach(function(f){kids.push(h('dt',{},f.l),h('dd',{},d[f.k]))});
+  });
+  return h('dl',{class:'fv'},kids.length?kids:h('dd',{},'Ficha vazia.'),h('h4',{},'Enviada em '+brDate(fi.criadoEm)+(fi.atualizadoEm?' · atualizada em '+brDate(fi.atualizadoEm):'')));
+}
+
+function buildFicha(){
+  var el=h('section',{class:'fx',role:'tabpanel'});
+  var form=h('form',{novalidate:true,autocomplete:'on'});
+  var keys=[],stepKeys=[],cur=0,tm=null;
+  function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+  function lab(f,id){var l=mk('label',f.req?'req':'',f.l);if(id)l.htmlFor=id;return l}
+  function pills(f,cls){
+    var g=mk('div',cls);g.setAttribute('role','radiogroup');g.setAttribute('aria-label',f.l);
+    f.o.forEach(function(v){var l=mk('label','o'),r=mk('input');r.type='radio';r.name=f.k;r.value=v;r.addEventListener('change',refresh);l.append(r,mk('span',null,v));g.append(l)});
+    return g;
+  }
+  function build(f,host){
+    if(f.row){var r=mk('div','row');f.row.forEach(function(x){build(x,r)});host.append(r);return}
+    var w=mk('div','f'),id='q_'+f.k;keys.push(f.k);
+    if(f.t==='text'){
+      w.append(lab(f,id));var i=mk('input');i.type=f.type||'text';i.id=id;i.name=f.k;if(f.ph)i.placeholder=f.ph;if(f.im)i.inputMode=f.im;if(f.ac)i.autocomplete=f.ac;i.maxLength=160;
+      if(f.mask)i.dataset.mask=f.mask;if(f.type==='email')i.dataset.mask='email';w.append(i);
+      if(f.hint)w.append(mk('p','hint',f.hint));
+    }else if(f.t==='area'){
+      w.append(lab(f,id));var a=mk('textarea');a.id=id;a.name=f.k;a.maxLength=3000;w.append(a);
+      if(f.hint)w.append(mk('p','hint',f.hint));
+    }else if(f.t==='sel'){
+      var curto=f.o.length<=3;
+      if(curto)w.append(mk('span','q'+(f.req?' req':''),f.l));else w.append(lab(f,id));
+      if(f.desc){var dp=mk('p','hint',f.desc+' ');dp.style.margin='0 0 9px';if(f.href){var ah=mk('a',null,f.href);ah.href=f.href;ah.target='_blank';ah.rel='noopener noreferrer';dp.append(ah)}w.append(dp)}
+      if(curto)w.append(pills(f,'opts col'));
+      else{var s=mk('select');s.id=id;s.name=f.k;s.append(new Option('Selecione',''));f.o.forEach(function(o){s.append(new Option(o,o))});s.addEventListener('change',refresh);w.append(s)}
+      if(f.rec){var cb=mk('div','sub2');cb.id='fx_rec';cb.hidden=true;f.rec.forEach(function(x){build(x,cb)});w.append(cb)}
+      if(f.dt){var db=mk('div','sub2');db.id='fx_dt';db.hidden=true;f.dt.forEach(function(x){build(x,db)});w.append(db)}
+      if(f.resp){var rb=mk('div','sub2');rb.id='fx_resp';rb.hidden=true;var rp=mk('p','hint','Quem solicita o atendimento e assina o contrato. Os dados de quem será atendido são pedidos na próxima etapa.');rp.style.margin='0 0 10px';rb.append(rp);f.resp.forEach(function(x){build(x,rb)});w.append(rb)}
+    }else if(f.t==='yn'){
+      w.append(mk('span','q',f.l));w.append(pills({k:f.k,l:f.l,o:SN},'yn'));
+      if(f.sub){var sb=mk('div','sub');sb.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb)});w.append(sb)}
+    }else if(f.t==='chk'){
+      var l=mk('label','chk'),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;l.append(c,mk('span',f.req?'req':'',f.l));w.append(l);
+    }
+    w.dataset.k=f.k;host.append(w);
+  }
+  STEPS.forEach(function(st,i){
+    var k0=keys.length,card=h('section',{class:'card fstep','data-i':i});
+    card.append(h('h2',{},st.n),mk('p','lead',st.lead));
+    st.s.forEach(function(si){var sc=SEC[si],blk=mk('div','blk');if(st.s.length>1)blk.append(mk('h2',null,sc.h));sc.f.forEach(function(f){build(f,blk)});card.append(blk)});
+    form.append(card);stepKeys[i]=keys.slice(k0);
+  });
+  var msg=mk('p','err','');msg.setAttribute('role','status');form.append(msg);
+  var back=mk('button','btn','Voltar');back.type='button';var next=mk('button','btn primary','Continuar →');next.type='submit';
+  form.append(h('div',{class:'btns'},back,next));
+
+  var intro=h('div',{class:'card'},h('h2',{},'Ficha de inscrição'),h('p',{class:'meta'},'Preencha os dados de quem será atendido. Campos com * são obrigatórios. Somente a equipe Emotiss terá acesso a estas informações (sigilo profissional e LGPD).'));
+  var pn=h('b',{},'1'),pp=h('span',{},'25%'),pb=h('i',{style:'width:25%'}),pd=h('div',{class:'dots'},STEPS.map(function(s){return h('span',{},s.n)}));
+  var prog=h('div',{class:'card'},h('div',{class:'t'},h('span',{},'Etapa ',pn,' de '+STEPS.length),pp),h('div',{class:'pbar'},pb),pd);
+  var okmsg=h('p',{class:'meta'});
+  var okc=h('div',{class:'card stack',hidden:true},h('h2',{},'Ficha enviada'),okmsg,
+    h('h3',{},'O que acontece agora'),
+    h('div',{class:'nx'},h('b',{},'1'),h('span',{},'Nossa equipe analisa a sua ficha.')),
+    h('div',{class:'nx'},h('b',{},'2'),h('span',{},'O profissional envia o contrato para a sua assinatura.')),
+    h('div',{class:'nx'},h('b',{},'3'),h('span',{},'Você recebe as orientações para dar início ao acompanhamento.')),
+    h('p',{class:'meta'},'Dúvidas? Fale conosco pelos canais oficiais. WhatsApp: (31) 98837-4248 · E-mail: emotiss.psicologia@gmail.com'),
+    h('div',{class:'soc'},h('a',{class:'btn primary',href:'https://wa.me/5531988374248',target:'_blank',rel:'noopener noreferrer'},'WhatsApp'),
+      h('a',{class:'btn',href:'https://www.instagram.com/emotiss.psicologia/',target:'_blank',rel:'noopener noreferrer'},'Instagram'),
+      btn('Atualizar minha ficha',function(){P.fxEdit=true;P.fxRender()},'')));
+  el.append(okc,intro,prog,form);
+
+  function val(k){var r=form.querySelector('input[name="'+k+'"]:checked');return r?r.value:''}
+  function setLab(k,t){var l=form.querySelector('label[for="q_'+k+'"]');if(l)l.textContent=t}
+  function refresh(){
+    form.querySelectorAll('.sub').forEach(function(s){s.hidden=val(s.dataset.when)!=='SIM'});
+    var tv=val('titular'),outro=!!tv&&tv!==TIT[0];
+    var br=form.querySelector('#fx_resp');if(br)br.hidden=!outro;
+    var bc=form.querySelector('#fx_rec');if(bc)bc.hidden=val('recibo')!==REC[1];
+    setLab('paciente',outro?'Nome completo do paciente':'Nome completo');
+    setLab('nascimento',outro?'Data de nascimento do paciente':'Data de nascimento');
+    setLab('cpf',outro?'CPF do paciente':'CPF');
+    setLab('resp_nome',tv===TIT[2]?'Nome completo do responsável (pai, mãe ou responsável legal)':'Nome completo de quem solicita');
+    setLab('resp_cpf',tv===TIT[2]?'CPF do responsável':'CPF de quem solicita');
+  }
+  refresh();
+  function limpa(t){if(t.classList)t.classList.remove('bad');var w=t.closest&&t.closest('.f');if(w)w.classList.remove('bad')}
+  form.addEventListener('input',function(e){var m=e.target.dataset&&e.target.dataset.mask;if(m&&MASK[m])e.target.value=MASK[m](e.target.value);tick(e.target);limpa(e.target);salvaSoon()});
+  form.addEventListener('change',function(e){limpa(e.target);salvaSoon()});
+
+  /* rascunho neste aparelho (apagado ao enviar e ao sair) */
+  function RK(){return 'emotiss_ficha_v2_'+S.codigo}
+  function salva(){try{var o={};form.querySelectorAll('input[name],select[name],textarea[name]').forEach(function(x){if(x.name==='lgpd')return;if(x.type==='radio'||x.type==='checkbox'){if(x.checked)o[x.name]=x.value}else if(x.value)o[x.name]=x.value});localStorage.setItem(RK(),JSON.stringify({d:o,s:cur}))}catch(x){}}
+  function salvaSoon(){clearTimeout(tm);tm=setTimeout(salva,400)}
+  function limpaRascunho(){clearTimeout(tm);try{localStorage.removeItem(RK())}catch(x){}}
+  function restaura(){
+    try{var r=JSON.parse(localStorage.getItem(RK())||'null');if(!r||!r.d)return;
+      Object.keys(r.d).forEach(function(n){form.querySelectorAll('[name="'+n+'"]').forEach(function(x){if(x.type==='radio'||x.type==='checkbox')x.checked=x.value===r.d[n];else x.value=r.d[n];tick(x)})});
+      refresh();cur=Math.min(+r.s||0,STEPS.length-1)}catch(x){}
+  }
+  function prefill(){var p=S.d.perfil||{};[['email',p.email],['telefone',p.telefone],['paciente',p.nome]].forEach(function(x){var i=form.querySelector('[name="'+x[0]+'"]');if(i&&!i.value&&x[1]){i.value=String(x[1]).replace(/\s*\(.*?\)/g,'');var m=i.dataset.mask;if(m&&MASK[m])i.value=MASK[m](i.value);tick(i)}})}
+
+  function mostra(i,rolar){
+    cur=i;form.querySelectorAll('.fstep').forEach(function(s){s.hidden=+s.dataset.i!==i});
+    var pc=Math.round((i+1)/STEPS.length*100);pn.textContent=i+1;pp.textContent=pc+'%';pb.style.width=pc+'%';
+    pd.querySelectorAll('span').forEach(function(s,j){s.className=j===i?'on':''});
+    back.hidden=i===0;next.textContent=i===STEPS.length-1?'Enviar ficha':'Continuar →';msg.textContent='';
+    if(rolar)prog.scrollIntoView({block:'start'});
+    salvaSoon();
+  }
+  back.addEventListener('click',function(){if(cur>0)mostra(cur-1,true)});
+  mostra(0,false);
+
+  function coleta(){
+    var d={};
+    keys.forEach(function(k){var x=form.querySelector('[name="'+k+'"]');if(!x)return;if(x.closest('.sub[hidden], .sub2[hidden]'))return;
+      if(x.type==='radio')d[k]=val(k);else if(x.type==='checkbox')d[k]=x.checked?x.value:'';else d[k]=x.value.trim()});
+    return d;
+  }
+  function marca(k){var x=form.querySelector('[name="'+k+'"]');if(x)x.classList.add('bad');var w=form.querySelector('.f[data-k="'+k+'"]');if(w)w.classList.add('bad')}
+  function erro(d,escopo){
+    var no=function(k){return !escopo||escopo.indexOf(k)>=0};
+    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','demanda','lgpd'];
+    if(d.titular&&d.titular!==TIT[0])obrig.push('resp_nome','resp_cpf');
+    if(d.recibo===REC[1])obrig.push('recibo_nome','recibo_cpf');
+    var falta=obrig.filter(function(k){return no(k)&&!d[k]});
+    if(falta.length){falta.forEach(marca);return {k:falta[0],m:falta.length===1&&falta[0]==='lgpd'?'Para enviar, confirme o consentimento.':'Confira os campos marcados em vermelho.'}}
+    var tests=[['cpf',cpfOk,'CPF inválido. Confira os números.'],['nascimento',dataOk,'Data de nascimento inválida. Use dd/mm/aaaa.'],['email',emailOk,'E-mail inválido. Use o formato nome@exemplo.com.']];
+    if(d.titular&&d.titular!==TIT[0])tests.push(['resp_cpf',cpfOk,'CPF do responsável inválido.']);
+    if(d.recibo===REC[1])tests.push(['recibo_cpf',cpfOk,'CPF do pagador inválido.']);
+    for(var i=0;i<tests.length;i++){var t=tests[i];if(no(t[0])&&d[t[0]]&&!t[1](d[t[0]])){marca(t[0]);return {k:t[0],m:t[2]}}}
+    return null;
+  }
+  function foca(k){var x=form.querySelector('[name="'+k+'"]'),w=form.querySelector('.f[data-k="'+k+'"]')||x;if(w)w.scrollIntoView({block:'center'})}
+  form.addEventListener('submit',function(e){
+    e.preventDefault();msg.textContent='';
+    var d=coleta();
+    if(cur<STEPS.length-1){var er=erro(d,stepKeys[cur]);if(er){msg.textContent=er.m;foca(er.k);return}mostra(cur+1,true);return}
+    var eg=erro(d,null);
+    if(eg){var alvo=0;stepKeys.forEach(function(ks,i){if(ks.indexOf(eg.k)>=0)alvo=i});if(alvo!==cur)mostra(alvo,true);msg.textContent=eg.m;setTimeout(function(){foca(eg.k)},50);return}
+    next.disabled=true;next.textContent='Enviando…';
+    api('salvarFicha',ctx(),d).then(function(){
+      limpaRascunho();P.fxEdit=false;P.fxJust=true;next.disabled=false;mostra(0,false);return recarregar();
+    }).then(function(){toast('Ficha enviada.')}).catch(function(er){
+      next.disabled=false;next.textContent='Enviar ficha';msg.textContent=er.message;if(/SESSAO_EXPIRADA/.test(er.message))falha(er);
+    });
+  });
+
+  P.fxRender=function(){
+    var f=S.d.ficha,done=!!f&&!P.fxEdit;
+    okc.hidden=!done;intro.hidden=done;prog.hidden=done;form.hidden=done;
+    if(done)okmsg.textContent=P.fxJust?'Recebemos a sua inscrição. Enviamos uma confirmação para o seu e-mail.':'Ficha enviada em '+brDate(f.atualizadoEm||f.criadoEm)+'. Se algo mudou, você pode enviar uma versão atualizada.';
+    else if(!P.fxPre){P.fxPre=1;restaura();prefill();mostra(cur,false)}
+  };
+  P.fxReset=function(){limpaRascunho();form.reset();form.querySelectorAll('.valid,.bad').forEach(function(x){x.classList.remove('valid','bad')});refresh();mostra(0,false);P.fxPre=0;P.fxEdit=false;P.fxJust=false;next.disabled=false};
+  return el;
+}
+
+var DIAS=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+var DIAS_C=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function buildDisp(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f={};
+  f.dia=h('select',{id:'dp-dia'},DIAS.map(function(n,i){return opt(String(i),n)}));f.dia.value='1';
+  f.ini=h('input',{id:'dp-ini',type:'time',required:true,value:'08:00'});
+  f.fim=h('input',{id:'dp-fim',type:'time',required:true,value:'12:00'});
+  f.prof=h('select',{id:'dp-prof'});profSelects.push({sel:f.prof,vazio:'Todos os profissionais'});
+  f.msg=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn primary'},'Adicionar janela');
+  var form=h('form',{class:'panel-form',style:'margin-top:12px'},
+    h('p',{class:'meta'},'Os pacientes veem horários de hora em hora dentro das janelas, sem choque com sessões já marcadas. Escolha o profissional da janela ou "Todos os profissionais". Cadastre profissionais na aba Profissionais.'),
+    h('div',{class:'fields'},field('Dia da semana',f.dia),field('Início',f.ini),field('Fim',f.fim),field('Profissional',f.prof)),
+    f.msg,h('div',{class:'actions'},ok));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;f.msg.textContent='Salvando…';
+    try{await api('salvarDisponibilidade',ctx(),{diaSemana:f.dia.value,inicio:f.ini.value,fim:f.fim.value,profissional:f.prof.value});f.msg.textContent='';await recarregar();toast('Janela adicionada.')}
+    catch(e){f.msg.textContent=e.message}
+    ok.disabled=false;
+  });
+  P.dispFilters=h('div',{class:'filters'});P.dispGrid=h('div',{class:'week'});
+  el.append(h('details',{class:'card fold',open:true},h('summary',{},'Horários de atendimento · adicionar janela'),form),P.dispFilters,P.dispGrid);
+  return el;
+}
+function renderDisp(){
+  var l=S.d.disponibilidade||[],fp=S.dProf||'';
+  P.dispFilters.replaceChildren(chipBar('Profissional',[{v:'',l:'Todos'}].concat(profsAtivos().map(function(p){return {v:p.nome,l:p.nome,cor:p.cor}})),fp,function(v){S.dProf=v;renderDisp()}));
+  P.dispGrid.replaceChildren.apply(P.dispGrid,[1,2,3,4,5,6,0].map(function(d){
+    var js=l.filter(function(x){return +x.diaSemana===d&&(!fp||!x.profissional||x.profissional===fp)}).sort(function(a,b){return a.inicio.localeCompare(b.inicio)});
+    return h('section',{class:'day'},h('header',{},h('span',{class:'dw'},DIAS_C[d]),h('span',{class:'dn'},DIAS[d].split('-')[0])),
+      js.length?h('ul',{class:'wins'},js.map(function(j){
+        var li=janelaItem(j);li.append(confirmBtn('Excluir',function(){excluir('Disponibilidade',j.id)}));return li;
+      })):h('p',{class:'none'},'Sem horários'));
+  }));
+}
+
+/* ================= PROFISSIONAIS ================= */
+function reduzirFoto(f){
+  return new Promise(function(ok,fail){
+    if(!f||!/^image\//.test(f.type))return fail(new Error('Escolha um arquivo de imagem.'));
+    var r=new FileReader();r.onerror=function(){fail(new Error('Não foi possível ler a imagem.'))};
+    r.onload=function(){
+      var img=new Image();img.onerror=function(){fail(new Error('Imagem inválida.'))};
+      img.onload=function(){
+        var w=240,c=document.createElement('canvas');c.width=c.height=w;var x=c.getContext('2d');
+        var m=Math.min(img.width,img.height),sx=(img.width-m)/2,sy=(img.height-m)/2;
+        x.fillStyle='#fff';x.fillRect(0,0,w,w);x.drawImage(img,sx,sy,m,m,0,0,w,w);
+        var q=.8,u=c.toDataURL('image/jpeg',q);
+        while(u.length>44000&&q>.3){q-=.1;u=c.toDataURL('image/jpeg',q)}
+        if(u.length>44000)fail(new Error('Imagem muito detalhada. Tente outra.'));else ok(u);
+      };
+      img.src=r.result;
+    };
+    r.readAsDataURL(f);
+  });
+}
+function buildProfissionais(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f=P.pf={id:'',foto:'',sel:[]};
+  f.nome=h('input',{id:'pf-nome',type:'text',required:true,maxlength:'80',placeholder:'Nome como aparece para o paciente'});
+  f.desc=h('textarea',{id:'pf-desc',maxlength:'800',placeholder:'Formação, abordagem, público atendido…'});
+  f.email=h('input',{id:'pf-email',type:'email',autocomplete:'off',placeholder:'profissional@exemplo.com'});
+  f.tel=h('input',{id:'pf-tel',type:'tel',placeholder:'(31) 90000-0000'});
+  f.arq=h('input',{id:'pf-foto',type:'file',accept:'image/*'});
+  f.prev=h('div',{class:'prof'});
+  f.svc=h('div',{class:'stack',style:'gap:8px'});
+  f.ativo=h('input',{id:'pf-ativo',type:'checkbox'});f.ativo.checked=true;
+  f.msg=h('p',{class:'meta'});
+  f.ok=h('button',{type:'submit',class:'btn primary pillb'},'Cadastrar profissional');
+  f.cancel=h('button',{type:'button',class:'btn pillb',hidden:true},'Cancelar edição');
+  f.sum=h('summary',{},'+ Cadastrar profissional');
+  function preview(){
+    f.prev.replaceChildren(avatar({nome:f.nome.value||'?',foto:f.foto},64),
+      f.foto?btn('Remover foto',function(){f.foto='';f.arq.value='';preview()},'small'):h('span',{class:'meta'},'Sem foto. Envie uma imagem (será recortada em quadrado).'));
+  }
+  f.preview=preview;
+  f.nome.addEventListener('input',function(){if(!f.foto)preview()});
+  f.arq.addEventListener('change',async function(){
+    try{f.foto=await reduzirFoto(f.arq.files[0]);f.msg.textContent='';preview()}catch(e){f.msg.textContent=e.message;f.arq.value=''}
+  });
+  f.limpar=function(){
+    f.id='';f.foto='';f.sel=[];f.nome.value='';f.desc.value='';f.email.value='';f.tel.value='';f.arq.value='';f.ativo.checked=true;f.msg.textContent='';
+    f.ok.textContent='Cadastrar profissional';f.cancel.hidden=true;f.sum.textContent='+ Cadastrar profissional';preview();renderProfSvc();
+  };
+  f.cancel.addEventListener('click',f.limpar);
+  var form=h('form',{class:'panel-form',style:'margin-top:12px'},
+    h('div',{class:'fields'},field('Nome',f.nome),field('E-mail',f.email),field('Telefone / WhatsApp',f.tel),field('Foto',f.arq),field('Apresentação',f.desc,true)),
+    f.prev,h('div',{class:'step'},h('h3',{},'Serviços que atende'),f.svc),
+    h('label',{class:'f check'},f.ativo,h('span',{},'Ativo: aparece para o paciente no agendamento.')),
+    f.msg,h('div',{class:'actions'},f.ok,f.cancel));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();f.ok.disabled=true;f.msg.textContent='Salvando…';
+    try{
+      await api('salvarProfissional',ctx(),{id:f.id||undefined,nome:f.nome.value,descricao:f.desc.value,email:f.email.value,telefone:f.tel.value,servicos:f.sel.slice(),foto:f.foto,ativo:f.ativo.checked});
+      var editou=!!f.id;f.limpar();P.pfBox.open=false;await recarregar();toast(editou?'Profissional atualizado.':'Profissional cadastrado.');
+    }catch(e){f.msg.textContent=e.message}
+    f.ok.disabled=false;
+  });
+  P.pfBox=h('details',{class:'card fold'},f.sum,form);
+  P.pfList=h('div',{class:'list'});
+  el.append(P.pfBox,P.pfList);
+  preview();
+  return el;
+}
+function renderProfSvc(){
+  var f=P.pf;if(!f)return;
+  f.svc.replaceChildren.apply(f.svc,svcs().map(function(sv){
+    var c=h('input',{type:'checkbox'});c.checked=f.sel.indexOf(sv.id)>=0;
+    c.addEventListener('change',function(){f.sel=f.sel.filter(function(x){return x!==sv.id});if(c.checked)f.sel.push(sv.id)});
+    return h('label',{class:'f check'},c,h('span',{},sv.nome));
+  }));
+}
+function editarProf(p){
+  var f=P.pf;
+  f.id=p.id;f.foto=p.foto||'';f.sel=profServ(p);f.nome.value=p.nome;f.desc.value=p.descricao||'';f.email.value=p.email||'';f.tel.value=p.telefone||'';f.arq.value='';
+  f.ativo.checked=p.ativo!=='nao';f.msg.textContent='';f.ok.textContent='Salvar alterações';f.cancel.hidden=false;f.sum.textContent='Editando: '+p.nome;
+  f.preview();renderProfSvc();P.pfBox.open=true;P.pfBox.scrollIntoView({block:'nearest'});f.nome.focus();
+}
+async function alternarProf(p){
+  try{
+    await api('salvarProfissional',ctx(),{id:p.id,nome:p.nome,descricao:p.descricao,email:p.email,telefone:p.telefone,servicos:profServ(p),foto:p.foto,ativo:p.ativo==='nao'});
+    await recarregar();toast(p.ativo==='nao'?'Profissional ativado.':'Profissional desativado.');
+  }catch(e){falha(e)}
+}
+function renderProfs(){
+  renderProfSvc();
+  var l=profs().slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
+  if(!l.length){P.pfList.replaceChildren(empty('Nenhum profissional cadastrado','Cadastre o primeiro profissional acima. Depois vincule os horários de atendimento a ele na aba Disponibilidade.'));return}
+  P.pfList.replaceChildren.apply(P.pfList,l.map(function(p){
+    var fut=S.d.agenda.filter(function(a){return a.profissional===p.nome&&a.data>=todayKey&&(a.status==='agendada'||a.status==='confirmada')}).length;
+    var dig=String(p.telefone||'').replace(/\D/g,'');
+    var contatos=[];
+    if(p.email)contatos.push(h('a',{href:'mailto:'+p.email},p.email));
+    if(p.telefone)contatos.push(h('span',{},p.telefone));
+    if(dig.length>=10)contatos.push(h('a',{href:'https://wa.me/55'+dig,target:'_blank',rel:'noopener noreferrer'},'WhatsApp'));
+    var tags=profServ(p).map(function(id){return h('span',{class:'pill tag'},svcNome(id)||id)});
+    return h('article',{class:'item'},h('div',{class:'prof'},avatar(p,64),h('div',{class:'stack',style:'flex:1;gap:6px'},
+      h('div',{class:'row'},h('h3',{},dot(p.cor||'#6b6358'),p.nome),
+        h('div',{class:'actions'},h('span',{class:'pill '+(p.ativo==='nao'?'tag':'confirmada')},p.ativo==='nao'?'Inativo':'Ativo'),h('span',{class:'pill tag'},fut+' sessão(ões) futura(s)'))),
+      p.descricao?h('p',{class:'body'},p.descricao):null,
+      contatos.length?h('div',{class:'chips meta'},contatos):h('p',{class:'meta'},'Sem contatos cadastrados.'),
+      tags.length?h('div',{class:'tags'},tags):h('p',{class:'meta'},'Nenhum serviço vinculado: o paciente não o encontra no agendamento.'),
+      h('div',{class:'actions'},btn('Editar',function(){editarProf(p)},'small'),btn(p.ativo==='nao'?'Ativar':'Desativar',function(){alternarProf(p)},'small'),
+        confirmBtn('Excluir',function(){excluir('Profissionais',p.id)})))));
+  }));
+}
+
+/* ================= casca ================= */
+var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
+function go(id){
+  S.tab=id;
+  if(S.modo==='paciente'){
+    if(id==='avisos'){S.avRef=(S.d.perfil&&S.d.perfil.vistoEm)||'';marcarVistos()}else S.avRef=null;
+  }
+  renderShell();
+}
+async function marcarVistos(){
+  if(!novosAvisos())return;
+  try{var t=await api('marcarAvisosVistos',ctx());if(t&&S.d.perfil){S.d.perfil.vistoEm=t;renderTabs()}}catch(e){}
+}
+function renderTabs(){
+  var tabs=document.getElementById('tabs');tabs.replaceChildren();
+  if(!S.modo){tabs.hidden=true;return}
+  tabs.hidden=false;
+  (S.modo==='gestao'?TABS_G:TABS_P).forEach(function(t){
+    var n=t.id==='entrada'?naoLidas():t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
+    tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
+  });
+}
+function renderShell(){
+  var g=S.modo==='gestao';
+  document.getElementById('role-label').textContent=g?'Gestão':'Área do paciente';
+  document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações.':'';document.getElementById('h-title').textContent='SiAGE | Sistema de Agendamento e Gestão Emotiss';document.querySelector('.top').classList.toggle('pac',!g);
+  var act=document.getElementById('top-actions');act.replaceChildren(btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small'));
+  Object.keys(PANELS).forEach(function(k){PANELS[k].hidden=true});
+  PANELS[g?S.tab:'p_'+S.tab].hidden=false;
+  renderTabs();renderDados();
+}
+function renderDados(){
+  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderTabs()}
+  else if(S.modo==='paciente'){renderPaciente()}
+}
+function refreshSelects(){
+  var sv=P.ag&&P.ag.svc;
+  if(sv){var pv=sv.value;sv.replaceChildren(opt('','Sem serviço específico'));svcs().forEach(function(x){sv.append(opt(x.id,x.nome))});if(pv)sv.value=pv}
+  profSelects.forEach(function(ps){
+    var prev=ps.sel.value;ps.sel.replaceChildren(opt('',ps.vazio));
+    profsAtivos().forEach(function(p){ps.sel.append(opt(p.nome,p.nome))});
+    if(prev&&Array.prototype.some.call(ps.sel.options,function(o){return o.value===prev}))ps.sel.value=prev;
+  });
+  var l=S.d.pacientes.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
+  patientSelects.forEach(function(ps){
+    var prev=ps.sel.value;ps.sel.replaceChildren();
+    if(ps.todos)ps.sel.append(opt('todos','Todos os pacientes'));
+    l.forEach(function(p){ps.sel.append(opt(p.codigo,p.nome+' ('+p.codigo+')'))});
+    if(!ps.todos&&!l.length)ps.sel.append(opt('','Nenhum paciente cadastrado'));
+    if(prev&&Array.prototype.some.call(ps.sel.options,function(o){return o.value===prev}))ps.sel.value=prev;
+  });
+}
+
+/* ---------- início ---------- */
+var main=document.getElementById('main');
+PANELS.gate=buildGate();
+PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();
+PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
+Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true;main.append(PANELS[k])});
+})();
+</script>
+</body>
+</html>
