@@ -326,29 +326,6 @@ label.f.check span{flex:1;min-width:0}
 .gates .hl input::placeholder{color:#8b8274}
 .gates .hl .btn.primary{background:#17130f;color:#f5f0e8;border-color:#17130f}
 
-/* avisos */
-.av-wrap{padding:0;overflow:hidden}
-.av-head{padding:20px 20px 4px}.av-head h2{margin:0 0 2px}
-.av-tabs{display:flex;gap:4px;overflow-x:auto;padding:8px 14px 0;border-bottom:1px solid var(--line);scrollbar-width:none}
-.av-tab{font:inherit;font-size:.88rem;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:10px 10px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
-.av-tab.on{color:var(--fg);border-bottom-color:var(--warm)}
-.av-n{background:var(--warm);color:#fff;font-size:.68rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
-.av-list{display:flex;flex-direction:column}
-.av{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);position:relative}
-.av:last-child{border-bottom:0}
-.av.novo{background:color-mix(in srgb,var(--warm) 7%,var(--surface))}
-.av.novo::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--warm)}
-.av-ic{width:44px;height:44px;border-radius:14px;background:var(--surface-2);color:var(--fg);display:flex;align-items:center;justify-content:center;font-size:1.25rem}
-.av-sessao .av-ic{background:#e6eef9;color:#2f5f9e}.av-documento .av-ic{background:#e8f3ec;color:#2f7d4f}.av-contrato .av-ic{background:#f7e8e2;color:#b8573b}
-.av-material .av-ic{background:#f6efd9;color:#94600f}.av-ficha .av-ic{background:#efe7f4;color:#7a4a8a}.av-geral .av-ic{background:#17130f;color:#e8c98f}
-@media (prefers-color-scheme: dark){.av-sessao .av-ic,.av-documento .av-ic,.av-contrato .av-ic,.av-material .av-ic,.av-ficha .av-ic{background:var(--surface-2);color:var(--fg)}}
-.av-body{min-width:0;display:flex;flex-direction:column;gap:3px}
-.av-meta{display:flex;align-items:center;gap:8px;font-size:.74rem;color:var(--muted)}
-.av-tipo{text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.av-new{color:var(--warm);font-weight:700;display:inline-flex;align-items:center;gap:5px}.av-new::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--warm)}
-.av-when{margin-left:auto}
-.av h3{font-size:1rem;margin:0}.av.novo h3{font-weight:700}
-.av .body{color:var(--muted);font-size:.92rem;margin:0}
 /* bloqueio de novo agendamento e orientação de contrato */
 .lock-box{display:flex;gap:14px;align-items:flex-start;background:var(--surface-2);border-radius:16px;padding:16px}
 .lock-ic{font-size:1.6rem;line-height:1}
@@ -377,6 +354,52 @@ label.f.check span{flex:1;min-width:0}
 .gates .gestao>.meta:empty{display:none}
 .gates .gestao .actions{margin-top:4px}
 .gates .gestao .g-foot{margin:4px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+
+/* sistema de cores por situação */
+.st-agendada{--sc:#2f5f9e}.st-confirmada{--sc:#2f7d4f}.st-cancelada{--sc:#a02a1c}.st-reagendada{--sc:#9a6b00}.st-realizada{--sc:#6b6358}.st-faltou{--sc:#b45a14}.st-geral{--sc:#17130f}
+.pill.reagendada{color:#9a6b00}
+@media (prefers-color-scheme: dark){.st-agendada{--sc:#8ab4ea}.st-confirmada{--sc:#6cc48f}.st-cancelada{--sc:#ec8b82}.st-reagendada{--sc:#e0b34a}.st-realizada{--sc:#a59d8d}.st-faltou{--sc:#f0a060}.st-geral{--sc:#e8c98f}}
+/* avisos */
+.nt-head{padding:0 2px}.nt-head h2{margin:0 0 4px}
+.nt-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.nt-tab{font:inherit;font-size:.86rem;font-weight:600;background:var(--surface);color:var(--fg);border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.nt-tab.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.nt-n{background:var(--warm);color:#fff;font-size:.68rem;font-weight:700;min-width:20px;height:20px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.nt-list{display:flex;flex-direction:column;gap:12px}
+.nt{display:grid;grid-template-columns:48px 1fr;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--sc,var(--line));border-radius:14px;box-shadow:0 2px 10px #17130f0d}
+.nt.novo{background:color-mix(in srgb,var(--sc) 7%,var(--surface))}
+.nt-ic{width:48px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--sc) 14%,var(--surface));color:var(--sc);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700}
+.st-geral .nt-ic{background:var(--band);color:var(--gold)}
+.nt-body{min-width:0;display:flex;flex-direction:column;gap:4px}
+.nt-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.74rem}
+.nt-tipo{color:var(--sc);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.nt-new{background:var(--sc);color:#fff;font-weight:700;border-radius:6px;padding:1px 8px;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}
+.nt-when{margin-left:auto;color:var(--muted)}
+.nt h3{font-size:1.02rem;margin:0;font-weight:700;color:var(--fg)}
+.nt-txt{margin:0;font-size:.93rem;line-height:1.5;font-weight:400;color:color-mix(in srgb,var(--fg) 82%,var(--surface))}
+/* sessões do paciente */
+.sx{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:16px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--sc);border-radius:16px;box-shadow:0 2px 10px #17130f0d}
+.sx-date{width:64px;height:68px;border-radius:14px;background:color-mix(in srgb,var(--sc) 13%,var(--surface));color:var(--sc);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.sx-date b{font:700 1.7rem var(--font-display)}.sx-date small{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:4px}
+.sx-main{min-width:0;display:flex;flex-direction:column;gap:8px}
+.sx-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.sx-top h3{margin:0;font-size:1.05rem}
+.sx-badge{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--sc);background:color-mix(in srgb,var(--sc) 13%,var(--surface));border-radius:8px;padding:4px 10px}
+.sx-ck{font-style:normal;color:#2f7d4f;font-weight:800}
+.sx-time{margin:0;font-weight:600;font-size:.95rem}
+.sx-tags{display:flex;flex-wrap:wrap;gap:6px}
+.sx-tags span{font-size:.8rem;background:var(--surface-2);border-radius:8px;padding:3px 10px;color:var(--fg)}
+.sx.st-cancelada .sx-top h3,.sx.st-cancelada .sx-time{text-decoration:line-through;opacity:.7}
+.bk-head{align-items:center}
+/* contrato */
+.ctr{border-left:6px solid var(--warm)}
+.ctr.pend{border-left-color:#9a6b00;background:color-mix(in srgb,#9a6b00 5%,var(--surface))}
+.ctr.ok{border-left-color:#2f7d4f;background:color-mix(in srgb,#2f7d4f 8%,var(--surface))}
+.ctr-badge{font-size:.78rem;font-weight:700;border-radius:8px;padding:4px 10px;background:color-mix(in srgb,#9a6b00 15%,var(--surface));color:#9a6b00}
+.ctr.ok .ctr-badge{background:#2f7d4f;color:#fff}
+.ctr-msg{margin:0;color:#2f7d4f;font-weight:600}
+.ctr-up{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media (max-width:560px){.sx{grid-template-columns:52px 1fr;gap:12px}.sx-date{width:52px;height:58px}.sx-date b{font-size:1.4rem}}
 </style>
 </head>
 <body>
@@ -434,7 +457,7 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 var ACCEPT='.pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
 var MAX_BYTES=5*1024*1024;
-var STATUS={agendada:'Agendada',confirmada:'Confirmada',realizada:'Realizada',faltou:'Faltou',cancelada:'Cancelada'};
+var STATUS={agendada:'Agendada',confirmada:'Confirmada',reagendada:'Reagendada',realizada:'Realizada',faltou:'Faltou',cancelada:'Cancelada'};
 var todayKey=ymd(new Date());
 
 var toastTimer=null;
@@ -471,7 +494,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -531,12 +554,38 @@ function arquivosDe(m){
   if(isHttp(m.link)) out.push(h('a',{class:'file',href:m.link,target:'_blank',rel:'noopener noreferrer'},'Abrir link'));
   return out;
 }
+function limpaRef(t){return String(t||'').replace(/\s*\[contrato:[^\]]+\]/g,'')}
+function assinadoDe(m){return (S.d.mensagens||[]).filter(function(x){return x.tipo==='material'&&String(x.mensagem||'').indexOf('[contrato:'+m.id+']')>=0}).sort(byNew)[0]||null}
+function contratoCard(m){
+  var ass=assinadoDe(m);
+  var kids=[h('div',{class:'row'},h('h3',{},m.titulo||'Contrato'),
+    h('span',{class:'ctr-badge'},ass?'✓ Assinado e enviado':'Aguardando assinatura')),
+    m.descricao?h('p',{class:'body'},m.descricao):null];
+  if(ass){
+    kids.push(h('p',{class:'ctr-msg'},'Recebemos o seu contrato assinado em '+brDate(ass.criadoEm)+(ass.arquivoNome?' ('+ass.arquivoNome+')':'')+'. Obrigado!'));
+    kids.push(h('div',{class:'actions'},arquivosDe(m)));
+  }else{
+    var inp=h('input',{type:'file',accept:ACCEPT,'aria-label':'Arquivo do contrato assinado'}),msg=h('p',{class:'meta'});
+    var ok=btn('Enviar contrato assinado',async function(){
+      if(!inp.files[0]){msg.textContent='Escolha o arquivo do contrato assinado.';return}
+      ok.disabled=true;msg.textContent='Enviando…';
+      try{var arq=await lerArquivo(inp.files[0]);
+        await api('enviarMensagem',ctx(),{tipo:'material',titulo:'Contrato assinado: '+(m.titulo||''),mensagem:'Contrato assinado enviado pelo paciente. [contrato:'+m.id+']',link:''},arq);
+        await recarregar();toast('Contrato assinado enviado.');
+      }catch(e){msg.textContent=e.message;ok.disabled=false}
+    },'primary small');
+    kids.push(h('div',{class:'govbr'},h('b',{},'Ainda não recebemos o contrato assinado. '),'Assine o documento pelo ',h('a',{href:'https://www.gov.br/governodigital/pt-br/assinatura-eletronica',target:'_blank',rel:'noopener noreferrer'},'Gov.br'),' e envie o arquivo assinado aqui (ou na aba ',h('b',{},'Documentos'),', em “Área de envios”).'));
+    kids.push(h('div',{class:'actions'},arquivosDe(m)));
+    kids.push(h('div',{class:'ctr-up'},inp,ok),msg);
+  }
+  return h('article',{class:'item ctr '+(ass?'ok':'pend')},kids);
+}
 function materialCard(m,gestao){
+  if(!gestao&&m.categoria==='contrato')return contratoCard(m);
   var aud=(({fatura:'Fatura/recibo',documento:'Documento psicológico',contrato:'Contrato'})[m.categoria]||'Material de apoio')+' · '+(m.para==='todos'?'Todos os pacientes':'Para '+nomeDe(m.para,m.para));
   return h('article',{class:'item'},
     h('div',{class:'row'},h('h3',{},m.titulo||'Sem título'),gestao?h('span',{class:'pill tag'},aud):null),
     m.descricao?h('p',{class:'body'},m.descricao):null,
-    (!gestao&&m.categoria==='contrato')?h('div',{class:'govbr'},h('b',{},'Como assinar: '),'assine este documento pelo ',h('a',{href:'https://www.gov.br/governodigital/pt-br/assinatura-eletronica',target:'_blank',rel:'noopener noreferrer'},'Gov.br'),' e devolva o arquivo assinado na aba ',h('b',{},'Documentos'),', em “Área de envios”.'):null,
     h('div',{class:'row'},h('div',{class:'actions'},arquivosDe(m)),h('span',{class:'meta'},brDate(m.criadoEm)),
       gestao?confirmBtn('Excluir',function(){excluir('Materiais',m.id)}):null));
 }
@@ -629,7 +678,7 @@ async function entrar(jaCarregado){
   PANELS.gate.hidden=true;
   Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true});
   S.tab=S.modo==='gestao'?'agenda':'sessoes';
-  S.slots={};S.bk=novoBk();P.bkInit=0;if(P.fxReset)P.fxReset();
+  S.slots={};S.bk=novoBk();S.bkAberto=undefined;S.bkMsg='';P.bkInit=0;if(P.fxReset)P.fxReset();
   renderShell();
   clearInterval(S.timer);
   S.timer=setInterval(function(){if(!document.hidden&&!S.editPac&&!document.querySelector('details.pedido[open]'))recarregar(true)},60000);
@@ -783,12 +832,11 @@ function renderPacientes(){
     var avisosOn=p.avisos==='sim'&&p.email;var fi=(S.d.fichas||[]).filter(function(x){return x.codigo===p.codigo})[0];
     return h('article',{class:'item'},
       h('div',{class:'row'},h('h3',{},p.nome),h('span',{class:'code'},p.codigo)),
-      h('div',{class:'meta'},[p.telefone||'Sem telefone',avisosOn?'Avisos por e-mail ativos':(p.email?'E-mail cadastrado, avisos desativados':'Sem e-mail'),fi?'Ficha enviada':'Ficha pendente',p.liberado==='pedido'?'Pediu novo agendamento':(p.liberado==='sim'?'Novo agendamento liberado':''),prox?'Próxima sessão: '+longDay(prox.data)+' às '+prox.hora:'Sem sessão marcada'].join(' · ')),
+      h('div',{class:'meta'},[p.telefone||'Sem telefone',avisosOn?'Avisos por e-mail ativos':(p.email?'E-mail cadastrado, avisos desativados':'Sem e-mail'),fi?'Ficha enviada':'Ficha pendente',prox?'Próxima sessão: '+longDay(prox.data)+' às '+prox.hora:'Sem sessão marcada'].join(' · ')),
       S.editPac===p.id?editorEmail(p):null,
       (S.verFicha===p.id&&fi)?fichaView(fi):null,
       h('div',{class:'actions'},
         btn('Agendar sessão',function(){go('agenda');toggleAgForm({codigo:p.codigo})},'small'),
-        (p.liberado!=='sim'&&S.d.agenda.some(function(a){return a.codigo===p.codigo&&a.status!=='cancelada'}))?btn(p.liberado==='pedido'?'Liberar novo agendamento (pedido)':'Liberar novo agendamento',function(){liberarNovo(p)},p.liberado==='pedido'?'small primary':'small'):null,
         btn('Enviar material',function(){go('materiais');P.lib.para.value=p.codigo;P.lib.titulo.focus()},'small'),
         fi?btn(S.verFicha===p.id?'Ocultar ficha':'Ver ficha',function(){S.verFicha=S.verFicha===p.id?null:p.id;renderPacientes()},'small'):null,
         btn('E-mail e avisos',function(){S.editPac=S.editPac===p.id?null:p.id;renderPacientes()},'small'),
@@ -897,7 +945,6 @@ function buildEntrada(){
     h('div',{class:'cols two'},h('div',{class:'stack'},P.inAgH,P.inAg),h('div',{class:'stack'},P.inDocH,P.inDoc)));
   return el;
 }
-async function liberarNovo(p){try{await api('liberarAgendamento',ctx(),p.id);await recarregar();toast('Novo agendamento liberado para '+p.nome+'.')}catch(e){falha(e)}}
 async function situacao(id,s){try{await api('definirSituacao',ctx(),id,s);await recarregar()}catch(e){falha(e)}}
 var TIPO_ROT={solicitacao:'Pedido de horário',cancelamento:'Cancelamento',agendamento:'Novo agendamento',material:'Documento'};
 function itemAtualizacao(m){
@@ -906,7 +953,7 @@ function itemAtualizacao(m){
   return h('article',{class:'item'+(nova?' unread':'')},
     h('div',{class:'row'},h('h3',{},nomeDe(m.codigo,m.iniciais)+' · '+(m.titulo||rot)),
       h('div',{class:'actions'},h('span',{class:'pill '+(nova?'nova':'tag')},nova?'Nova':'Lida'),h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
-    m.mensagem?h('p',{class:'body'},m.mensagem):null,
+    limpaRef(m.mensagem)?h('p',{class:'body'},limpaRef(m.mensagem)):null,
     m.tipo==='solicitacao'&&m.dataPreferida?h('p',{class:'meta'},'Data preferida: '+longDay(m.dataPreferida)):null,
     h('div',{class:'actions'},arquivosDe(m)),
     h('div',{class:'row'},h('span',{class:'meta'},brDate(m.criadoEm)),
@@ -936,8 +983,13 @@ function buildPSessoes(){
   var el=h('section',{class:'stack',role:'tabpanel'});
   P.pTiles=h('div',{class:'tiles'});P.pNudge=h('div',{class:'nudge'});
   P.pSess=h('div',{class:'list'});P.pHist=h('div',{class:'list'});
+  P.pSessSum=h('summary',{},'Próximas sessões');
+  P.pSessD=h('details',{class:'card fold',open:true},P.pSessSum,h('div',{class:'stack',style:'margin-top:12px'},h('p',{class:'meta'},'Você pode cancelar uma sessão por aqui até 24 horas antes do horário marcado.'),P.pSess));
   P.bkBox=h('div',{class:'card panel-form wiz'});
-  el.append(P.pTiles,P.pNudge,h('div',{class:'stack'},h('h2',{},'Próximas sessões'),h('p',{class:'meta'},'Você pode cancelar uma sessão por aqui até 24 horas antes do horário marcado.'),P.pSess),P.bkBox,
+  P.bkTog=btn('+ Novo agendamento',function(){S.bkAberto=!S.bkAberto;S.bkMsg='';renderBooking()},'primary');
+  P.bkMsg=h('div',{});
+  P.bkWrap=h('div',{class:'stack'},h('div',{class:'row bk-head'},h('h2',{},'Agendamento'),P.bkTog),P.bkMsg,P.bkBox);
+  el.append(P.pTiles,P.pNudge,P.pSessD,P.bkWrap,
     h('details',{class:'card fold'},h('summary',{},'Histórico'),h('div',{style:'margin-top:10px'},P.pHist)));
   return el;
 }
@@ -963,13 +1015,17 @@ function pedidoForm(a){
 }
 function sessCard(a,cancelavel){
   var dt=parse(a.data),aberta=cancelavel&&(a.status==='agendada'||a.status==='confirmada');
-  return h('article',{class:'item sc'},h('div',{class:'dbadge','aria-hidden':'true'},h('b',{},dt.getDate()),h('small',{},mon(dt))),
-    h('div',{class:'stack',style:'flex:1;gap:4px'},h('div',{class:'row'},h('h3',{},longDay(a.data)+' às '+a.hora),h('span',{class:'pill '+a.status},STATUS[a.status]||a.status)),
-    h('p',{class:'meta'},[svcNome(a.servico),a.modalidade,a.duracao?a.duracao+' min':'',a.profissional,a.local].filter(Boolean).join(' · ')),
-    aberta?(podeCancelar(a)
-      ?h('div',{class:'actions'},confirmBtn('Cancelar sessão',function(){cancelarMinhaSessao(a)},'Confirmar cancelamento'))
-      :h('p',{class:'meta'},'O cancelamento pelo painel é permitido até '+CANCEL_HORAS+' h antes da sessão. Para alterar, use o pedido abaixo ou fale com a clínica.')):null,
-    aberta?pedidoForm(a):null));
+  var tags=[svcNome(a.servico),a.modalidade,a.profissional,a.local].filter(Boolean);
+  return h('article',{class:'sx st-'+a.status},
+    h('div',{class:'sx-date','aria-hidden':'true'},h('b',{},dt.getDate()),h('small',{},mon(dt))),
+    h('div',{class:'sx-main'},
+      h('div',{class:'sx-top'},h('h3',{},longDay(a.data)),h('span',{class:'sx-badge'},a.status==='realizada'?h('i',{class:'sx-ck'},'✓'):null,STATUS[a.status]||a.status)),
+      h('p',{class:'sx-time'},a.hora+(a.duracao?' · '+a.duracao+' min':'')),
+      tags.length?h('div',{class:'sx-tags'},tags.map(function(t){return h('span',{},t)})):null,
+      aberta?(podeCancelar(a)
+        ?h('div',{class:'actions'},confirmBtn('Cancelar sessão',function(){cancelarMinhaSessao(a)},'Confirmar cancelamento'))
+        :h('p',{class:'meta'},'O cancelamento pelo painel é permitido até '+CANCEL_HORAS+' h antes da sessão. Para alterar, use o pedido abaixo ou fale com a clínica.')):null,
+      aberta?pedidoForm(a):null));
 }
 async function cancelarMinhaSessao(a){
   try{
@@ -1013,7 +1069,7 @@ async function confirmarAgendamento(){
   try{
     await api('agendarSessao',ctx(),{servico:b.servico,profissional:b.prof,data:b.data,hora:b.hora,modalidade:b.mod,aceite:true});
     var info=longDay(b.data)+' às '+b.hora;
-    S.bk=novoBk();S.bk.ok='Sessão agendada para '+info+'. Seu contrato está sendo emitido e será enviado a você para assinatura.';S.slots={};
+    S.bk=novoBk();S.bkAberto=false;S.bkMsg='Sessão agendada para '+info+'. Seu contrato está sendo emitido e será enviado a você para assinatura.';S.slots={};
     await recarregar();renderBooking();toast('Sessão agendada.');
   }catch(e){
     b.busy=false;b.hora='';b.passo=2;falha(e);
@@ -1032,23 +1088,13 @@ function trilha(b){
 function guia(b,txt){return h('p',{class:'guide'},h('b',{},'Passo '+b.passo+' de '+PASSOS.length+' · '),txt)}
 function nav(voltar,avancar){return h('div',{class:'wiz-nav'},voltar||h('span',{}),avancar)}
 function renderBooking(){
-  var pf=S.d.perfil||{};
-  if(pf.bloqueado&&pf.liberado!=='sim'){
-    var pedido=pf.liberado==='pedido';
-    P.bkBox.replaceChildren(h('h2',{},'Novo agendamento'),
-      S.bk&&S.bk.ok?h('div',{class:'ok-box',role:'status'},S.bk.ok):null,
-      h('div',{class:'lock-box'},h('div',{class:'lock-ic','aria-hidden':'true'},'🔒'),
-        h('div',{class:'stack',style:'gap:6px'},h('strong',{},pedido?'Pedido enviado':'Novo agendamento bloqueado'),
-          h('p',{class:'meta'},pedido?'A clínica foi avisada e você receberá um aviso quando o novo agendamento for liberado.':'Você já tem um agendamento. Para marcar outra sessão, solicite a liberação à clínica.'),
-          pedido?null:btn('Solicitar novo agendamento',async function(ev){
-            var bt=ev.currentTarget;bt.disabled=true;
-            try{await api('solicitarNovoAgendamento',ctx());S.bk.ok='';await recarregar();toast('Pedido enviado à clínica.')}catch(e){bt.disabled=false;falha(e)}
-          },'primary'))));
-    return;
-  }
   var b=S.bk,lista=svcs(),sv=lista.filter(function(s){return s.id===b.servico})[0];
   if(!sv&&b.passo>1)b.passo=1;
-  var kids=[h('h2',{},'Novo agendamento')];
+  if(S.bkAberto===undefined)S.bkAberto=!S.d.agenda.some(function(a){return a.status!=='cancelada'});
+  P.bkBox.hidden=!S.bkAberto;P.bkTog.textContent=S.bkAberto?'Fechar':'+ Novo agendamento';
+  P.bkMsg.replaceChildren.apply(P.bkMsg,S.bkMsg?[h('div',{class:'ok-box',role:'status'},S.bkMsg)]:[]);
+  if(!S.bkAberto)return;
+  var kids=[];
   if(b.ok)kids.push(h('div',{class:'ok-box',role:'status'},b.ok));
   kids.push(trilha(b));
   P.bkConfirm=null;
@@ -1152,7 +1198,7 @@ function renderDocs(){
   var mine=S.d.mensagens.filter(function(m){return m.tipo==='material'}).sort(byNew);
   P.dMine.replaceChildren.apply(P.dMine,mine.length?mine.map(function(m){
     return h('article',{class:'item'},h('div',{class:'row'},h('h3',{},m.titulo||'Sem assunto'),h('span',{class:'meta'},brDate(m.criadoEm))),
-      m.mensagem?h('p',{class:'body'},m.mensagem):null,h('div',{class:'actions'},arquivosDe(m)));
+      limpaRef(m.mensagem)?h('p',{class:'body'},limpaRef(m.mensagem)):null,h('div',{class:'actions'},arquivosDe(m)));
   }):[empty('Nada enviado ainda','O que você enviar à clínica fica listado aqui.')]);
 }
 
@@ -1160,11 +1206,21 @@ function renderDocs(){
 var AV_TIPOS=[['todos','Todos'],['sessao','Sessões'],['documento','Documentos'],['contrato','Contrato'],['material','Materiais'],['ficha','Ficha'],['geral','Comunicados']];
 var AV_ROT={sessao:'Sessão',documento:'Documento',contrato:'Contrato',material:'Material',ficha:'Ficha',geral:'Comunicado'};
 var AV_ICO={sessao:'◷',documento:'▤',contrato:'✎',material:'✦',ficha:'☰',geral:'✉'};
+function stAviso(a){
+  if(a.tipo!=='sessao'){return ({documento:'confirmada',contrato:'reagendada',material:'agendada',ficha:'realizada',geral:'geral'})[a.tipo]||'realizada'}
+  var t=((a.titulo||'')+' '+(a.mensagem||'')).toLowerCase();
+  if(/reagendad/.test(t))return 'reagendada';
+  if(/cancelad|removid|encerrad/.test(t))return 'cancelada';
+  if(/confirmad/.test(t))return 'confirmada';
+  if(/realizad/.test(t))return 'realizada';
+  if(/faltou|como falta/.test(t))return 'faltou';
+  return 'agendada';
+}
 function buildPAvisos(){
   var el=h('section',{class:'stack',role:'tabpanel'});
   S.avFiltro='todos';
-  P.avChips=h('div',{class:'av-tabs',role:'tablist'});P.avList=h('div',{class:'av-list'});
-  el.append(h('div',{class:'card av-wrap'},h('div',{class:'av-head'},h('h2',{},'Avisos'),h('p',{class:'meta'},'Novidades sobre sessões, documentos, contrato e comunicados da clínica.')),P.avChips,P.avList));
+  P.avChips=h('div',{class:'nt-tabs',role:'tablist'});P.avList=h('div',{class:'nt-list'});
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Avisos'),h('p',{class:'meta'},'Novidades sobre sessões, documentos, contrato e comunicados da clínica.')),P.avChips,P.avList);
   return el;
 }
 function quandoAviso(iso){
@@ -1180,17 +1236,17 @@ function renderAvisos(){
     var q=todos.filter(function(a){return t[0]==='todos'||a.tipo===t[0]});
     if(t[0]!=='todos'&&!q.length)return null;
     var nv=q.filter(avisoNovo).length;
-    return h('button',{type:'button',role:'tab','aria-selected':S.avFiltro===t[0]?'true':'false',class:'av-tab'+(S.avFiltro===t[0]?' on':''),onclick:function(){S.avFiltro=t[0];renderAvisos()}},t[1],nv?h('span',{class:'av-n'},nv):null);
+    return h('button',{type:'button',role:'tab','aria-selected':S.avFiltro===t[0]?'true':'false',class:'nt-tab'+(S.avFiltro===t[0]?' on':''),onclick:function(){S.avFiltro=t[0];renderAvisos()}},t[1],nv?h('span',{class:'nt-n'},nv):null);
   }).filter(Boolean));
   var l=todos.filter(function(a){return S.avFiltro==='todos'||a.tipo===S.avFiltro});
   P.avList.replaceChildren.apply(P.avList,l.length?l.map(function(a){
-    var nv=avisoNovo(a);
-    return h('article',{class:'av av-'+a.tipo+(nv?' novo':'')},
-      h('div',{class:'av-ic','aria-hidden':'true'},AV_ICO[a.tipo]||'•'),
-      h('div',{class:'av-body'},
-        h('div',{class:'av-meta'},h('span',{class:'av-tipo'},AV_ROT[a.tipo]||'Aviso'),nv?h('span',{class:'av-new'},'Novo'):null,h('span',{class:'av-when'},quandoAviso(a.criadoEm))),
+    var nv=avisoNovo(a),st=stAviso(a);
+    return h('article',{class:'nt st-'+st+(nv?' novo':'')},
+      h('div',{class:'nt-ic','aria-hidden':'true'},st==='realizada'&&a.tipo==='sessao'?'✓':(AV_ICO[a.tipo]||'•')),
+      h('div',{class:'nt-body'},
+        h('div',{class:'nt-meta'},h('span',{class:'nt-tipo'},AV_ROT[a.tipo]||'Aviso'),nv?h('span',{class:'nt-new'},'Novo'):null,h('span',{class:'nt-when'},quandoAviso(a.criadoEm))),
         h('h3',{},a.titulo||'Aviso'),
-        a.mensagem?h('p',{class:'body'},a.mensagem):null));
+        a.mensagem?h('p',{class:'nt-txt'},limpaRef(a.mensagem)):null));
   }):[empty('Nenhum aviso','Quando houver novidades, elas aparecem aqui.')]);
 }
 
@@ -1204,7 +1260,7 @@ function renderContratos(){
   var docs=S.d.materiais.filter(function(m){return m.categoria==='contrato'}).sort(byNew);
   var visto={},acs=[];
   S.d.agenda.filter(function(a){return a.aceiteEm&&a.servico&&a.status!=='cancelada'}).sort(function(a,b){return a.aceiteEm.localeCompare(b.aceiteEm)}).forEach(function(a){if(!visto[a.servico]){visto[a.servico]=1;acs.push(a)}});
-  var kids=[h('h2',{},'Contrato para assinatura'),h('p',{class:'meta'},'O contrato deve ser assinado no Gov.br e devolvido na aba Documentos, em “Área de envios”.')];
+  var kids=[h('h2',{},'Contrato para assinatura'),h('p',{class:'meta'},'O contrato deve ser assinado no Gov.br e o arquivo assinado enviado de volta por aqui.')];
   if(docs.length)docs.forEach(function(m){kids.push(materialCard(m,false))});
   else kids.push(empty('Nenhum contrato recebido ainda','O contrato é emitido e enviado a você pelo profissional. Assim que estiver disponível, aparece aqui.'));
   kids.push(h('h2',{class:'aceite-h'},'Aceite do serviço'));
@@ -1234,6 +1290,7 @@ function renderPaciente(){
     {l:'Agendadas',v:prox.length},{l:'Realizadas',v:S.d.agenda.filter(function(a){return a.status==='realizada'}).length}]));
   P.pNudge.hidden=!!S.d.ficha;
   P.pNudge.replaceChildren(h('div',{},h('b',{},'Falta preencher a sua ficha cadastral'),h('p',{class:'meta'},'Ela prepara o primeiro encontro e leva cerca de 5 minutos.')),btn('Preencher ficha',function(){go('ficha')},'primary'));
+  P.pSessSum.textContent='Próximas sessões ('+prox.length+')';
   P.pSess.replaceChildren.apply(P.pSess,prox.length?prox.map(function(a){return sessCard(a,true)}):[empty('Nenhuma sessão marcada','Use "Novo agendamento" para escolher serviço, dia e horário.')]);
   P.pHist.replaceChildren.apply(P.pHist,hist.length?hist.map(function(a){return sessCard(a,false)}):[h('p',{class:'none'},'Sem histórico ainda.')]);
   if(!P.bkInit){P.bkInit=1;renderBooking()}
