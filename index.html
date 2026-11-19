@@ -400,6 +400,50 @@ label.f.check span{flex:1;min-width:0}
 .ctr-msg{margin:0;color:#2f7d4f;font-weight:600}
 .ctr-up{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 @media (max-width:560px){.sx{grid-template-columns:52px 1fr;gap:12px}.sx-date{width:52px;height:58px}.sx-date b{font-size:1.4rem}}
+
+/* WhatsApp e recepção */
+.btn.wa{background:#1f8a4c;color:#fff;border-color:#1f8a4c;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn.wa::before{content:'💬'}
+.top .btn.wa{background:none;color:#f5f0e8;border-color:#f5f0e866}
+.wa-bar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+
+/* trilha: linha entre os números, sem cruzar o círculo */
+.trail li::before{left:calc(-50% + 24px);width:calc(100% - 48px);top:16px;z-index:0}
+.trail .tl-in,.trail button{z-index:1}
+.trail .n{position:relative;z-index:1}
+.trail .tn{line-height:1.2;max-width:100%}
+@media (max-width:480px){.trail li{font-size:.72rem}.trail .n{width:30px;height:30px}.trail li::before{top:14px;left:calc(-50% + 20px);width:calc(100% - 40px)}}
+.lock-box{display:flex;gap:14px;align-items:flex-start;background:var(--surface-2);border-radius:16px;padding:16px}
+.lock-ic{font-size:1.6rem;line-height:1}
+/* agenda da gestão */
+.week.wk-lista{display:flex;flex-direction:column;gap:14px}
+.week.wk-cols{display:grid;grid-template-columns:repeat(7,minmax(250px,1fr));gap:12px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.dia2{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:0 2px 10px #17130f0d}
+.dia2.today{border-color:var(--warm);box-shadow:inset 0 4px 0 var(--warm),0 2px 10px #17130f0d}
+.dia2.past{opacity:.78}
+.dia2.vazio{padding:10px 16px;background:transparent;box-shadow:none;border-style:dashed}
+.dia2 header{display:flex;align-items:center;gap:14px}
+.dia2-d{width:52px;height:52px;border-radius:14px;background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;flex:none}
+.dia2.today .dia2-d{background:var(--warm);color:#fff}
+.dia2.vazio .dia2-d{width:40px;height:40px}.dia2.vazio .dia2-d b{font-size:1rem}
+.dia2-d b{font:700 1.35rem var(--font-display)}.dia2-d small{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-top:3px}
+.dia2-t{display:flex;flex-direction:column;gap:2px;min-width:0}.dia2-t strong{font-family:var(--font-display);font-size:1.02rem;text-transform:capitalize}
+.dia2 header .add{margin-left:auto}
+.wins.row{flex-direction:row;flex-wrap:wrap;gap:8px}
+.wins.row .win{flex-direction:row;gap:8px;align-items:center;padding:4px 10px}
+.ag2-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.wk-cols .ag2-grid{grid-template-columns:1fr}
+.ag2{display:grid;grid-template-columns:70px 1fr;gap:14px;background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--c,var(--line));border-radius:14px;padding:12px 14px;min-width:0}
+.ag2-time{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;background:color-mix(in srgb,var(--sc,#6b6358) 14%,var(--surface));color:var(--sc,var(--fg));padding:8px 0;align-self:start;line-height:1.1}
+.ag2-time b{font:700 1.25rem var(--font-display)}.ag2-time small{font-size:.7rem;font-weight:600;margin-top:3px}
+.ag2-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ag2-who{font:700 1.08rem var(--font-display);color:var(--fg);overflow-wrap:anywhere;line-height:1.25}
+.ag2-meta{font-size:.86rem;color:color-mix(in srgb,var(--fg) 75%,var(--surface))}
+.ag2-chips{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.ag2-tag{font-size:.72rem;font-weight:700;background:var(--surface-2);border-radius:7px;padding:2px 8px}.ag2-tag.aviso{background:color-mix(in srgb,#9a6b00 14%,var(--surface));color:#9a6b00}
+.ag2-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+.ag2-foot select.st{border:1.5px solid var(--sc,var(--line));color:var(--sc,var(--fg));font-weight:700;border-radius:10px;padding:5px 8px;background:var(--surface)}
+@media (max-width:560px){.ag2{grid-template-columns:58px 1fr;gap:10px}.ag2-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -455,6 +499,28 @@ function brDate(iso){try{return new Date(iso).toLocaleDateString('pt-BR')}catch(
 function isHttp(u){return /^https?:\/\//i.test(u||'')}
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+/* ---------- WhatsApp da equipe e modelos de mensagem ---------- */
+var WHATS='5531988374248';
+var LINK_SISTEMA='https://emotisspsicologia-clin.github.io/emotiss/';
+function waUrl(texto,tel){var n=tel?foneWa(tel):WHATS;return 'https://wa.me/'+n+'?text='+encodeURIComponent(texto||'')}
+function foneWa(t){var d=String(t||'').replace(/\D/g,'');return d.length<=11?'55'+d:d}
+function btnEquipe(texto,cls){return h('a',{class:'btn wa '+(cls||''),href:waUrl(texto),target:'_blank',rel:'noopener noreferrer'},'Falar com a equipe Emotiss')}
+var PRE_SERV='';try{var q=new URLSearchParams(location.search).get('servico');if(q){PRE_SERV=q;sessionStorage.setItem('siage-serv',q)}else PRE_SERV=sessionStorage.getItem('siage-serv')||''}catch(e){}
+var TPL=[
+ {id:'convite',nome:'Convite para agendar pelo sistema',t:'Olá, {nome}! Foi um prazer conversar com você. Para escolher o dia e o horário que melhor combinam com a sua rotina, é só acessar: {link}\nQualquer dúvida, estou por aqui.'},
+ {id:'ficha',nome:'Retorno: ficha recebida, falta agendar',t:'Olá, {nome}! Recebemos a sua ficha, obrigado. Posso te ajudar a escolher um horário? Se preferir, agende por aqui: {link}'},
+ {id:'semficha',nome:'Retorno: cadastro sem ficha',t:'Olá, {nome}! Vimos que o seu cadastro foi iniciado. Falta preencher a ficha e escolher o horário: {link}\nSe precisar de ajuda, me chame por aqui.'},
+ {id:'confirma',nome:'Confirmação de agendamento',t:'Olá, {nome}! Recebemos o seu agendamento para {quando}. Que bom que deu certo, te esperamos! Em breve enviaremos o contrato para assinatura pelo Gov.br.'},
+ {id:'lembrete',nome:'Lembrete de sessão',t:'Olá, {nome}! Passando para lembrar da sua sessão {quando}. Qualquer imprevisto, é só nos avisar por aqui.'},
+ {id:'contrato',nome:'Envio do contrato',t:'Olá, {nome}! Enviamos o seu contrato para assinatura. Assine pelo Gov.br e devolva o arquivo assinado na aba Documentos do painel: {link}'},
+ {id:'assinatura',nome:'Lembrar de devolver o contrato assinado',t:'Olá, {nome}! Passando para lembrar do contrato: assine pelo Gov.br e envie o arquivo assinado pelo painel: {link}\nSe tiver qualquer dúvida na assinatura, posso te ajudar.'}
+];
+function proxSessao(codigo){return S.d.agenda.filter(function(a){return a.codigo===codigo&&a.data>=todayKey&&(a.status==='agendada'||a.status==='confirmada')}).sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})[0]}
+function textoModelo(id,p){
+  var t=(TPL.filter(function(x){return x.id===id})[0]||TPL[0]).t,pr=p?proxSessao(p.codigo):null;
+  var nome=p?String(p.nome||'').replace(/\s*\(.*?\)/g,'').trim().split(/\s+/)[0]:'';
+  return t.replace(/\{nome\}/g,nome||'').replace(/\{link\}/g,LINK_SISTEMA).replace(/\{quando\}/g,pr?longDay(pr.data)+' às '+pr.hora:'[dia e horário]').replace('Olá, !','Olá!');
+}
 var ACCEPT='.pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
 var MAX_BYTES=5*1024*1024;
 var STATUS={agendada:'Agendada',confirmada:'Confirmada',reagendada:'Reagendada',realizada:'Realizada',faltou:'Faltou',cancelada:'Cancelada'};
@@ -494,7 +560,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -671,7 +737,7 @@ function buildGate(){
     }catch(e){m3.textContent=e.message}
     b3.disabled=false;
   });
-  return h('div',{class:'gates'},pac,f1);
+  return h('div',{},h('div',{class:'gates'},pac,f1),h('div',{class:'wa-bar'},h('span',{class:'meta'},'Precisa de ajuda para entrar ou agendar?'),btnEquipe('Olá! Preciso de ajuda com o sistema de agendamento da Emotiss.')));
 }
 async function entrar(jaCarregado){
   if(!jaCarregado) await recarregar();
@@ -680,6 +746,7 @@ async function entrar(jaCarregado){
   S.tab=S.modo==='gestao'?'agenda':'sessoes';
   S.slots={};S.bk=novoBk();S.bkAberto=undefined;S.bkMsg='';P.bkInit=0;if(P.fxReset)P.fxReset();
   renderShell();
+  if(S.modo==='paciente'&&PRE_SERV&&svcs().some(function(x){return x.id===PRE_SERV})){S.bkAberto=true;escolherServico(PRE_SERV);try{sessionStorage.removeItem('siage-serv')}catch(e){}PRE_SERV=''}
   clearInterval(S.timer);
   S.timer=setInterval(function(){if(!document.hidden&&!S.editPac&&!document.querySelector('details.pedido[open]'))recarregar(true)},60000);
 }
@@ -751,13 +818,21 @@ function sessaoItem(a){
     try{await api('atualizarSessao',ctx(),a.id,sel.value);await recarregar()}catch(e){falha(e);sel.value=a.status}
   });
   var cor=corProf(a.profissional);
-  return h('li',{class:'sess',style:'--c:'+(a.profissional?cor:'var(--line)')},
-    h('div',{class:'row'},h('span',{class:'t'},a.hora),a.serie?h('span',{class:'pill tag',title:'Repete toda semana'},'↻ Semanal'):null,a.profissional?h('span',{class:'pchip',style:'--c:'+cor},dot(cor),a.profissional):h('span',{class:'meta'},'Sem profissional')),
-    h('div',{class:'who'},nomeDe(a.codigo,a.iniciais)),
-    h('div',{class:'meta'},[svcNome(a.servico),a.aceiteEm?'Aceite registrado (enviar contrato)':'',a.modalidade,a.duracao?a.duracao+' min':'',a.local].filter(Boolean).join(' · ')),
-    h('div',{class:'row'},sel,a.status!=='cancelada'?(a.serie
-      ?confirmBtn('Desfixar',function(){desfixar(a)},'Remover repetições futuras?')
-      :btn('Fixar toda semana',function(){fixar(a)},'small')):null,confirmBtn('Excluir',function(){excluir('Agenda',a.id)})));
+  var tags=[svcNome(a.servico),a.modalidade,a.local].filter(Boolean);
+  return h('li',{class:'ag2 st-'+a.status,style:'--c:'+(a.profissional?cor:'var(--line)')},
+    h('div',{class:'ag2-time'},h('b',{},a.hora),a.duracao?h('small',{},a.duracao+' min'):null),
+    h('div',{class:'ag2-main'},
+      h('div',{class:'ag2-who'},nomeDe(a.codigo,a.iniciais)),
+      tags.length?h('div',{class:'ag2-meta'},tags.join(' · ')):null,
+      h('div',{class:'ag2-chips'},
+        a.profissional?h('span',{class:'pchip',style:'--c:'+cor},dot(cor),a.profissional):h('span',{class:'meta'},'Sem profissional'),
+        a.serie?h('span',{class:'ag2-tag'},'↻ Semanal'):null,
+        a.aceiteEm?h('span',{class:'ag2-tag aviso'},'Aceite registrado · enviar contrato'):null),
+      h('div',{class:'ag2-foot'},sel,
+        a.status!=='cancelada'?(a.serie
+          ?confirmBtn('Desfixar',function(){desfixar(a)},'Remover repetições futuras?')
+          :btn('Fixar toda semana',function(){fixar(a)},'small')):null,
+        confirmBtn('Excluir',function(){excluir('Agenda',a.id)}))));
 }
 async function fixar(a){try{var n=await api('fixarSessao',ctx(),a.id);await recarregar();toast(n?'Sessão fixa: '+n+' semanas criadas.':'Sessão fixa. Nenhuma semana nova (horários ocupados).')}catch(e){falha(e)}}
 async function desfixar(a){try{var n=await api('desfixarSessao',ctx(),a.id);await recarregar();toast('Repetição encerrada. '+n+' sessões futuras removidas.')}catch(e){falha(e)}}
@@ -787,17 +862,21 @@ function renderAgenda(){
   P.filters.replaceChildren(
     chipBar('Profissional',opsP,S.fProf,function(v){S.fProf=v;renderAgenda()}),
     chipBar('Serviço',opsS,S.fServ,function(v){S.fServ=v;renderAgenda()}),
+    chipBar('Visão',[{v:'lista',l:'Lista por dia'},{v:'semana',l:'Semana em colunas'}],S.agView==='semana'?'semana':'lista',function(v){S.agView=v;renderAgenda()}),
     chipBar('Exibir',[{v:'1',l:'Horários de atendimento'}],S.semDisp?'':'1',function(){S.semDisp=!S.semDisp;renderAgenda()}));
   P.week.replaceChildren();
   var disp=S.d.disponibilidade||[];
+  var lista=S.agView!=='semana';
+  P.week.className='week '+(lista?'wk-lista':'wk-cols');
   for(var i=0;i<7;i++){(function(d,key){
     var itens=S.d.agenda.filter(function(a){return a.data===key&&passa(a)}).sort(function(a,b){return (a.hora||'').localeCompare(b.hora||'')});
     var wins=S.semDisp?[]:disp.filter(function(j){return +j.diaSemana===d.getDay()&&janelaVisivel(j,S.fProf,S.fServ)}).sort(function(a,b){return a.inicio.localeCompare(b.inicio)});
-    P.week.append(h('section',{class:'day'+(key===todayKey?' today':'')},
-      h('header',{},h('span',{class:'dw'},wd(d)),h('span',{class:'dn'},d.getDate()+' '+mon(d)),
-        h('button',{type:'button',class:'btn small add','aria-label':'Nova sessão em '+longDay(key),onclick:function(){toggleAgForm({data:key,profissional:S.fProf,servico:S.fServ})}},'+')),
-      wins.length?h('ul',{class:'wins','aria-label':'Horários de atendimento'},wins.map(janelaItem)):null,
-      itens.length?h('ul',{class:'clean'},itens.map(sessaoItem)):h('p',{class:'none'},'Sem sessões')));
+    var add=h('button',{type:'button',class:'btn small add','aria-label':'Nova sessão em '+longDay(key),onclick:function(){toggleAgForm({data:key,profissional:S.fProf,servico:S.fServ})}},'+ Sessão');
+    P.week.append(h('section',{class:'dia2'+(key===todayKey?' today':'')+(key<todayKey?' past':'')+(itens.length?'':' vazio')},
+      h('header',{},h('div',{class:'dia2-d'},h('b',{},d.getDate()),h('small',{},mon(d))),
+        h('div',{class:'dia2-t'},h('strong',{},longDay(key)),h('span',{class:'meta'},itens.length?itens.length+(itens.length===1?' sessão':' sessões'):'Sem sessões')),add),
+      wins.length?h('ul',{class:'wins row','aria-label':'Horários de atendimento'},wins.map(janelaItem)):null,
+      itens.length?h('ul',{class:'ag2-grid'},itens.map(sessaoItem)):null));
   })(addDays(ws,i),ymd(addDays(ws,i)))}
 }
 
@@ -821,8 +900,77 @@ function buildPacientes(){
     ok.disabled=false;
   });
   P.patList=h('div',{class:'list'});
-  el.append(h('details',{class:'card fold'},h('summary',{},'+ Cadastrar paciente'),form),P.patList);
+  el.append(h('details',{class:'card fold'},h('summary',{},'+ Cadastrar paciente'),form),buildModelos(),P.patList);
   return el;
+}
+/* ---------- mensagens prontas (recepção) ---------- */
+function buildModelos(){
+  var f={};
+  f.pac=h('select',{id:'md-pac'});patientSelects.push({sel:f.pac,todos:false});
+  f.tpl=h('select',{id:'md-tpl'},TPL.map(function(t){return opt(t.id,t.nome)}));
+  f.txt=h('textarea',{id:'md-txt',rows:5});
+  f.msg=h('p',{class:'meta'});
+  function carregar(){f.txt.value=textoModelo(f.tpl.value,porCodigo()[f.pac.value])}
+  f.pac.addEventListener('change',carregar);f.tpl.addEventListener('change',carregar);
+  f.copiar=btn('Copiar texto',async function(){
+    try{await navigator.clipboard.writeText(f.txt.value);f.msg.textContent='Texto copiado.'}
+    catch(e){f.txt.select();f.msg.textContent='Selecione e copie o texto (Ctrl+C).'}
+  },'small');
+  f.wa=btn('Abrir no WhatsApp',function(){
+    var p=porCodigo()[f.pac.value];
+    if(!p||!p.telefone){f.msg.textContent='Este paciente não tem telefone cadastrado. Use "Copiar texto".';return}
+    window.open(waUrl(f.txt.value,p.telefone),'_blank','noopener');
+  },'primary small');
+  P.md=f;P.mdBox=h('details',{class:'card fold'},h('summary',{},'Mensagens prontas para WhatsApp'),
+    h('div',{class:'stack',style:'margin-top:12px'},h('p',{class:'meta'},'Escolha o paciente e o modelo, ajuste o texto se quiser e abra a conversa já preenchida.'),
+      h('div',{class:'fields'},field('Paciente',f.pac),field('Modelo',f.tpl),field('Mensagem',f.txt,true)),f.msg,h('div',{class:'actions'},f.wa,f.copiar)));
+  return P.mdBox;
+}
+function abrirModelos(codigo,modelo){
+  if(S.tab!=='pacientes')go('pacientes');
+  P.md.pac.value=codigo;if(modelo)P.md.tpl.value=modelo;
+  P.md.txt.value=textoModelo(P.md.tpl.value,porCodigo()[codigo]);P.md.msg.textContent='';
+  P.mdBox.open=true;P.mdBox.scrollIntoView({block:'center'});
+}
+
+/* ---------- recepção: quem precisa de retorno ---------- */
+function diasDesde(iso){var d=Math.floor((Date.now()-new Date(iso).getTime())/86400000);return d<=0?'hoje':(d===1?'há 1 dia':'há '+d+' dias')}
+function itensRecepcao(){
+  var out=[],ag=S.d.agenda||[],mats=S.d.materiais||[],msgs=S.d.mensagens||[],fichas=S.d.fichas||[];
+  (S.d.pacientes||[]).forEach(function(p){
+    var viva=ag.some(function(a){return a.codigo===p.codigo&&a.status!=='cancelada'});
+    var fi=fichas.filter(function(x){return x.codigo===p.codigo})[0];
+    var contratos=mats.filter(function(m){return m.categoria==='contrato'&&m.para===p.codigo});
+    var aceite=ag.some(function(a){return a.codigo===p.codigo&&a.aceiteEm&&a.status!=='cancelada'});
+    var pendAss=contratos.filter(function(m){return !msgs.some(function(x){return x.codigo===p.codigo&&String(x.mensagem||'').indexOf('[contrato:'+m.id+']')>=0})});
+    if(!viva&&fi)out.push({p:p,k:'ficha',ordem:1,tit:'Ficha recebida, sem agendamento',desde:fi.criadoEm||p.criadoEm,tpl:'ficha',cor:'agendada'});
+    if(!viva&&!fi)out.push({p:p,k:'semficha',ordem:4,tit:'Cadastro sem ficha e sem agendamento',desde:p.criadoEm,tpl:'semficha',cor:'realizada'});
+    if(aceite&&!contratos.length)out.push({p:p,k:'contrato',ordem:2,tit:'Agendou: contrato a enviar',desde:p.criadoEm,tpl:null,cor:'reagendada'});
+    if(pendAss.length)out.push({p:p,k:'assinatura',ordem:3,tit:'Contrato enviado, aguardando assinatura',desde:pendAss[0].criadoEm,tpl:'assinatura',cor:'reagendada'});
+  });
+  return out.sort(function(a,b){return a.ordem-b.ordem||(a.desde||'').localeCompare(b.desde||'')});
+}
+function buildRecepcao(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.rcRes=h('div',{class:'tiles'});P.rcList=h('div',{class:'list'});
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Recepção'),h('p',{class:'meta'},'Pacientes que precisam de um contato de retorno. Cada linha abre a conversa no WhatsApp já com a mensagem pronta.')),P.rcRes,P.rcList);
+  return el;
+}
+function renderRecepcao(){
+  if(!P.rcList)return;
+  var l=itensRecepcao(),c=function(k){return l.filter(function(x){return x.k===k}).length};
+  P.rcRes.replaceChildren.apply(P.rcRes,tiles([{l:'Ficha sem agendamento',v:c('ficha')},{l:'Contrato a enviar',v:c('contrato')},{l:'Aguardando assinatura',v:c('assinatura')},{l:'Cadastro incompleto',v:c('semficha')}]));
+  P.rcList.replaceChildren.apply(P.rcList,l.length?l.map(function(x){
+    var p=x.p,fi=(S.d.fichas||[]).filter(function(f){return f.codigo===p.codigo})[0];
+    return h('article',{class:'sx st-'+x.cor},
+      h('div',{class:'sx-date','aria-hidden':'true'},h('b',{},(p.nome||'?').charAt(0).toUpperCase())),
+      h('div',{class:'sx-main'},
+        h('div',{class:'sx-top'},h('h3',{},p.nome),h('span',{class:'sx-badge'},x.tit)),
+        h('p',{class:'meta'},[p.telefone||'Sem telefone',p.email||'Sem e-mail',diasDesde(x.desde)].join(' · ')),
+        h('div',{class:'actions'},
+          x.tpl?btn('WhatsApp',function(){abrirModelos(p.codigo,x.tpl)},'primary small'):btn('Enviar contrato',function(){go('materiais');P.lib.para.value=p.codigo;P.lib.cat.value='contrato';P.lib.titulo.focus()},'primary small'),
+          fi?btn('Ver ficha',function(){S.verFicha=p.id;go('pacientes')},'small'):null)));
+  }):[empty('Tudo em dia','Nenhum paciente aguardando retorno agora.')]);
 }
 function renderPacientes(){
   var lista=S.d.pacientes.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
@@ -837,6 +985,7 @@ function renderPacientes(){
       (S.verFicha===p.id&&fi)?fichaView(fi):null,
       h('div',{class:'actions'},
         btn('Agendar sessão',function(){go('agenda');toggleAgForm({codigo:p.codigo})},'small'),
+        btn('Mensagem WhatsApp',function(){abrirModelos(p.codigo)},'small'),
         btn('Enviar material',function(){go('materiais');P.lib.para.value=p.codigo;P.lib.titulo.focus()},'small'),
         fi?btn(S.verFicha===p.id?'Ocultar ficha':'Ver ficha',function(){S.verFicha=S.verFicha===p.id?null:p.id;renderPacientes()},'small'):null,
         btn('E-mail e avisos',function(){S.editPac=S.editPac===p.id?null:p.id;renderPacientes()},'small'),
@@ -1076,16 +1225,17 @@ async function confirmarAgendamento(){
     if(b.servico)await carregarSlots();else renderBooking();
   }
 }
-var PASSOS=['Serviço','Dia e horário','Confirmação'];
+var PASSOS=['Ficha','Serviço','Dia e horário','Confirmação'];
 function trilha(b){
+  var fichaOk=!!S.d.ficha,cur=fichaOk?b.passo+1:1;
   return h('ol',{class:'trail','aria-label':'Etapas do agendamento'},PASSOS.map(function(n,i){
-    var k=i+1,cls=k<b.passo?'done':(k===b.passo?'cur':'');
-    var inner=[h('span',{class:'n','aria-hidden':'true'},k<b.passo?'✓':k),h('span',{},n)];
-    var conteudo=k<b.passo?h('button',{type:'button','aria-label':'Voltar para '+n,onclick:function(){b.passo=k;b.ok='';renderBooking()}},inner):h('div',{class:'tl-in'},inner);
-    var li=h('li',{class:cls},conteudo);if(k===b.passo)li.setAttribute('aria-current','step');return li;
+    var k=i+1,cls=k<cur?'done':(k===cur?'cur':'');
+    var inner=[h('span',{class:'n','aria-hidden':'true'},k<cur?'✓':k),h('span',{class:'tn'},n)];
+    var conteudo=(k<cur&&k>1)?h('button',{type:'button','aria-label':'Voltar para '+n,onclick:function(){b.passo=k-1;b.ok='';renderBooking()}},inner):h('div',{class:'tl-in'},inner);
+    var li=h('li',{class:cls},conteudo);if(k===cur)li.setAttribute('aria-current','step');return li;
   }));
 }
-function guia(b,txt){return h('p',{class:'guide'},h('b',{},'Passo '+b.passo+' de '+PASSOS.length+' · '),txt)}
+function guia(b,txt){return h('p',{class:'guide'},h('b',{},'Passo '+(b.passo+1)+' de '+PASSOS.length+' · '),txt)}
 function nav(voltar,avancar){return h('div',{class:'wiz-nav'},voltar||h('span',{}),avancar)}
 function renderBooking(){
   var b=S.bk,lista=svcs(),sv=lista.filter(function(s){return s.id===b.servico})[0];
@@ -1094,6 +1244,15 @@ function renderBooking(){
   P.bkBox.hidden=!S.bkAberto;P.bkTog.textContent=S.bkAberto?'Fechar':'+ Novo agendamento';
   P.bkMsg.replaceChildren.apply(P.bkMsg,S.bkMsg?[h('div',{class:'ok-box',role:'status'},S.bkMsg)]:[]);
   if(!S.bkAberto)return;
+  if(!S.d.ficha){
+    P.bkBox.replaceChildren(trilha(b),
+      h('p',{class:'guide'},h('b',{},'Passo 1 de '+PASSOS.length+' · '),'Preencha a ficha cadastral para liberar o agendamento.'),
+      h('div',{class:'lock-box'},h('div',{class:'lock-ic','aria-hidden':'true'},'📝'),
+        h('div',{class:'stack',style:'gap:8px'},h('strong',{},'Falta a sua ficha cadastral'),
+          h('p',{class:'meta'},'Ela leva cerca de 5 minutos e prepara o seu primeiro encontro. Depois de enviá-la, você volta aqui para escolher o serviço, o dia e o horário.'),
+          btn('Preencher ficha agora',function(){go('ficha')},'primary'))));
+    return;
+  }
   var kids=[];
   if(b.ok)kids.push(h('div',{class:'ok-box',role:'status'},b.ok));
   kids.push(trilha(b));
@@ -1525,7 +1684,7 @@ function buildFicha(){
     next.disabled=true;next.textContent='Enviando…';
     api('salvarFicha',ctx(),d).then(function(){
       limpaRascunho();P.fxEdit=false;P.fxJust=true;next.disabled=false;mostra(0,false);return recarregar();
-    }).then(function(){toast('Ficha enviada.')}).catch(function(er){
+    }).then(function(){toast('Ficha enviada.');if(S.modo==='paciente'&&!S.d.agenda.some(function(a){return a.status!=='cancelada'})){S.bkAberto=true;go('sessoes')}}).catch(function(er){
       next.disabled=false;next.textContent='Enviar ficha';msg.textContent=er.message;if(/SESSAO_EXPIRADA/.test(er.message))falha(er);
     });
   });
@@ -1689,7 +1848,7 @@ function renderProfs(){
 }
 
 /* ================= casca ================= */
-var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
 var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
 function go(id){
   S.tab=id;
@@ -1707,7 +1866,7 @@ function renderTabs(){
   if(!S.modo){tabs.hidden=true;return}
   tabs.hidden=false;
   (S.modo==='gestao'?TABS_G:TABS_P).forEach(function(t){
-    var n=t.id==='entrada'?naoLidas():t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
+    var n=t.id==='entrada'?naoLidas():t.id==='recepcao'?itensRecepcao().length:t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
     tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
   });
 }
@@ -1715,13 +1874,13 @@ function renderShell(){
   var g=S.modo==='gestao';
   document.getElementById('role-label').textContent=g?'Gestão':'Área do paciente';
   document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações.':'';document.getElementById('h-title').textContent='SiAGE | Sistema de Agendamento e Gestão Emotiss';document.querySelector('.top').classList.toggle('pac',!g);
-  var act=document.getElementById('top-actions');act.replaceChildren(btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small'));
+  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?null:btnEquipe('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.','small'),btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small')].filter(Boolean));
   Object.keys(PANELS).forEach(function(k){PANELS[k].hidden=true});
   PANELS[g?S.tab:'p_'+S.tab].hidden=false;
   renderTabs();renderDados();
 }
 function renderDados(){
-  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderTabs()}
+  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderTabs()}
   else if(S.modo==='paciente'){renderPaciente()}
 }
 function refreshSelects(){
@@ -1745,7 +1904,7 @@ function refreshSelects(){
 /* ---------- início ---------- */
 var main=document.getElementById('main');
 PANELS.gate=buildGate();
-PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();
+PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();
 PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
 Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true;main.append(PANELS[k])});
 })();
