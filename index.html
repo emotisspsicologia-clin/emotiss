@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'">
 <meta name="referrer" content="no-referrer">
 <base target="_top">
 <meta charset="utf-8">
@@ -329,6 +329,14 @@ label.f.check span{flex:1;min-width:0}
 /* bloqueio de novo agendamento e orientação de contrato */
 .lock-box{display:flex;gap:14px;align-items:flex-start;background:var(--surface-2);border-radius:16px;padding:16px}
 .lock-ic{font-size:1.6rem;line-height:1}
+.cb{display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--sc);border-radius:16px;box-shadow:0 2px 10px rgba(23,19,15,.05)}
+.cb h3{margin:0}.cb-val{font-family:'Work Sans',sans-serif;font-weight:800;font-size:1.35rem;white-space:nowrap}
+.cb .sx-badge{align-self:flex-start}
+.cb-pay{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.cb-qr{background:#fff;border-radius:14px;padding:8px;border:1px solid var(--line);line-height:0;flex:0 0 auto}
+.cb-qr svg{width:176px;height:176px}
+.cb-code{width:100%;font:.74rem/1.35 ui-monospace,Menlo,monospace;word-break:break-all;resize:none}
+.cb-up{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
 .govbr{background:color-mix(in srgb,var(--warm) 10%,var(--surface));border-left:4px solid var(--warm);border-radius:10px;padding:10px 12px;font-size:.88rem}
 
 /* login da gestão */
@@ -560,7 +568,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -1362,10 +1370,11 @@ function renderDocs(){
 }
 
 /* ---------- avisos do paciente ---------- */
-var AV_TIPOS=[['todos','Todos'],['sessao','Sessões'],['documento','Documentos'],['contrato','Contrato'],['material','Materiais'],['ficha','Ficha'],['geral','Comunicados']];
-var AV_ROT={sessao:'Sessão',documento:'Documento',contrato:'Contrato',material:'Material',ficha:'Ficha',geral:'Comunicado'};
-var AV_ICO={sessao:'◷',documento:'▤',contrato:'✎',material:'✦',ficha:'☰',geral:'✉'};
+var AV_TIPOS=[['todos','Todos'],['sessao','Sessões'],['documento','Documentos'],['contrato','Contrato'],['pagamento','Pagamentos'],['material','Materiais'],['ficha','Ficha'],['geral','Comunicados']];
+var AV_ROT={sessao:'Sessão',documento:'Documento',contrato:'Contrato',pagamento:'Pagamento',material:'Material',ficha:'Ficha',geral:'Comunicado'};
+var AV_ICO={sessao:'◷',documento:'▤',contrato:'✎',pagamento:'$',material:'✦',ficha:'☰',geral:'✉'};
 function stAviso(a){
+  if(a.tipo==='pagamento'){var tp=((a.titulo||'')+'').toLowerCase();return /confirmado/.test(tp)?'confirmada':/cancelad|não aceito/.test(tp)?'cancelada':'reagendada'}
   if(a.tipo!=='sessao'){return ({documento:'confirmada',contrato:'reagendada',material:'agendada',ficha:'realizada',geral:'geral'})[a.tipo]||'realizada'}
   var t=((a.titulo||'')+' '+(a.mensagem||'')).toLowerCase();
   if(/reagendad/.test(t))return 'reagendada';
@@ -1767,6 +1776,10 @@ function buildProfissionais(){
   f.prev=h('div',{class:'prof'});
   f.svc=h('div',{class:'stack',style:'gap:8px'});
   f.ativo=h('input',{id:'pf-ativo',type:'checkbox'});f.ativo.checked=true;
+  f.crp=h('input',{id:'pf-crp',type:'text',autocomplete:'off',placeholder:'04/85394',maxlength:20});
+  f.pixc=h('input',{id:'pf-pixc',type:'text',autocomplete:'off',placeholder:'e-mail, CPF/CNPJ, +5531… ou chave aleatória'});
+  f.pixn=h('input',{id:'pf-pixn',type:'text',autocomplete:'off',placeholder:'Nome completo do titular da chave'});
+  f.pixcid=h('input',{id:'pf-pixcid',type:'text',autocomplete:'off',value:'Belo Horizonte'});
   f.msg=h('p',{class:'meta'});
   f.ok=h('button',{type:'submit',class:'btn primary pillb'},'Cadastrar profissional');
   f.cancel=h('button',{type:'button',class:'btn pillb',hidden:true},'Cancelar edição');
@@ -1781,19 +1794,21 @@ function buildProfissionais(){
     try{f.foto=await reduzirFoto(f.arq.files[0]);f.msg.textContent='';preview()}catch(e){f.msg.textContent=e.message;f.arq.value=''}
   });
   f.limpar=function(){
-    f.id='';f.foto='';f.sel=[];f.nome.value='';f.desc.value='';f.email.value='';f.tel.value='';f.arq.value='';f.ativo.checked=true;f.msg.textContent='';
+    f.id='';f.foto='';f.sel=[];f.nome.value='';f.desc.value='';f.email.value='';f.tel.value='';f.arq.value='';f.crp.value='';f.pixc.value='';f.pixn.value='';f.pixcid.value='Belo Horizonte';f.ativo.checked=true;f.msg.textContent='';
     f.ok.textContent='Cadastrar profissional';f.cancel.hidden=true;f.sum.textContent='+ Cadastrar profissional';preview();renderProfSvc();
   };
   f.cancel.addEventListener('click',f.limpar);
   var form=h('form',{class:'panel-form',style:'margin-top:12px'},
-    h('div',{class:'fields'},field('Nome',f.nome),field('E-mail',f.email),field('Telefone / WhatsApp',f.tel),field('Foto',f.arq),field('Apresentação',f.desc,true)),
-    f.prev,h('div',{class:'step'},h('h3',{},'Serviços que atende'),f.svc),
+    h('div',{class:'fields'},field('Nome',f.nome),field('E-mail',f.email),field('Telefone / WhatsApp',f.tel),field('Foto',f.arq),field('CRP (aparece no contrato)',f.crp),field('Apresentação',f.desc,true)),
+    f.prev,h('div',{class:'step'},h('h3',{},'Recebimento por Pix'),h('p',{class:'meta'},'Cada profissional recebe na própria chave. Deixe a chave em branco para remover o Pix deste profissional. A chave só aparece para o paciente dentro de uma cobrança dele.'),
+      h('div',{class:'fields'},field('Chave Pix',f.pixc),field('Nome do titular',f.pixn),field('Cidade',f.pixcid))),
+    h('div',{class:'step'},h('h3',{},'Serviços que atende'),f.svc),
     h('label',{class:'f check'},f.ativo,h('span',{},'Ativo: aparece para o paciente no agendamento.')),
     f.msg,h('div',{class:'actions'},f.ok,f.cancel));
   form.addEventListener('submit',async function(ev){
     ev.preventDefault();f.ok.disabled=true;f.msg.textContent='Salvando…';
     try{
-      await api('salvarProfissional',ctx(),{id:f.id||undefined,nome:f.nome.value,descricao:f.desc.value,email:f.email.value,telefone:f.tel.value,servicos:f.sel.slice(),foto:f.foto,ativo:f.ativo.checked});
+      await api('salvarProfissional',ctx(),{id:f.id||undefined,nome:f.nome.value,descricao:f.desc.value,email:f.email.value,telefone:f.tel.value,servicos:f.sel.slice(),foto:f.foto,ativo:f.ativo.checked,crp:f.crp.value,pixChave:f.pixc.value,pixNome:f.pixn.value,pixCidade:f.pixcid.value});
       var editou=!!f.id;f.limpar();P.pfBox.open=false;await recarregar();toast(editou?'Profissional atualizado.':'Profissional cadastrado.');
     }catch(e){f.msg.textContent=e.message}
     f.ok.disabled=false;
@@ -1814,7 +1829,7 @@ function renderProfSvc(){
 }
 function editarProf(p){
   var f=P.pf;
-  f.id=p.id;f.foto=p.foto||'';f.sel=profServ(p);f.nome.value=p.nome;f.desc.value=p.descricao||'';f.email.value=p.email||'';f.tel.value=p.telefone||'';f.arq.value='';
+  f.id=p.id;f.foto=p.foto||'';f.sel=profServ(p);f.nome.value=p.nome;f.desc.value=p.descricao||'';f.email.value=p.email||'';f.tel.value=p.telefone||'';f.crp.value=p.crp||'';f.pixc.value=p.pixChave||'';f.pixn.value=p.pixNome||'';f.pixcid.value=p.pixCidade||'Belo Horizonte';f.arq.value='';
   f.ativo.checked=p.ativo!=='nao';f.msg.textContent='';f.ok.textContent='Salvar alterações';f.cancel.hidden=false;f.sum.textContent='Editando: '+p.nome;
   f.preview();renderProfSvc();P.pfBox.open=true;P.pfBox.scrollIntoView({block:'nearest'});f.nome.focus();
 }
@@ -1838,7 +1853,7 @@ function renderProfs(){
     var tags=profServ(p).map(function(id){return h('span',{class:'pill tag'},svcNome(id)||id)});
     return h('article',{class:'item'},h('div',{class:'prof'},avatar(p,64),h('div',{class:'stack',style:'flex:1;gap:6px'},
       h('div',{class:'row'},h('h3',{},dot(p.cor||'#6b6358'),p.nome),
-        h('div',{class:'actions'},h('span',{class:'pill '+(p.ativo==='nao'?'tag':'confirmada')},p.ativo==='nao'?'Inativo':'Ativo'),h('span',{class:'pill tag'},fut+' sessão(ões) futura(s)'))),
+        h('div',{class:'actions'},h('span',{class:'pill '+(p.ativo==='nao'?'tag':'confirmada')},p.ativo==='nao'?'Inativo':'Ativo'),h('span',{class:'pill '+(p.pixChave?'confirmada':'tag')},p.pixChave?'Pix ativo ✓':'Sem Pix'),p.crp?h('span',{class:'pill tag'},'CRP '+p.crp):h('span',{class:'pill tag'},'Sem CRP'),h('span',{class:'pill tag'},fut+' sessão(ões) futura(s)'))),
       p.descricao?h('p',{class:'body'},p.descricao):null,
       contatos.length?h('div',{class:'chips meta'},contatos):h('p',{class:'meta'},'Sem contatos cadastrados.'),
       tags.length?h('div',{class:'tags'},tags):h('p',{class:'meta'},'Nenhum serviço vinculado: o paciente não o encontra no agendamento.'),
@@ -1847,9 +1862,417 @@ function renderProfs(){
   }));
 }
 
+/* Gerador de QR Code (modo byte, correção M, versões 1–12). Sem dependências externas. */
+var QR=(function(){
+  var EC=[null,[10,1,16,0,0],[16,1,28,0,0],[26,1,44,0,0],[18,2,32,0,0],[24,2,43,0,0],[16,4,27,0,0],[18,4,31,0,0],[22,2,38,2,39],[22,3,36,2,37],[26,4,43,1,44],[30,1,50,4,51],[22,6,36,2,37]];
+  var AL=[null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58]];
+  var EXP=new Array(512),LOG=new Array(256);
+  (function(){var x=1;for(var i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&256)x^=0x11d}for(i=255;i<512;i++)EXP[i]=EXP[i-255]})();
+  function mul(a,b){return a&&b?EXP[LOG[a]+LOG[b]]:0}
+  function gen(n){var g=[1];for(var i=0;i<n;i++){var ng=new Array(g.length+1).fill(0);for(var j=0;j<g.length;j++){ng[j]^=g[j];ng[j+1]^=mul(g[j],EXP[i])}g=ng}return g}
+  function rs(data,n){var g=gen(n),r=new Array(n).fill(0);
+    data.forEach(function(d){var f=d^r[0];r.shift();r.push(0);for(var i=0;i<n;i++)r[i]^=mul(g[i+1],f)});return r}
+  function utf8(s){return Array.prototype.slice.call(unescape(encodeURIComponent(s))).map(function(c){return c.charCodeAt(0)})}
+  function bch(v,poly,bits){var d=v<<bits;var top=0;for(var t=poly;t>1;t>>=1)top++;for(var i=top+bits-top;;){break}
+    var pl=poly.toString(2).length;for(var k=d.toString(2).length-pl;k>=0;k--){if((d>>(k+pl-1))&1)d^=poly<<k}return d}
+  function make(text){
+    var bytes=utf8(text),ver=0;
+    for(var v=1;v<=12;v++){var e=EC[v],cap=e[1]*e[2]+e[3]*e[4];var need=4+(v<10?8:16)+bytes.length*8;if(Math.ceil(need/8)<=cap){ver=v;break}}
+    if(!ver)throw new Error('Texto longo demais para o QR.');
+    var e=EC[ver],total=e[1]*e[2]+e[3]*e[4],bits=[];
+    function put(val,n){for(var i=n-1;i>=0;i--)bits.push((val>>i)&1)}
+    put(4,4);put(bytes.length,ver<10?8:16);bytes.forEach(function(b){put(b,8)});
+    for(var i=0;i<4&&bits.length<total*8;i++)bits.push(0);
+    while(bits.length%8)bits.push(0);
+    var cw=[];for(i=0;i<bits.length;i+=8){var b=0;for(var j=0;j<8;j++)b=b*2+bits[i+j];cw.push(b)}
+    for(var p=0;cw.length<total;p++)cw.push(p%2?0x11:0xec);
+    var blocks=[],pos=0,k;
+    for(k=0;k<e[1]+e[3];k++){var len=k<e[1]?e[2]:e[4];blocks.push(cw.slice(pos,pos+len));pos+=len}
+    var ecs=blocks.map(function(b){return rs(b,e[0])});
+    var out=[],maxd=Math.max(e[2],e[4]);
+    for(i=0;i<maxd;i++)blocks.forEach(function(b){if(i<b.length)out.push(b[i])});
+    for(i=0;i<e[0];i++)ecs.forEach(function(b){out.push(b[i])});
+    var n=17+4*ver,M=[],R=[];
+    for(i=0;i<n;i++){M.push(new Array(n).fill(null));R.push(new Array(n).fill(false))}
+    function set(r,c,v){M[r][c]=v;R[r][c]=true}
+    function finder(r,c){for(var y=-1;y<=7;y++)for(var x=-1;x<=7;x++){var rr=r+y,cc=c+x;if(rr<0||cc<0||rr>=n||cc>=n)continue;
+      set(rr,cc,(y>=0&&y<=6&&(x==0||x==6))||(x>=0&&x<=6&&(y==0||y==6))||(y>=2&&y<=4&&x>=2&&x<=4))}}
+    finder(0,0);finder(0,n-7);finder(n-7,0);
+    var al=AL[ver];
+    al.forEach(function(r){al.forEach(function(c){
+      if((r==6&&c==6)||(r==6&&c==al[al.length-1])||(r==al[al.length-1]&&c==6))return;
+      for(var y=-2;y<=2;y++)for(var x=-2;x<=2;x++)set(r+y,c+x,Math.max(Math.abs(x),Math.abs(y))!=1)})});
+    for(i=8;i<n-8;i++){if(!R[6][i])set(6,i,i%2==0);if(!R[i][6])set(i,6,i%2==0)}
+    set(n-8,8,true);
+    // reservar áreas de formato/versão
+    for(i=0;i<9;i++){if(!R[8][i])set(8,i,false);if(!R[i][8])set(i,8,false)}
+    for(i=0;i<8;i++){if(!R[8][n-1-i])set(8,n-1-i,false);if(!R[n-1-i][8])set(n-1-i,8,false)}
+    set(n-8,8,true);
+    if(ver>=7){var vi=(ver<<12)|bch(ver,0x1f25,12);
+      for(i=0;i<18;i++){var bt=((vi>>i)&1)==1,a=Math.floor(i/3),bb=i%3+n-11;set(a,bb,bt);set(bb,a,bt)}}
+    // dados em zigue-zague
+    var bi=0,up=true;
+    for(var c=n-1;c>0;c-=2){if(c==6)c--;
+      for(var t=0;t<n;t++){var r=up?n-1-t:t;
+        for(var d=0;d<2;d++){var cc=c-d;if(R[r][cc])continue;
+          var bit=bi<out.length*8?((out[bi>>3]>>(7-(bi&7)))&1)==1:false;bi++;
+          M[r][cc]=bit}}
+      up=!up}
+    var masks=[function(r,c){return (r+c)%2==0},function(r,c){return r%2==0},function(r,c){return c%3==0},function(r,c){return (r+c)%3==0},
+      function(r,c){return (Math.floor(r/2)+Math.floor(c/3))%2==0},function(r,c){return (r*c)%2+(r*c)%3==0},
+      function(r,c){return ((r*c)%2+(r*c)%3)%2==0},function(r,c){return ((r+c)%2+(r*c)%3)%2==0}];
+    function build(m){
+      var G=M.map(function(row,r){return row.map(function(v,c){return R[r][c]?v:(v!==masks[m](r,c))})});
+      var f=((0<<3)|m);var fb=((f<<10)|bch(f,0x537,10))^0x5412;
+      function sf(r,c,i){G[r][c]=((fb>>i)&1)==1}
+      for(var i=0;i<=5;i++)sf(i,8,i);sf(7,8,6);sf(8,8,7);sf(8,7,8);
+      for(i=9;i<15;i++)sf(8,14-i,i);
+      for(i=0;i<8;i++)sf(8,n-1-i,i);
+      for(i=8;i<15;i++)sf(n-15+i,8,i);
+      G[n-8][8]=true;return G}
+    function pen(G){var s=0,i,j;
+      for(i=0;i<n;i++){var rr=1,cr=1;for(j=1;j<n;j++){if(G[i][j]==G[i][j-1]){rr++}else{if(rr>=5)s+=rr-2;rr=1}if(G[j][i]==G[j-1][i]){cr++}else{if(cr>=5)s+=cr-2;cr=1}}
+        if(rr>=5)s+=rr-2;if(cr>=5)s+=cr-2}
+      for(i=0;i<n-1;i++)for(j=0;j<n-1;j++){var v=G[i][j];if(v==G[i][j+1]&&v==G[i+1][j]&&v==G[i+1][j+1])s+=3}
+      var pat=[1,0,1,1,1,0,1,0,0,0,0],pat2=pat.slice().reverse();
+      function chk(get){for(var a=0;a<n;a++)for(var b=0;b<=n-11;b++){var m1=true,m2=true;for(var k=0;k<11;k++){var x=get(a,b+k)?1:0;if(x!=pat[k])m1=false;if(x!=pat2[k])m2=false}if(m1)s+=40;if(m2)s+=40}}
+      chk(function(a,b){return G[a][b]});chk(function(a,b){return G[b][a]});
+      var dark=0;for(i=0;i<n;i++)for(j=0;j<n;j++)if(G[i][j])dark++;
+      s+=Math.floor(Math.abs(dark*100/(n*n)-50)/5)*10;return s}
+    var best=null,bs=1e9;
+    for(var m=0;m<8;m++){var G=build(m),s=pen(G);if(s<bs){bs=s;best=G}}
+    return best;
+  }
+  function svg(text,px){
+    var G=make(text),n=G.length,q=4,d='';
+    for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(G[r][c])d+='M'+(c+q)+' '+(r+q)+'h1v1h-1z';
+    var s=n+2*q;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+s+' '+s+'" width="'+(px||200)+'" height="'+(px||200)+'" shape-rendering="crispEdges"><rect width="'+s+'" height="'+s+'" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+  }
+  return {make:make,svg:svg};
+})();
+
+/* ================= PAGAMENTOS (Pix) ================= */
+function brl(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function dbr(s){return String(s||'').split('-').reverse().join('/')}
+function cbStatus(c){
+  if(c.status==='pendente')return c.vencimento&&c.vencimento<todayKey?'vencida':'pendente';
+  return c.status;
+}
+var CB_ROT={pendente:'A pagar',vencida:'Vencida',comprovante:'Comprovante enviado',pago:'Pago ✓',cancelada:'Cancelada'};
+var CB_ST={pendente:'reagendada',vencida:'cancelada',comprovante:'agendada',pago:'confirmada',cancelada:'realizada'};
+function cbBadge(c){var s=cbStatus(c);return h('span',{class:'sx-badge'},CB_ROT[s])}
+function qrBox(txt){var d=h('div',{class:'cb-qr','aria-label':'QR Code do Pix',role:'img'});try{d.innerHTML=QR.svg(txt,176)}catch(e){d.textContent='QR indisponível: use o código copia e cola.'}return d}
+async function copiarTexto(t,msgEl){
+  try{await navigator.clipboard.writeText(t);msgEl.textContent='Código copiado. Cole no app do seu banco.'}
+  catch(e){var ta=h('textarea',{style:'position:fixed;opacity:0'});ta.value=t;document.body.append(ta);ta.select();try{document.execCommand('copy');msgEl.textContent='Código copiado.'}catch(x){msgEl.textContent='Copie o código manualmente.'}ta.remove()}
+}
+function cobrancaPCard(c){
+  var s=cbStatus(c),kids=[];
+  kids.push(h('div',{class:'row'},h('div',{class:'stack',style:'gap:2px'},h('h3',{},c.descricao||'Cobrança'),
+    h('span',{class:'meta'},'Vencimento '+dbr(c.vencimento)+(c.profissional?' · '+c.profissional:''))),
+    h('div',{class:'cb-val'},brl(c.valor))),cbBadge(c));
+  if(c.status==='pendente'){
+    if(c.motivo)kids.push(h('p',{class:'govbr'},h('b',{},'Comprovante não aceito. '),c.motivo));
+    if(c.pix){
+      var msg=h('p',{class:'meta',role:'status'}),ta=h('textarea',{readonly:true,rows:3,class:'cb-code','aria-label':'Pix copia e cola'});ta.value=c.pix;
+      var inp=h('input',{type:'file',accept:'.pdf,.png,.jpg,.jpeg,.webp','aria-label':'Comprovante do Pix'}),m2=h('p',{class:'meta'});
+      var env=btn('Enviar comprovante',async function(){
+        if(!inp.files[0]){m2.textContent='Anexe o comprovante do Pix. Ele é obrigatório.';return}
+        env.disabled=true;m2.textContent='Enviando…';
+        try{var arq=await lerArquivo(inp.files[0]);await api('enviarComprovante',ctx(),c.id,arq);await recarregar();toast('Comprovante enviado. Aguarde a confirmação da clínica.')}
+        catch(e){m2.textContent=e.message;env.disabled=false}
+      },'primary small');
+      kids.push(h('div',{class:'cb-pay'},qrBox(c.pix),h('div',{class:'stack',style:'gap:8px;flex:1;min-width:210px'},
+        h('b',{},'1. Pague pelo Pix'),
+        h('p',{class:'meta'},'Escaneie o QR Code ou use o Pix copia e cola no app do seu banco. Favorecido: '+(c.favorecido||'')+'.'),
+        ta,btn('Copiar código Pix',function(){copiarTexto(c.pix,msg)},'small'),msg)));
+      kids.push(h('div',{class:'cb-up'},h('b',{},'2. Envie o comprovante'),
+        h('p',{class:'meta'},'O pagamento só é considerado pago depois que você enviar o comprovante e a clínica confirmar.'),
+        h('div',{class:'ctr-up'},inp,env),m2));
+    }else{
+      kids.push(h('p',{class:'govbr'},'Os dados de pagamento desta cobrança ainda não estão disponíveis. ',btnEquipe('Olá! Preciso dos dados para pagar a cobrança "'+(c.descricao||'')+'".','small')));
+    }
+  }else if(c.status==='comprovante'){
+    kids.push(h('p',{class:'ctr-msg'},'Recebemos o seu comprovante'+(c.enviadoEm?' em '+brDate(c.enviadoEm):'')+'. A clínica vai conferir e confirmar o pagamento.'));
+    if(c.arquivoId)kids.push(h('div',{class:'actions'},arquivosDe(c)));
+  }else if(c.status==='pago'){
+    kids.push(h('p',{class:'ctr-msg'},'Pagamento confirmado'+(c.pagoEm?' em '+brDate(c.pagoEm):'')+'. Obrigado!'));
+  }
+  return h('article',{class:'cb st-'+CB_ST[s]},kids);
+}
+function buildPPagamentos(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  P.cbTiles=h('div',{class:'tiles'});P.cbAberto=h('div',{class:'list'});P.cbHistSum=h('summary',{},'Histórico');P.cbHist=h('div',{class:'list'});
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Pagamentos'),h('p',{class:'meta'},'Pague por Pix e envie o comprovante. Só depois do comprovante enviado e confirmado pela clínica o pagamento conta como pago.')),
+    P.cbTiles,P.cbAberto,h('details',{class:'card fold'},P.cbHistSum,P.cbHist));
+  return el;
+}
+function cobrancasP(){return (S.d&&S.d.cobrancas)||[]}
+function abertasP(){return cobrancasP().filter(function(c){return c.status==='pendente'})}
+function renderPagamentos(){
+  if(!P.cbTiles)return;
+  var l=cobrancasP().slice().sort(function(a,b){return String(a.vencimento).localeCompare(String(b.vencimento))});
+  var ab=l.filter(function(c){return c.status==='pendente'}),conf=l.filter(function(c){return c.status==='comprovante'}),hist=l.filter(function(c){return c.status==='pago'||c.status==='cancelada'}).reverse();
+  var soma=function(a){return a.reduce(function(t,c){return t+Number(c.valor||0)},0)};
+  P.cbTiles.replaceChildren.apply(P.cbTiles,tiles([{l:'A pagar',v:brl(soma(ab)),s:ab.length+' cobrança(s)',big:1},{l:'Em conferência',v:conf.length},{l:'Pagas',v:l.filter(function(c){return c.status==='pago'}).length}]));
+  var vis=ab.concat(conf);
+  P.cbAberto.replaceChildren.apply(P.cbAberto,vis.length?vis.map(cobrancaPCard):[empty('Nenhuma cobrança em aberto','Quando a clínica emitir uma cobrança, ela aparece aqui e você recebe um aviso.')]);
+  P.cbHistSum.textContent='Histórico ('+hist.length+')';
+  P.cbHist.replaceChildren.apply(P.cbHist,hist.length?hist.map(cobrancaPCard):[empty('Sem histórico ainda','Cobranças pagas ou canceladas ficam guardadas aqui.')]);
+}
+
+/* ---------- Financeiro (gestão) ---------- */
+function buildFinanceiro(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f={};
+  f.pac=h('select',{id:'fn-pac',required:true});patientSelects.push({sel:f.pac,todos:false});
+  f.prof=h('select',{id:'fn-prof',required:true});profSelects.push({sel:f.prof,vazio:'Escolha o profissional'});
+  f.desc=h('input',{id:'fn-desc',type:'text',placeholder:'Ex.: Sessão de 12/12, Mensalidade, Pacote de 4 sessões'});
+  f.valor=h('input',{id:'fn-valor',type:'text',inputmode:'decimal',required:true,placeholder:'150,00'});
+  f.venc=h('input',{id:'fn-venc',type:'date',required:true});f.venc.value=todayKey;
+  f.rep=h('select',{id:'fn-rep'});f.rep.append(opt('1','Só esta cobrança'));for(var i=2;i<=12;i++)f.rep.append(opt(String(i),'Repetir por '+i+' meses'));
+  f.msg=h('p',{class:'meta'});
+  var ok=h('button',{type:'submit',class:'btn primary pillb'},'Criar cobrança');
+  var form=h('form',{class:'panel-form',style:'margin-top:12px'},
+    h('div',{class:'fields'},field('Paciente',f.pac),field('Profissional que recebe',f.prof),field('Descrição',f.desc,true),field('Valor (R$)',f.valor),field('Vencimento (1ª parcela)',f.venc),field('Recorrência',f.rep)),
+    h('p',{class:'meta'},'A forma de cobrança (por sessão, mensal ou pacote) é a combinada no contrato de cada paciente. O Pix usa a chave cadastrada no profissional escolhido.'),
+    f.msg,h('div',{class:'actions'},ok));
+  form.addEventListener('submit',async function(ev){
+    ev.preventDefault();ok.disabled=true;f.msg.textContent='Criando…';
+    try{
+      await api('criarCobranca',ctx(),{codigo:f.pac.value,profissional:f.prof.value,descricao:f.desc.value,valor:f.valor.value,vencimento:f.venc.value,meses:Number(f.rep.value)});
+      f.desc.value='';f.valor.value='';f.rep.value='1';f.msg.textContent='';P.fnBox.open=false;await recarregar();toast('Cobrança criada e paciente avisado.');
+    }catch(e){f.msg.textContent=e.message}
+    ok.disabled=false;
+  });
+  P.fnBox=h('details',{class:'card fold'},h('summary',{},'+ Nova cobrança'),form);
+  S.fnFiltro='conferir';S.fnProf='';
+  P.fnTiles=h('div',{class:'tiles'});
+  P.fnChips=h('div',{class:'nt-tabs',role:'tablist'});
+  P.fnProfSel=h('select',{id:'fn-fprof','aria-label':'Filtrar por profissional'});P.fnProfSel.addEventListener('change',function(){S.fnProf=P.fnProfSel.value;renderFinanceiro()});
+  P.fnList=h('div',{class:'list'});
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Financeiro'),h('p',{class:'meta'},'Cobranças por Pix. Um pagamento só pode ser confirmado depois que o paciente enviar o comprovante.')),
+    P.fnTiles,P.fnBox,h('div',{class:'row'},P.fnChips,h('label',{class:'f',style:'min-width:200px'},P.fnProfSel)),P.fnList);
+  return el;
+}
+function cobrancasG(){return (S.d&&S.d.cobrancas)||[]}
+function aConferir(){return cobrancasG().filter(function(c){return c.status==='comprovante'})}
+var FN_FILTROS=[['conferir','A conferir'],['pendente','A pagar'],['pago','Pagas'],['cancelada','Canceladas'],['todas','Todas']];
+function cobrancaGCard(c){
+  var s=cbStatus(c),pac=nomeDe(c.codigo,c.codigo);
+  var kids=[h('div',{class:'row'},h('div',{class:'stack',style:'gap:2px'},h('h3',{},pac),h('span',{class:'meta'},(c.descricao||'')+' · vence '+dbr(c.vencimento)+' · '+(c.profissional||'—'))),h('div',{class:'cb-val'},brl(c.valor))),cbBadge(c)];
+  if(c.status==='comprovante'){
+    kids.push(h('p',{class:'ctr-msg'},'Comprovante enviado'+(c.enviadoEm?' em '+brDate(c.enviadoEm):'')+'. Confira no extrato antes de confirmar.'));
+  }
+  if(c.status==='pendente'&&c.motivo)kids.push(h('p',{class:'meta'},'Último comprovante recusado: '+c.motivo));
+  if(c.status==='pago')kids.push(h('p',{class:'meta'},'Pago e confirmado'+(c.pagoEm?' em '+brDate(c.pagoEm):'')+'.'));
+  var acts=[];
+  if(c.arquivoId)acts=acts.concat(arquivosDe({arquivoId:c.arquivoId,arquivoNome:'comprovante'}));
+  if(c.status==='comprovante'){
+    acts.push(btn('Confirmar pagamento',async function(ev){ev.currentTarget.disabled=true;try{await api('confirmarPagamento',ctx(),c.id);await recarregar();toast('Pagamento confirmado e paciente avisado.')}catch(e){falha(e);recarregar()}},'primary small'));
+    acts.push(btn('Recusar',function(){S.recusar=S.recusar===c.id?null:c.id;renderFinanceiro()},'small'));
+  }
+  if(c.status!=='pago'&&c.status!=='cancelada')acts.push(confirmBtn('Cancelar cobrança',async function(){try{await api('cancelarCobranca',ctx(),c.id);await recarregar()}catch(e){falha(e)}}));
+  if(c.status==='pago'||c.status==='cancelada')acts.push(confirmBtn('Excluir',function(){excluir('Cobrancas',c.id)}));
+  if(S.recusar===c.id){
+    var mi=h('input',{type:'text',placeholder:'Motivo (ex.: valor diferente, comprovante ilegível)','aria-label':'Motivo da recusa',style:'flex:1;min-width:200px'});
+    kids.push(h('div',{class:'ctr-up'},mi,btn('Enviar recusa',async function(){try{await api('recusarComprovante',ctx(),c.id,mi.value);S.recusar=null;await recarregar();toast('Comprovante recusado. O paciente foi avisado.')}catch(e){falha(e)}},'small')));
+  }
+  kids.push(h('div',{class:'actions'},acts));
+  return h('article',{class:'cb st-'+CB_ST[s]},kids);
+}
+function renderFinanceiro(){
+  if(!P.fnList)return;
+  var l=cobrancasG();
+  var mes=todayKey.slice(0,7);
+  var soma=function(a){return a.reduce(function(t,c){return t+Number(c.valor||0)},0)};
+  var rec=l.filter(function(c){return c.status==='pendente'}),conf=aConferir(),mesPago=l.filter(function(c){return c.status==='pago'&&String(c.pagoEm).slice(0,7)===mes});
+  P.fnTiles.replaceChildren.apply(P.fnTiles,tiles([{l:'A receber',v:brl(soma(rec)),s:rec.length+' cobrança(s)',big:1},{l:'A conferir',v:conf.length,s:brl(soma(conf))},{l:'Recebido no mês',v:brl(soma(mesPago)),s:mesPago.length+' pagamento(s)'}]));
+  P.fnChips.replaceChildren.apply(P.fnChips,FN_FILTROS.map(function(t){
+    var n=t[0]==='conferir'?conf.length:0;
+    return h('button',{type:'button',class:'nt-tab',role:'tab','aria-selected':S.fnFiltro===t[0]?'true':'false',onclick:function(){S.fnFiltro=t[0];renderFinanceiro()}},t[1],n?h('span',{class:'badge'},n):null)}));
+  var pv=P.fnProfSel.value;P.fnProfSel.replaceChildren(opt('','Todos os profissionais'));profs().forEach(function(p){P.fnProfSel.append(opt(p.nome,p.nome))});P.fnProfSel.value=S.fnProf||pv||'';
+  var vis=l.filter(function(c){
+    if(S.fnProf&&c.profissional!==S.fnProf)return false;
+    if(S.fnFiltro==='conferir')return c.status==='comprovante';
+    if(S.fnFiltro==='pendente')return c.status==='pendente';
+    if(S.fnFiltro==='pago')return c.status==='pago';
+    if(S.fnFiltro==='cancelada')return c.status==='cancelada';
+    return true;
+  }).sort(function(a,b){return String(a.vencimento).localeCompare(String(b.vencimento))});
+  P.fnList.replaceChildren.apply(P.fnList,vis.length?vis.map(cobrancaGCard):[empty('Nada por aqui','Nenhuma cobrança neste filtro. Use "+ Nova cobrança" para emitir.')]);
+}
+
+/* ================= CONTRATOS (gerador de PDF) ================= */
+var PDF_LIB='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',pdfPromise=null;
+function carregarScript(src){return new Promise(function(ok,fail){var s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=function(){fail(new Error('Não foi possível carregar '+src.split('/').pop()+'. Confira a internet e se o arquivo contrato.js está no GitHub junto do index.html.'))};document.head.append(s)})}
+function carregarPdf(){
+  if(window.jspdf&&window.SiageContrato)return Promise.resolve();
+  if(!pdfPromise)pdfPromise=(window.jspdf?Promise.resolve():carregarScript(PDF_LIB)).then(function(){return window.SiageContrato?0:carregarScript('contrato.js')}).catch(function(e){pdfPromise=null;throw e});
+  return pdfPromise;
+}
+var CT_CIVIL=['Solteiro(a)','Casado(a)','União estável','Separado(a)','Divorciado(a)','Viúvo(a)'];
+var CT_DIAS=['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo'];
+var CT_QUANDO=[['antes','Antes da sessão'],['apos','Após cada sessão'],['dia','Mensal, em um dia do mês']];
+function ctEndereco(f){
+  var g=function(k){return String(f[k]||'').trim()};
+  var rua=[g('logradouro'),g('numero')].filter(Boolean).join(', ');
+  if(g('complemento'))rua=rua?rua+' - '+g('complemento'):g('complemento');
+  return [rua,g('bairro'),[g('cidade'),g('uf')].filter(Boolean).join(' - '),g('cep')?'CEP '+g('cep'):''].filter(Boolean).join(', ');
+}
+function ctIniciais(nome){
+  return String(nome||'').replace(/\([^)]*\)/g,' ').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().split(/\s+/).filter(function(w){return w&&!/^(d[aeo]s?|e)$/.test(w)})
+    .map(function(w){var m=/[a-z]/.exec(w);return m?m[0].toUpperCase():''}).join('').slice(0,8);
+}
+function ctMascData(v){var d=String(v).replace(/\D/g,'').slice(0,8);return d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d}
+function ctNomeArq(t){return String(t).replace(/[\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim()}
+function fichaDoPac(cod){
+  var f=(S.d.fichas||[]).filter(function(x){return x.codigo===cod})[0];if(!f)return null;
+  try{return JSON.parse(f.dados)}catch(e){return null}
+}
+function buildContratos(){
+  var el=h('section',{class:'stack',role:'tabpanel'});
+  var f={},X={};P.ct=f;
+  function txt(k,label,o){o=o||{};var i=h(o.area?'textarea':'input',Object.assign({id:'ct-'+k,type:'text',autocomplete:'off'},o.attrs||{}));if(o.area)i.rows=2;f[k]=i;return field(label,i,o.wide)}
+  function sel(k,label,list){var s=h('select',{id:'ct-'+k});s.append(opt('',list.empty||'Escolher'));list.forEach(function(x){s.append(opt(Array.isArray(x)?x[0]:x,Array.isArray(x)?x[1]:x))});f[k]=s;return field(label,s)}
+  function chk(k,label){var c=h('input',{type:'checkbox',id:'ct-'+k});f[k]=c;return h('label',{class:'f check'},c,h('span',{},label))}
+  f.pac=h('select',{id:'ct-pac'});patientSelects.push({sel:f.pac,todos:false});
+  f.prof=h('select',{id:'ct-prof'});profSelects.push({sel:f.prof,vazio:'Escolha o profissional'});
+  f.sv=['Psicoterapia','Neuropsicologia'].map(function(n){var c=h('input',{type:'checkbox'});c.value=n;return c});
+  f.md=['Presencial','Online'].map(function(n){var c=h('input',{type:'checkbox'});c.value=n;return c});
+  f.qd=CT_QUANDO.map(function(q){var r=h('input',{type:'radio',name:'ct-quando'});r.value=q[0];return r});
+  f.msg=h('p',{class:'meta',role:'status'});
+  var grp=function(arr,labels){return h('div',{class:'stack',style:'gap:6px'},arr.map(function(c,i){return h('label',{class:'f check'},c,h('span',{},labels[i]))}))};
+  var cabec=h('div',{class:'fields'},field('Paciente',f.pac),field('Profissional (contratado)',f.prof),txt('data','Data do contrato',{attrs:{inputmode:'numeric',maxlength:10,placeholder:'dd/mm/aaaa'}}),
+    txt('cod','Código do prontuário',{attrs:{placeholder:'INICIAIS.Psic-dd.mm.aaaa/0001'}}));
+  f.dados=h('div',{class:'fields'},
+    txt('nome','Contratante (nome completo)'),txt('nac','Nacionalidade',{attrs:{placeholder:'brasileiro(a)'}}),sel('civil','Estado civil',CT_CIVIL),
+    txt('cpf','CPF',{attrs:{inputmode:'numeric',maxlength:14}}),txt('tel','Telefone'),txt('email','E-mail'),txt('end','Residente em (endereço completo)',{area:1,wide:1}));
+  f.menorBox=h('div',{class:'fields'},txt('resp','Responsável (representante)'),txt('respcpf','CPF do responsável',{attrs:{inputmode:'numeric',maxlength:14}}));
+  f.menorBox.hidden=true;f.menor=h('input',{type:'checkbox',id:'ct-menor'});
+  f.menor.addEventListener('change',function(){f.menorBox.hidden=!f.menor.checked});
+  f.objeto=h('div',{class:'fields'},h('div',{class:'f'},h('span',{},'Serviços'),grp(f.sv,['Psicoterapia','Neuropsicologia'])),h('div',{class:'f'},h('span',{},'Modalidade'),grp(f.md,['Presencial','Online'])),
+    txt('aval','Nº de sessões da avaliação (se neuropsicologia)',{attrs:{inputmode:'numeric',maxlength:3}}),txt('local','Endereço do atendimento presencial',{area:1,wide:1}),txt('link','Link da sala online',{wide:1}));
+  f.pag=h('div',{class:'fields'},txt('valor','Valor por sessão (R$)',{attrs:{inputmode:'decimal',placeholder:'150,00'}}),sel('forma','Forma de pagamento',['Pix','Transferência']),
+    txt('pix','Chave Pix'),txt('conta','Conta para transferência',{area:1,wide:1}),
+    h('div',{class:'f'},h('span',{},'Quando se paga'),grp(f.qd,CT_QUANDO.map(function(q){return q[1]}))),txt('dia','Dia do mês (se mensal)',{attrs:{inputmode:'numeric',maxlength:2}}));
+  f.ag=h('div',{class:'fields'},sel('diasem','Dia da semana',CT_DIAS),txt('hora','Horário (hh:mm)',{attrs:{inputmode:'numeric',maxlength:5,placeholder:'14:00'}}));
+  f.pub=h('input',{type:'checkbox',id:'ct-pub'});f.pub.checked=true;
+  f.bPrev=btn('Pré-visualizar',function(){acaoContrato('prev')},'pillb');
+  f.bDown=btn('Baixar as 2 vias',function(){acaoContrato('baixar')},'pillb');
+  f.bSave=btn('Gerar e guardar no Drive',function(){acaoContrato('drive')},'primary pillb');
+  f.ficha=h('p',{class:'govbr',hidden:true});
+  var card=function(t,k){return h('div',{class:'step'},h('h3',{},t),k)};
+  var form=h('form',{class:'panel-form',style:'margin-top:12px',onsubmit:function(e){e.preventDefault()}},
+    f.ficha,card('Dados do contrato',cabec),card('Identificação do contratante',f.dados),h('label',{class:'f check'},f.menor,h('span',{},'Contratante menor de idade (representado por responsável)')),f.menorBox,
+    card('Objeto do contrato',f.objeto),card('Valores e condições de pagamento',f.pag),card('Agendamento (dia e horário fixos)',f.ag),
+    h('label',{class:'f check'},f.pub,h('span',{},'Publicar a 1ª via para o paciente assinar (ele recebe um aviso e devolve assinada na aba Aceite).')),
+    f.msg,h('div',{class:'actions'},f.bPrev,f.bDown,f.bSave));
+  f.pac.addEventListener('change',function(){preencherContrato(true)});
+  f.prof.addEventListener('change',function(){preencherContrato(false)});
+  f.sv.forEach(function(c){c.addEventListener('change',atualizaCod)});
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Contratos'),h('p',{class:'meta'},'Gera o contrato de prestação de serviços em PDF (duas vias) com os dados da ficha, guarda na pasta do paciente no Drive e, se quiser, publica para o paciente assinar.')),
+    h('div',{class:'card'},form));
+  return el;
+}
+function atualizaCod(){
+  var f=P.ct,pac=pacDoCt();if(!pac)return;
+  var fi=fichaDoPac(pac.codigo)||{};var nasc=String(fi.nascimento||'').replace(/\//g,'.');
+  var neu=f.sv[1].checked&&!f.sv[0].checked;
+  if(!nasc){return}
+  var atual=f.cod.value.trim(),seq=(/\/(\d{1,6})$/.exec(atual)||[])[1]||'0001';
+  f.cod.value=ctIniciais(fi.paciente||pac.nome)+'.'+(neu?'Neur':'Psic')+'-'+nasc+'/'+seq;
+}
+function pacDoCt(){var c=P.ct&&P.ct.pac.value;return c?S.d.pacientes.filter(function(p){return p.codigo===c})[0]:null}
+function profDoCt(){var n=P.ct&&P.ct.prof.value;return n?profs().filter(function(p){return p.nome===n})[0]:null}
+/* ponte: ficha + cadastro + agenda + profissional (Pix) -> campos do contrato */
+function preencherContrato(trocouPac){
+  var f=P.ct,pac=pacDoCt(),pr=profDoCt();
+  if(trocouPac&&pac){
+    var fi=fichaDoPac(pac.codigo);
+    f.ficha.hidden=!!fi;f.ficha.textContent=fi?'':'Este paciente ainda não enviou a ficha. Os dados abaixo precisam ser digitados e a data de nascimento é necessária para criar a pasta no Drive.';
+    fi=fi||{};
+    f.nome.value=fi.paciente||pac.nome||'';f.cpf.value=fi.cpf||'';f.tel.value=fi.telefone||pac.telefone||'';f.email.value=fi.email||pac.email||'';
+    f.civil.value=CT_CIVIL.indexOf(fi.estado_civil)>=0?fi.estado_civil:'';f.end.value=ctEndereco(fi);
+    var men=/menor/i.test(String(fi.titular||''));f.menor.checked=men;f.menorBox.hidden=!men;f.resp.value=men?(fi.resp_nome||''):'';f.respcpf.value=men?(fi.resp_cpf||''):'';
+    var sv=String(fi.servico||'');f.sv[0].checked=/psicoter/i.test(sv);f.sv[1].checked=/neuro/i.test(sv);
+    var md=String(fi.modalidade||'');f.md[0].checked=/presencial/i.test(md);f.md[1].checked=/online/i.test(md);
+    f.cod.value='';atualizaCod();
+    if(!f.data.value)f.data.value=ctMascData(todayKey.split('-').reverse().join(''));
+    // dia e horário: da sessão mais recente/próxima do paciente (agenda)
+    var ses=S.d.agenda.filter(function(a){return a.codigo===pac.codigo&&a.status!=='cancelada'}).sort(function(a,b){return (b.data+b.hora).localeCompare(a.data+a.hora)});
+    var prox=ses.filter(function(a){return a.data>=todayKey}).sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})[0]||ses[0];
+    if(prox){var d=new Date(prox.data+'T12:00:00');f.diasem.value=CT_DIAS[(d.getDay()+6)%7];f.hora.value=prox.hora;
+      if(!pr&&prox.profissional)f.prof.value=prox.profissional;
+      if(prox.modalidade==='Online'&&!f.md[0].checked&&!f.md[1].checked)f.md[1].checked=true;}
+    pr=profDoCt();
+  }
+  if(pr){
+    if(pr.pixChave&&!f.pix.value)f.pix.value=pr.pixChave;
+    if(!f.forma.value)f.forma.value=pr.pixChave?'Pix':'';
+  }
+}
+function dadosContrato(){
+  var f=P.ct,pac=pacDoCt(),pr=profDoCt();
+  if(!pac)throw new Error('Escolha o paciente.');
+  if(!pr)throw new Error('Escolha o profissional que assina como contratado.');
+  if(!pr.crp)throw new Error('Cadastre o CRP de '+pr.nome+' na aba Profissionais (formato 04/85394). Ele aparece no contrato.');
+  if(!f.nome.value.trim())throw new Error('Informe o nome do contratante.');
+  if(!/^\d{2}\/\d{2}\/\d{4}$/.test(f.data.value.trim()))throw new Error('Informe a data do contrato (dd/mm/aaaa).');
+  var sv=f.sv.filter(function(c){return c.checked}).map(function(c){return c.value}),md=f.md.filter(function(c){return c.checked}).map(function(c){return c.value});
+  if(!sv.length)throw new Error('Marque o serviço contratado.');
+  if(!md.length)throw new Error('Marque a modalidade de atendimento.');
+  if(!/^(\d{1,3}(\.\d{3})*(,\d{1,2})?|\d{1,5}([.,]\d{1,2})?)$/.test(f.valor.value.trim()))throw new Error('Informe o valor por sessão (ex.: 150,00).');
+  if(!f.forma.value)throw new Error('Escolha a forma de pagamento.');
+  var q=f.qd.filter(function(r){return r.checked})[0];if(!q)throw new Error('Marque quando o pagamento é feito.');
+  if(q.value==='dia'&&!f.dia.value.trim())throw new Error('Informe o dia do mês do pagamento.');
+  if(f.menor.checked&&!f.resp.value.trim())throw new Error('Informe o responsável do menor.');
+  var partes=pr.nome.trim().split(/\s+/);
+  var d={paciente:f.nome.value.trim(),cpf:f.cpf.value.trim(),telefone:f.tel.value.trim(),email:f.email.value.trim(),estado_civil:f.civil.value,ct_nac:f.nac.value.trim(),ct_end:f.end.value.trim(),
+    ct_data:f.data.value.trim(),prontuario:f.cod.value.trim(),ct_menor:f.menor.checked?'SIM':'',ct_resp:f.resp.value.trim(),ct_resp_cpf:f.respcpf.value.trim(),
+    ct_serv:sv,ct_mod:md,ct_aval:f.aval.value.trim(),ct_local:f.local.value.trim(),ct_link:f.link.value.trim(),ct_valor:f.valor.value.trim(),ct_forma:f.forma.value,
+    ct_pix:f.pix.value.trim(),ct_conta:f.conta.value.trim(),ct_quando:q.value,ct_dia:f.dia.value.trim(),ct_diasem:f.diasem.value,ct_hora:f.hora.value.trim(),
+    profissional:pr.nome,__prof:{nome:pr.nome,curto:partes.length>1?partes[0]+' '+partes[partes.length-1]:partes[0],crpn:pr.crp,crpe:pr.crp.replace('/','—')}};
+  return {d:d,pac:pac,prof:pr};
+}
+function bufB64(buf){var u=new Uint8Array(buf),s='';for(var i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+async function acaoContrato(modo){
+  var f=P.ct;f.msg.textContent='';
+  var bs=[f.bPrev,f.bDown,f.bSave];bs.forEach(function(b){b.disabled=true});
+  try{
+    var r=dadosContrato();
+    f.msg.textContent='Preparando o PDF…';await carregarPdf();
+    var C=window.SiageContrato;
+    C.setProfs(profs().filter(function(p){return p.ativo!=='nao'&&p.crp}).map(function(p){var pt=p.nome.trim().split(/\s+/);return {id:p.id,nome:p.nome,curto:pt.length>1?pt[0]+' '+pt[pt.length-1]:pt[0],crpn:p.crp,crpe:p.crp.replace('/','—')}}));
+    var now=new Date(),J=window.jspdf.jsPDF;
+    var base=ctNomeArq('Contrato - '+r.d.paciente.slice(0,70)+' - '+(C.codigoDoc(r.d.prontuario,'C')||'sem codigo').replace(/\//g,'_'));
+    var n1=base+' - 1ª via paciente.pdf',n2=base+' - 2ª via contratado.pdf';
+    if(modo==='prev'){
+      var url=URL.createObjectURL(C.build(J,r.d,now,'paciente').output('blob'));
+      var w=window.open(url,'_blank');if(!w)f.msg.textContent='O navegador bloqueou a nova aba. Permita pop-ups ou use "Baixar as 2 vias".';else f.msg.textContent='';
+      setTimeout(function(){URL.revokeObjectURL(url)},120000);
+    }else if(modo==='baixar'){
+      [[n1,'paciente'],[n2,'contratado']].forEach(function(p,i){setTimeout(function(){
+        var u=URL.createObjectURL(C.build(J,r.d,now,p[1]).output('blob'));var a=h('a',{href:u,download:p[0]});document.body.append(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},30000)},i*500)});
+      f.msg.textContent='As duas vias foram baixadas.';
+    }else{
+      f.msg.textContent='Guardando no Drive…';
+      var a1={nome:n1,base64:bufB64(C.build(J,r.d,now,'paciente').output('arraybuffer'))},a2={nome:n2,base64:bufB64(C.build(J,r.d,now,'contratado').output('arraybuffer'))};
+      var res=await api('salvarContrato',ctx(),{codigo:r.pac.codigo,publicar:f.pub.checked,titulo:'Contrato de prestação de serviços'},a1,a2);
+      await recarregar();
+      f.msg.replaceChildren(document.createTextNode('Pronto. 1ª via na pasta “'+res.pasta+'” e 2ª via em CONTRATOS, no Drive.'+(res.publicado?' O paciente foi avisado para assinar. ':' ')),
+        isHttp(res.pastaUrl)?h('a',{href:res.pastaUrl,target:'_blank',rel:'noopener noreferrer'},'Abrir pasta do paciente'):'');
+      toast(res.publicado?'Contrato guardado e enviado ao paciente.':'Contrato guardado no Drive.');
+    }
+  }catch(e){f.msg.textContent=e.message}
+  bs.forEach(function(b){b.disabled=false});
+}
+function renderContratos(){if(P.ct)refreshSelects()}
+
 /* ================= casca ================= */
-var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
-var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
+var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'pagamentos',label:'Pagamentos'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
 function go(id){
   S.tab=id;
   if(S.modo==='paciente'){
@@ -1866,7 +2289,7 @@ function renderTabs(){
   if(!S.modo){tabs.hidden=true;return}
   tabs.hidden=false;
   (S.modo==='gestao'?TABS_G:TABS_P).forEach(function(t){
-    var n=t.id==='entrada'?naoLidas():t.id==='recepcao'?itensRecepcao().length:t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
+    var n=t.id==='entrada'?naoLidas():t.id==='recepcao'?itensRecepcao().length:t.id==='financeiro'?aConferir().length:t.id==='pagamentos'?abertasP().length:t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
     tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
   });
 }
@@ -1880,8 +2303,8 @@ function renderShell(){
   renderTabs();renderDados();
 }
 function renderDados(){
-  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderTabs()}
-  else if(S.modo==='paciente'){renderPaciente()}
+  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderFinanceiro();renderContratos();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderTabs()}
+  else if(S.modo==='paciente'){renderPaciente();renderPagamentos()}
 }
 function refreshSelects(){
   var sv=P.ag&&P.ag.svc;
@@ -1904,8 +2327,8 @@ function refreshSelects(){
 /* ---------- início ---------- */
 var main=document.getElementById('main');
 PANELS.gate=buildGate();
-PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();
-PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
+PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();
+PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_pagamentos=buildPPagamentos();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
 Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true;main.append(PANELS[k])});
 })();
 </script>
