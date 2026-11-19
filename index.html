@@ -482,11 +482,265 @@ body.gmob .app{padding-bottom:84px}
 .msheet .box button{appearance:none;border:0;background:none;text-align:left;font:700 1rem var(--font-body);color:var(--fg);padding:13px 12px;border-radius:12px;display:flex;justify-content:space-between}
 .msheet .box button.on{background:var(--surface-2)}
 }
+.subbar{display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none}
+.subbar .nt-tab{flex:none}
+.fabn{display:none}
+.hj-h{margin:4px 0 0}
+@media (max-width:720px){
+.fabn{display:flex;position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:41;border:0;border-radius:99px;background:var(--accent);color:var(--accent-fg);font:800 .95rem var(--font-body);padding:13px 18px;box-shadow:0 6px 18px rgba(184,87,59,.45);cursor:pointer}
+}
 .pg-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:10px}
 .pg-head .meta{margin-top:2px}
 .pg-subs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
 .pg-subs .nt-tab{flex:none}
 @media (max-width:560px){.srch .lbl{display:none}}
+
+/* ================= CABEÇALHO DO PACIENTE ================= */
+.pg-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 26px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(23,19,15,.03);
+}
+.pg-id-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.patient-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.patient-title {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0;
+  line-height: 1.2;
+}
+.status-pill {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: .02em;
+}
+.status-active {
+  background: #dcf2e3;
+  color: #1b6338;
+}
+
+/* Opção B: Pílula Dourada/Areia Harmonizada (Sem visual de máquina) */
+.badge-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f6e9cf;
+  border: 1px solid #ebd4a8;
+  color: #4a391a;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 11px;
+  border-radius: 999px;
+  letter-spacing: .03em;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.meta-sep {
+  opacity: 0.4;
+}
+
+/* ================= ESTRUTURA EM 2 COLUNAS DO PACIENTE ================= */
+.patient-grid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 840px) {
+  .patient-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card de Destaque da Próxima Sessão */
+.session-hero {
+  border-left: 4px solid var(--warm) !important;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 20px;
+  border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 4px rgba(23,19,15,.04);
+}
+.session-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--warm);
+  margin-bottom: 12px;
+}
+.session-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.session-date-badge {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 62px;
+}
+.session-date-badge .s-month {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--warm);
+}
+.session-date-badge .s-day {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--fg);
+  line-height: 1.1;
+}
+.session-headline {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 3px;
+}
+.session-empty {
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+/* Painel Lateral Administrativo */
+.side-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(23,19,15,.02);
+}
+.side-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.side-card-label {
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+}
+.side-card-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+.side-status {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.st-ok { background: #dcf2e3; color: #1b6338; }
+.st-warn { background: #faeed9; color: #8f5a11; }
+.st-neutral { background: var(--surface-2); color: var(--muted); }
+
+/* Barra de Busca Proeminente no Topo */
+.top .srch-prominent {
+  background: var(--surface) !important;
+  color: var(--fg) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 12px !important;
+  padding: 8px 16px !important;
+  min-width: 280px;
+  max-width: 380px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18) !important;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.top .srch-prominent:hover {
+  background: var(--surface) !important;
+  border-color: var(--gold) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
+}
+.top .srch-prominent .srch-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.top .srch-prominent .srch-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.top .srch-prominent .lbl {
+  font-size: 0.86rem;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.top .srch-prominent kbd {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 5px;
+}
+@media (max-width: 768px) {
+  .top .srch-prominent { min-width: 0; padding: 7px 11px !important; }
+  .top .srch-prominent .lbl { display: none; }
+}
+
+/* Destaque nos títulos de seções */
+.card h3, .stack>h3, .col-main h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
 </style>
 </head>
 <body>
@@ -603,7 +857,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -786,7 +1040,7 @@ async function entrar(jaCarregado){
   if(!jaCarregado) await recarregar();
   PANELS.gate.hidden=true;
   Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true});
-  S.tab=S.modo==='gestao'?'agenda':'sessoes';
+  S.tab=S.modo==='gestao'?'hoje':'sessoes';
   S.slots={};S.bk=novoBk();S.bkAberto=undefined;S.bkMsg='';P.bkInit=0;if(P.fxReset)P.fxReset();
   renderShell();
   if(S.modo==='paciente'&&PRE_SERV&&svcs().some(function(x){return x.id===PRE_SERV})){S.bkAberto=true;escolherServico(PRE_SERV);try{sessionStorage.removeItem('siage-serv')}catch(e){}PRE_SERV=''}
@@ -2317,7 +2571,7 @@ function acaoCobrar(c){go('financeiro');P.fnBox.open=true;var e=document.getElem
 function irContrato(c){go('contratos_g');if(P.ct){P.ct.pac.value=c;P.ct.pac.dispatchEvent(new Event('change'))}}
 function acaoMaterial(c){go('materiais');P.lib.para.value=c;P.lib.titulo.focus()}
 var CK={aberto:false,sel:0,itens:[]};
-var NAV_ROT={agenda:'Agenda',pacientes:'Pacientes',recepcao:'Recepção',financeiro:'Financeiro',contratos_g:'Contratos',profissionais:'Profissionais',materiais:'Materiais',disp:'Disponibilidade',entrada:'Atualizações'};
+var NAV_ROT={hoje:'Hoje',agenda:'Agenda',pacientes:'Pacientes',recepcao:'Recepção',financeiro:'Financeiro',contratos_g:'Contratos',profissionais:'Profissionais',materiais:'Materiais',disp:'Disponibilidade',entrada:'Atualizações'};
 function ckItens(q){
   var n=norm(q).trim(),out=[];
   var pacs=(S.d.pacientes||[]).slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
@@ -2370,11 +2624,12 @@ function ckAbrir(){
 }
 function ckFechar(){if(!CK.aberto)return;CK.aberto=false;CK.el.remove()}
 document.addEventListener('keydown',function(ev){
+  if(ev.key==='Escape'&&NV.aberto){ev.preventDefault();novoFechar();return}
   if(ev.key==='Escape'&&CK.aberto){ev.preventDefault();ckFechar();return}
   if(S.modo!=='gestao')return;
   var t=ev.target,tag=t&&t.tagName,digitando=tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable);
   if((ev.ctrlKey||ev.metaKey)&&String(ev.key).toLowerCase()==='k'){ev.preventDefault();CK.aberto?ckFechar():ckAbrir();return}
-  if((ev.key==='/'||ev.key==='n'||ev.key==='N')&&!digitando&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&!CK.aberto){ev.preventDefault();ckAbrir()}
+  if((ev.key==='/'||ev.key==='n'||ev.key==='N')&&!digitando&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&!CK.aberto&&!NV.aberto){ev.preventDefault();ev.key==='/'?ckAbrir():novoAbrir()}
 });
 
 /* ================= PROPOSTA C: página do paciente ================= */
@@ -2393,29 +2648,111 @@ function renderPacienteG(){
   if(!p){if(S.tab==='paciente_g'&&S.pacAberto){S.pacAberto=null;go('pacientes')}return}
   var c=p.codigo,sub=S.pacSub||'resumo';
   var fi=(S.d.fichas||[]).filter(function(x){return x.codigo===c})[0];
+
+  // Cabeçalho refinado com Opção B de código (cápsula dourada acolhedora)
   P.pgHead.replaceChildren(
-    h('div',{},h('div',{class:'row'},btn('← '+((S.pacVolta&&NAV_ROT[S.pacVolta.tab])||'Pacientes'),function(){var v=S.pacVolta||{tab:'pacientes',y:0};S.pacVolta=null;go(v.tab);window.scrollTo({top:v.y})},'small')),
-      h('h2',{style:'margin-top:8px'},p.nome),
-      h('p',{class:'meta'},[p.codigo,p.telefone||'Sem telefone',p.email||'Sem e-mail'].join(' · '))),
+    h('div',{class:'pg-id-col'},
+      h('div',{class:'row',style:'margin-bottom:6px'},
+        btn('← '+((S.pacVolta&&NAV_ROT[S.pacVolta.tab])||'Pacientes'),function(){
+          var v=S.pacVolta||{tab:'pacientes',y:0};
+          S.pacVolta=null;
+          go(v.tab);
+          window.scrollTo({top:v.y});
+        },'small')
+      ),
+      h('div',{class:'patient-title-row'},
+        h('h1',{class:'patient-title'},p.nome)
+      ),
+      h('div',{class:'meta-row'},
+        h('span',{class:'badge-code'},'Cód. '+p.codigo),
+        p.telefone||p.email?h('span',{class:'meta-sep'},'·'):null,
+        p.telefone?h('span',{},p.telefone):null,
+        p.telefone&&p.email?h('span',{class:'meta-sep'},'·'):null,
+        p.email?h('span',{},p.email):null
+      )
+    ),
     h('div',{class:'actions'},
       p.telefone?h('a',{class:'btn small',href:waUrl('',p.telefone),target:'_blank',rel:'noopener noreferrer'},'Falar no WhatsApp'):null,
-      btn('Mensagens prontas',function(){abrirModelos(c)},'small')));
+      btn('Mensagens prontas',function(){abrirModelos(c)},'small')
+    )
+  );
+
   P.pgSubs.replaceChildren.apply(P.pgSubs,PG_SUBS.map(function(t){
     var n=t[0]==='pagamentos'?pgAbertas(c).length:0;
-    return h('button',{type:'button',class:'nt-tab'+(sub===t[0]?' on':''),role:'tab','aria-selected':sub===t[0]?'true':'false',onclick:function(){S.pacSub=t[0];renderPacienteG()}},t[1],n?h('span',{class:'badge'},n):null)}));
+    return h('button',{type:'button',class:'nt-tab'+(sub===t[0]?' on':''),role:'tab','aria-selected':sub===t[0]?'true':'false',onclick:function(){S.pacSub=t[0];renderPacienteG()}},t[1],n?h('span',{class:'badge'},n):null)
+  }));
+
   var body;
   if(sub==='resumo'){
     var prox=proxSessao(c),cts=pgContratos(c),ab=pgAbertas(c),conf=ab.filter(function(x){return x.status==='comprovante'});
     var ass=cts.length&&cts.every(function(m){return assinadoDe(m)});
-    body=[h('div',{class:'tiles'},tiles([
-      {l:'Próxima sessão',v:prox?longDay(prox.data):'—',s:prox?prox.hora:'Sem sessão marcada'},
-      {l:'Ficha',v:fi?'Recebida':'Pendente'},
-      {l:'Contrato',v:!cts.length?'Sem contrato':(ass?'Assinado':'Aguardando'),s:cts.length?cts.length+' enviado(s)':''},
-      {l:'Cobranças abertas',v:ab.length,s:conf.length?conf.length+' a conferir':brl(ab.reduce(function(t,x){return t+Number(x.valor||0)},0))}])),
-      h('div',{class:'card'},h('h3',{},'Próximos passos'),h('div',{class:'actions',style:'margin-top:10px'},
-        btn('Agendar sessão',function(){acaoAgendar(c)},'primary small'),btn('+ Cobrança',function(){acaoCobrar(c)},'small'),
-        btn('Gerar contrato',function(){irContrato(c)},'small'),btn('Enviar material',function(){acaoMaterial(c)},'small'),
-        btn('E-mail e avisos',function(){S.editPac=p.id;go('pacientes')},'small')))];
+    var pData=prox?parse(prox.data):null;
+
+    // Coluna Clínica (Esquerda)
+    var colClinica = h('div',{class:'col-main stack'},
+      prox?h('div',{class:'card session-hero'},
+        h('div',{class:'session-tag'},'Próxima Sessão Agendada'),
+        h('div',{class:'session-hero-content'},
+          h('div',{class:'session-date-badge'},
+            h('span',{class:'s-month'},mon(pData)),
+            h('span',{class:'s-day'},pData.getDate())
+          ),
+          h('div',{class:'session-details'},
+            h('h3',{class:'session-headline'},longDay(prox.data)+' às '+prox.hora),
+            h('p',{class:'meta'},(prox.modalidade||'Presencial')+' · com '+(prox.profissional||'Psicólogo(a)'))
+          )
+        ),
+        h('div',{class:'actions',style:'margin-top:14px'},
+          btn('Ver na agenda',function(){go('agenda')},'primary small'),
+          confirmBtn('Remarcar',async function(){
+            try{await api('atualizarSessao',ctx(),prox.id,'reagendada');await recarregar()}catch(e){falha(e);return}
+            go('agenda');toggleAgForm({codigo:c,profissional:prox.profissional,servico:prox.servico});
+          },'A sessão atual será marcada como reagendada. Continuar?')
+        )
+      ):h('div',{class:'card session-empty'},
+        h('h3',{},'Nenhuma sessão agendada'),
+        h('p',{class:'meta'},'Marque o próximo atendimento para manter o acompanhamento clínico.'),
+        h('div',{class:'actions',style:'margin-top:12px'},btn('Agendar sessão agora',function(){acaoAgendar(c)},'primary small'))
+      ),
+      h('div',{class:'card'},
+        h('h3',{},'Próximos passos'),
+        h('div',{class:'actions',style:'margin-top:10px'},
+          btn('Agendar sessão',function(){acaoAgendar(c)},'primary small'),
+          btn('+ Cobrança',function(){acaoCobrar(c)},'small'),
+          btn('Gerar contrato',function(){irContrato(c)},'small'),
+          btn('Enviar material',function(){acaoMaterial(c)},'small'),
+          btn('E-mail e avisos',function(){S.editPac=p.id;go('pacientes')},'small')
+        )
+      )
+    );
+
+    // Coluna Administrativa (Direita)
+    var colAdmin = h('div',{class:'col-side stack'},
+      h('div',{class:'side-summary-card'},
+        h('div',{class:'side-card-info'},
+          h('span',{class:'side-card-label'},'Ficha Cadastral'),
+          h('span',{class:'side-card-val'},fi?'Recebida':'Pendente')
+        ),
+        h('span',{class:'side-status '+(fi?'st-ok':'st-warn')},fi?'Preenchida':'Aguardando')
+      ),
+      h('div',{class:'side-summary-card'},
+        h('div',{class:'side-card-info'},
+          h('span',{class:'side-card-label'},'Contrato de Prestação'),
+          h('span',{class:'side-card-val'},!cts.length?'Sem contrato':(ass?'Assinado':'Enviado')+' · '+cts.length+' enviado(s)')
+        ),
+        h('span',{class:'side-status '+(!cts.length?'st-neutral':(ass?'st-ok':'st-warn'))},!cts.length?'Não criado':(ass?'Assinado':'Pendente'))
+      ),
+      h('div',{class:'side-summary-card'},
+        h('div',{class:'side-card-info'},
+          h('span',{class:'side-card-label'},'Cobranças Abertas'),
+          h('span',{class:'side-card-val'},ab.length?ab.length+' · '+brl(ab.reduce(function(t,x){return t+Number(x.valor||0)},0)):'R$ 0,00')
+        ),
+        h('span',{class:'side-status '+(ab.length?'st-warn':'st-ok')},ab.length?(conf.length?conf.length+' a conferir':ab.length+' pendente(s)'):'Em dia')
+      )
+    );
+
+    body=[h('div',{class:'patient-grid'},colClinica,colAdmin)];
+
   }else if(sub==='ficha'){
     body=[fi?h('div',{class:'card'},fichaView(fi)):empty('Ficha pendente','Este paciente ainda não enviou a ficha.'),
       h('div',{class:'actions'},btn('Mensagem sobre a ficha',function(){abrirModelos(c,fi?'ficha':'semficha')},'small'))];
@@ -2448,8 +2785,53 @@ function renderPacienteG(){
   P.pgBody.replaceChildren.apply(P.pgBody,body);
 }
 
+/* ================= PROPOSTA B: painel Hoje + menu Novo ================= */
+function buildHoje(){var el=h('section',{class:'stack',role:'tabpanel'});P.hjBox=h('div',{class:'stack'});el.append(P.hjBox);return el}
+function renderHoje(){
+  if(!P.hjBox)return;
+  var hj=ymd(new Date()),ag=S.d.agenda.filter(function(a){return a.data===hj&&a.status!=='cancelada'}).sort(function(a,b){return String(a.hora).localeCompare(String(b.hora))});
+  var conf=aConferir(),rec=itensRecepcao(),venc=cobrancasG().filter(function(x){return x.status==='pendente'&&x.vencimento&&String(x.vencimento)<hj}),nl=naoLidas();
+  var kids=[h('h2',{class:'hj-h'},'Hoje'),h('p',{class:'meta'},longDay(hj)),
+    h('div',{class:'tiles'},tiles([{l:'Sessões hoje',v:ag.length},{l:'Comprovantes a conferir',v:conf.length},{l:'Fichas e contratos',v:rec.length,s:'pendentes'},{l:'Cobranças vencidas',v:venc.length}]))];
+  var fila=[];
+  conf.forEach(function(x){fila.push(h('article',{class:'item'},h('div',{class:'row'},h('div',{},h('h3',{},pgDe(x.codigo)?linkPac(x.codigo,nomeDe(x.codigo)):nomeDe(x.codigo)),h('p',{class:'meta'},'Comprovante enviado · '+brl(Number(x.valor||0)))),btn('Conferir',function(){go('financeiro')},'primary small'))))});
+  rec.forEach(function(x){fila.push(h('article',{class:'item'},h('div',{class:'row'},h('div',{},h('h3',{},linkPac(x.p.codigo,x.p.nome)),h('p',{class:'meta'},x.tit)),btn('Resolver',function(){go('recepcao')},'small'))))});
+  venc.forEach(function(x){fila.push(h('article',{class:'item'},h('div',{class:'row'},h('div',{},h('h3',{},pgDe(x.codigo)?linkPac(x.codigo,nomeDe(x.codigo)):nomeDe(x.codigo)),h('p',{class:'meta'},'Cobrança vencida · '+brl(Number(x.valor||0)))),btn('Ver',function(){go('financeiro')},'small'))))});
+  if(nl)fila.push(h('article',{class:'item'},h('div',{class:'row'},h('div',{},h('h3',{},nl+(nl>1?' atualizações novas':' atualização nova')),h('p',{class:'meta'},'Mensagens e documentos de pacientes')),btn('Abrir',function(){go('entrada')},'small'))));
+  kids.push(h('h3',{},'Precisa de ação'));
+  kids.push(fila.length?h('div',{class:'list'},fila):empty('Tudo em dia','Nenhuma pendência agora.'));
+  kids.push(h('h3',{},'Sessões de hoje'));
+  kids.push(ag.length?h('ul',{class:'ag2-grid'},ag.map(sessaoItem)):empty('Sem sessões hoje','Nenhuma sessão marcada para hoje.'));
+  P.hjBox.replaceChildren.apply(P.hjBox,kids);
+}
+var NV={aberto:false};
+function novoAbrir(){
+  if(S.modo!=='gestao'||NV.aberto)return;
+  var it=[
+   ['＋ Agendar sessão',function(){go('agenda');toggleAgForm()}],
+   ['＋ Cadastrar paciente',function(){go('pacientes');var d=document.querySelector('#main details.fold');if(d){d.open=true;d.scrollIntoView({block:'nearest'})}}],
+   ['＋ Nova cobrança',function(){go('financeiro');P.fnBox.open=true;P.fnBox.scrollIntoView({block:'nearest'})}],
+   ['📄 Gerar contrato',function(){go('contratos_g')}],
+   ['✉ Enviar aviso',function(){go('materiais')}],
+   ['📎 Publicar material',function(){go('materiais');if(P.lib&&P.lib.titulo)P.lib.titulo.focus()}]];
+  NV.aberto=true;
+  NV.el=h('div',{class:'cmdk',role:'dialog','aria-modal':'true','aria-label':'Novo',onclick:function(ev){if(ev.target===NV.el)novoFechar()}},
+    h('div',{class:'cmdk-box'},h('ul',{class:'cmdk-list'},h('li',{class:'cmdk-sec',role:'presentation'},'Novo'),it.map(function(x){return h('li',{class:'cmdk-it',tabindex:'0',onclick:function(){novoFechar();x[1]()},onkeydown:function(ev){if(ev.key==='Enter'){novoFechar();x[1]()}}},h('span',{},x[0]),h('small',{},'abrir'))})),h('div',{class:'cmdk-foot'},h('span',{},h('kbd',{},'Esc'),' fechar'))));
+  document.body.append(NV.el);var f=NV.el.querySelector('.cmdk-it');if(f)f.focus();
+}
+function novoFechar(){if(!NV.aberto)return;NV.aberto=false;NV.el.remove()}
+
 /* ================= casca ================= */
-var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var TABS_G=[{id:'hoje',label:'Hoje'},{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var GRUPOS=[
+ {id:'hoje',label:'Hoje',ico:'◷',subs:[['hoje','Painel'],['agenda','Agenda'],['recepcao','Recepção'],['entrada','Atualizações']]},
+ {id:'pacientes',label:'Pacientes',ico:'👤',subs:[['pacientes','Lista'],['contratos_g','Contratos']]},
+ {id:'financeiro',label:'Financeiro',ico:'$',subs:[['financeiro','Financeiro']]},
+ {id:'publicar',label:'Publicar',ico:'✦',subs:[['materiais','Avisos e materiais']]},
+ {id:'clinica',label:'Clínica',ico:'⚙',subs:[['profissionais','Profissionais'],['disp','Disponibilidade']]}];
+function grupoDe(tab){if(tab==='paciente_g')return 'pacientes';for(var i=0;i<GRUPOS.length;i++)for(var j=0;j<GRUPOS[i].subs.length;j++)if(GRUPOS[i].subs[j][0]===tab)return GRUPOS[i].id;return 'hoje'}
+function badgeTab(id){return id==='entrada'?naoLidas():id==='recepcao'?itensRecepcao().length:id==='financeiro'?aConferir().length:0}
+function badgeGrupo(g){return g.subs.reduce(function(t,x){return t+badgeTab(x[0])},0)}
 var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'pagamentos',label:'Pagamentos'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
 function go(id){
   S.tab=id;
@@ -2470,42 +2852,52 @@ window.addEventListener('popstate',function(ev){
   S.popping=true;S.pacAberto=st.pac;S.pacSub=st.sub||'resumo';
   try{go(st.tab)}finally{S.popping=false}
 });
-var MB_ITENS=[['agenda','◷','Agenda'],['pacientes','👤','Pacientes'],['financeiro','$','Financeiro'],['entrada','✉','Avisos']],MB={};
+var MB={},SUBN=null;
 function renderMobile(){
   var g=S.modo==='gestao';document.body.classList.toggle('gmob',g);
-  if(!MB.bar){MB.bar=h('nav',{class:'mbar','aria-label':'Navegação'});MB.sh=h('div',{class:'msheet',onclick:function(ev){if(ev.target===MB.sh)MB.sh.classList.remove('open')}});document.body.append(MB.bar,MB.sh)}
-  if(!g){MB.bar.style.display='none';MB.sh.classList.remove('open');return}
-  MB.bar.style.display='';
-  var ativo=S.tab==='paciente_g'?'pacientes':S.tab,princ=MB_ITENS.map(function(x){return x[0]});
-  function cnt(id){return id==='entrada'?naoLidas():id==='financeiro'?aConferir().length:0}
-  var kids=MB_ITENS.map(function(x){var n=cnt(x[0]);return h('button',{type:'button',class:ativo===x[0]?'on':'',onclick:function(){MB.sh.classList.remove('open');go(x[0])}},h('i',{},x[1]),x[2],n?h('span',{class:'badge'},n):null)});
-  var rest=TABS_G.filter(function(t){return princ.indexOf(t.id)<0});
-  kids.push(h('button',{type:'button',class:princ.indexOf(ativo)<0?'on':'',onclick:function(){MB.sh.classList.toggle('open')}},h('i',{},'☰'),'Mais',(function(){var n=itensRecepcao().length;return n?h('span',{class:'badge'},n):null})()));
-  MB.bar.replaceChildren.apply(MB.bar,kids);
-  MB.sh.replaceChildren(h('div',{class:'box'},rest.map(function(t){var n=t.id==='recepcao'?itensRecepcao().length:0;return h('button',{type:'button',class:ativo===t.id?'on':'',onclick:function(){MB.sh.classList.remove('open');go(t.id)}},t.label,n?h('span',{class:'badge'},n):null)})));
-  if(!rest.length)MB.sh.classList.remove('open');
+  if(!MB.bar){MB.bar=h('nav',{class:'mbar','aria-label':'Navegação'});MB.fab=h('button',{type:'button',class:'fabn',onclick:novoAbrir},'+ Novo');document.body.append(MB.bar,MB.fab)}
+  MB.bar.style.display=g?'':'none';MB.fab.style.display=g?'':'none';
+  if(!g)return;
+  var ga=grupoDe(S.tab);
+  MB.bar.replaceChildren.apply(MB.bar,GRUPOS.map(function(x){var n=badgeGrupo(x);return h('button',{type:'button',class:ga===x.id?'on':'',onclick:function(){irGrupo(x.id)}},h('i',{},x.ico),x.label,n?h('span',{class:'badge'},n):null)}));
+}
+function irGrupo(id){var g=GRUPOS.filter(function(x){return x.id===id})[0];S.subDe=S.subDe||{};go(S.subDe[id]||g.subs[0][0])}
+function renderSub(){
+  var main=document.getElementById('main');
+  if(!SUBN){SUBN=h('nav',{class:'subbar',role:'tablist','aria-label':'Subseções'});main.prepend(SUBN)}
+  var g=S.modo==='gestao'?GRUPOS.filter(function(x){return x.id===grupoDe(S.tab)})[0]:null;
+  if(!g||g.subs.length<2||S.tab==='paciente_g'){SUBN.hidden=true;return}
+  SUBN.hidden=false;
+  SUBN.replaceChildren.apply(SUBN,g.subs.map(function(t){var n=badgeTab(t[0]);return h('button',{type:'button',class:'nt-tab'+(S.tab===t[0]?' on':''),role:'tab','aria-selected':S.tab===t[0]?'true':'false',onclick:function(){go(t[0])}},t[1],n?h('span',{class:'badge'},n):null)}));
 }
 function renderTabs(){
   renderMobile();
   var tabs=document.getElementById('tabs');tabs.replaceChildren();
-  if(!S.modo){tabs.hidden=true;return}
+  if(!S.modo){tabs.hidden=true;if(SUBN)SUBN.hidden=true;return}
   tabs.hidden=false;
-  (S.modo==='gestao'?TABS_G:TABS_P).forEach(function(t){
-    var n=t.id==='entrada'?naoLidas():t.id==='recepcao'?itensRecepcao().length:t.id==='financeiro'?aConferir().length:t.id==='pagamentos'?abertasP().length:t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
-    tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':(S.tab===t.id||(S.tab==='paciente_g'&&t.id==='pacientes'))?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
+  if(S.modo==='gestao'){
+    var ga=grupoDe(S.tab);S.subDe=S.subDe||{};if(S.tab!=='paciente_g')S.subDe[ga]=S.tab;
+    GRUPOS.forEach(function(t){var n=badgeGrupo(t);
+      tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':ga===t.id?'true':'false',onclick:function(){irGrupo(t.id)}},t.label,n?h('span',{class:'badge'},n):null))});
+    renderSub();return;
+  }
+  if(SUBN)SUBN.hidden=true;
+  TABS_P.forEach(function(t){
+    var n=t.id==='pagamentos'?abertasP().length:t.id==='avisos'?novosAvisos():(t.id==='ficha'&&!S.d.ficha?'!':0);
+    tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
   });
 }
 function renderShell(){
   var g=S.modo==='gestao';
   document.getElementById('role-label').textContent=g?'Gestão':'Área do paciente';
-  document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações. Atalhos: / ou Ctrl+K para buscar, N para ações.':'';document.getElementById('h-title').textContent='SiAGE | Sistema de Agendamento e Gestão Emotiss';document.querySelector('.top').classList.toggle('pac',!g);
-  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?h('button',{type:'button',class:'btn small srch',onclick:ckAbrir,'aria-label':'Buscar paciente ou ação'},'🔎',h('span',{class:'lbl'},'Buscar'),h('kbd',{},'/')):null,g?null:btnEquipe('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.','small'),btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small')].filter(Boolean));
+  document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações. Atalhos: / ou Ctrl+K para buscar, N para criar.':'';document.getElementById('h-title').textContent='SiAGE | Sistema de Agendamento e Gestão Emotiss';document.querySelector('.top').classList.toggle('pac',!g);
+  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?btn('+ Novo',novoAbrir,'primary small'):null,g?h('button',{type:'button',class:'btn srch srch-prominent',onclick:ckAbrir,'aria-label':'Buscar paciente ou ação'},h('span',{class:'srch-left'},h('span',{class:'srch-icon'},'🔍'),h('span',{class:'lbl'},'Buscar paciente ou ação…')),h('kbd',{},'/')):null,g?null:btnEquipe('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.','small'),btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small')].filter(Boolean));
   Object.keys(PANELS).forEach(function(k){PANELS[k].hidden=true});
   PANELS[g?S.tab:'p_'+S.tab].hidden=false;
   renderTabs();renderDados();
 }
 function renderDados(){
-  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderFinanceiro();renderContratosG();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderPacienteG();renderTabs()}
+  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderFinanceiro();renderContratosG();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderPacienteG();renderHoje();renderTabs()}
   else if(S.modo==='paciente'){renderPaciente();renderPagamentos()}
 }
 function refreshSelects(){
@@ -2529,7 +2921,7 @@ function refreshSelects(){
 /* ---------- início ---------- */
 var main=document.getElementById('main');
 PANELS.gate=buildGate();
-PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();PANELS.paciente_g=buildPacienteG();
+PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();PANELS.paciente_g=buildPacienteG();PANELS.hoje=buildHoje();
 PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_pagamentos=buildPPagamentos();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
 Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true;main.append(PANELS[k])});
 })();
