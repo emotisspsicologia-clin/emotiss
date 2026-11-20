@@ -786,6 +786,7 @@ function waUrl(texto,tel){var n=tel?foneWa(tel):WHATS;return 'https://wa.me/'+n+
 function foneWa(t){var d=String(t||'').replace(/\D/g,'');return d.length<=11?'55'+d:d}
 function btnEquipe(texto,cls,rot){return h('a',{class:'btn wa '+(cls||''),href:waUrl(texto),target:'_blank',rel:'noopener noreferrer'},ico('chat',17),rot||'Falar com a equipe Emotiss')}
 var PRE_SERV='';try{var q=new URLSearchParams(location.search).get('servico');if(q){PRE_SERV=q;sessionStorage.setItem('siage-serv',q)}else PRE_SERV=sessionStorage.getItem('siage-serv')||''}catch(e){}
+var PRE_SOCIAL=false;try{if(new URLSearchParams(location.search).get('social')==='1')sessionStorage.setItem('siage-social','1');PRE_SOCIAL=sessionStorage.getItem('siage-social')==='1'}catch(e){}
 var TPL=[
  {id:'convite',nome:'Convite para agendar pelo sistema',t:'Olá, {nome}! Foi um prazer conversar com você. Para escolher o dia e o horário que melhor combinam com a sua rotina, é só acessar: {link}\nQualquer dúvida, estou por aqui.'},
  {id:'ficha',nome:'Retorno: ficha recebida, falta agendar',t:'Olá, {nome}! Recebemos a sua ficha, obrigado. Posso te ajudar a escolher um horário? Se preferir, agende por aqui: {link}'},
@@ -842,7 +843,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -1283,6 +1284,13 @@ function rsSet(k,sit,t){
   api('resolverItem',ctx(),k,sit,t||'').catch(function(er){if(srvAntigo(er))return;falha(er);recarregar(true)});
 }
 function resolverRec(x,t){var k=x.chave;rsSet(k,'resolvida',t);toastAcao('Resolvido: '+t+'.','Desfazer',function(){rsSet(k,'aberta','')})}
+function triagemDe(cod){
+  var fi=(S.d.fichas||[]).filter(function(x){return x.codigo===cod})[0],d={};
+  if(!fi)return {pri:2};
+  try{d=JSON.parse(fi.dados||'{}')}catch(e){}
+  var urg=/sofrimento intenso/.test(d.urgencia||''),pedido=d.lim_financeiro==='SIM',sc=socialCalc(d);
+  return {pri:urg?0:pedido?1:2,urg:urg,soc:pedido,faixa:sc?sc.faixa.split(':')[0]:null};
+}
 function itensRecepcao(todos){
   var out=[],ag=S.d.agenda||[],mats=S.d.materiais||[],msgs=S.d.mensagens||[],fichas=S.d.fichas||[];
   (S.d.pacientes||[]).forEach(function(p){
@@ -1296,26 +1304,26 @@ function itensRecepcao(todos){
     if(aceite&&!contratos.length)out.push({p:p,k:'contrato',ordem:2,tit:'Agendou: contrato a enviar',desde:p.criadoEm,tpl:null,cor:'reagendada'});
     if(pendAss.length)out.push({p:p,k:'assinatura',ordem:3,tit:'Contrato enviado, aguardando assinatura',desde:pendAss[0].criadoEm,tpl:'assinatura',cor:'reagendada'});
   });
-  out.forEach(function(x){x.chave=x.p.codigo+'|'+x.k+'|'+(x.desde||'')});
+  out.forEach(function(x){x.chave=x.p.codigo+'|'+x.k+'|'+(x.desde||'');x.tri=triagemDe(x.p.codigo)});
   if(!todos)out=out.filter(function(x){return !rsFeito(x.chave)});
-  return out.sort(function(a,b){return (a.desde||'').localeCompare(b.desde||'')||a.ordem-b.ordem});
+  return out.sort(function(a,b){return (a.tri.pri-b.tri.pri)||(a.desde||'').localeCompare(b.desde||'')||a.ordem-b.ordem});
 }
 function buildRecepcao(){
   var el=h('section',{class:'stack',role:'tabpanel'});
   P.rcRes=h('div',{class:'tiles'});P.rcList=h('div',{class:'list'});
-  el.append(h('div',{class:'nt-head'},h('h2',{},'Recepção'),h('p',{class:'meta'},'Pacientes que precisam de um contato de retorno, em ordem de chegada (os mais antigos primeiro). Cada linha abre a conversa no WhatsApp já com a mensagem pronta.')),P.rcRes,P.rcList);
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Recepção'),h('p',{class:'meta'},'Pacientes que precisam de um contato de retorno. Urgência alta aparece primeiro, depois os pedidos de valor reduzido; dentro de cada grupo, em ordem de chegada (os mais antigos primeiro). Cada linha abre a conversa no WhatsApp já com a mensagem pronta.')),P.rcRes,P.rcList);
   return el;
 }
 function renderRecepcao(){
   if(!P.rcList)return;
   var l=itensRecepcao(),c=function(k){return l.filter(function(x){return x.k===k}).length};
-  P.rcRes.replaceChildren.apply(P.rcRes,tiles([{l:'Ficha sem agendamento',v:c('ficha')},{l:'Contrato a enviar',v:c('contrato')},{l:'Aguardando assinatura',v:c('assinatura')},{l:'Cadastro incompleto',v:c('semficha')}]));
+  P.rcRes.replaceChildren.apply(P.rcRes,tiles([{l:'Ficha sem agendamento',v:c('ficha')},{l:'Contrato a enviar',v:c('contrato')},{l:'Aguardando assinatura',v:c('assinatura')},{l:'Cadastro incompleto',v:c('semficha')},{l:'Urgência alta',v:l.filter(function(x){return x.k==='ficha'&&x.tri.urg}).length},{l:'Pedidos de valor reduzido',v:l.filter(function(x){return x.k==='ficha'&&x.tri.soc}).length}]));
   P.rcList.replaceChildren.apply(P.rcList,l.length?l.map(function(x){
     var p=x.p,fi=(S.d.fichas||[]).filter(function(f){return f.codigo===p.codigo})[0];
     return h('article',{class:'sx st-'+x.cor},
       h('div',{class:'sx-date','aria-hidden':'true'},h('b',{},(p.nome||'?').charAt(0).toUpperCase())),
       h('div',{class:'sx-main'},
-        h('div',{class:'sx-top'},h('h3',{},linkPac(p.codigo,p.nome)),h('span',{class:'sx-badge'},x.tit)),
+        h('div',{class:'sx-top'},h('h3',{},linkPac(p.codigo,p.nome)),h('span',{class:'sx-badge'},x.tit),x.tri.urg?h('span',{class:'sx-badge'},'Urgência alta'):null,x.tri.soc?h('span',{class:'sx-badge'},'Valor reduzido'+(x.tri.faixa?': '+x.tri.faixa:'')):null),
         h('p',{class:'meta'},[p.telefone||'Sem telefone',p.email||'Sem e-mail',diasDesde(x.desde)].join(' · ')),
         h('div',{class:'actions'},
           x.tpl?btn('WhatsApp',function(){abrirModelos(p.codigo,x.tpl);resolverRec(x,'contato iniciado por WhatsApp')},'primary small'):btn('Gerar contrato',function(){irContrato(p.codigo);resolverRec(x,'contrato encaminhado')},'primary small'),
@@ -1896,6 +1904,8 @@ function renderPaciente(){
 
 /* ================= FICHA DE INSCRIÇÃO (dentro do sistema: o e-mail já foi confirmado pelo código) ================= */
 var SN=['SIM','NÃO'];
+var URG=['Preciso começar logo, estou em sofrimento intenso','Gostaria de começar em breve','Sem urgência'];
+var TRAB=['Empregado(a) com carteira','Autônomo(a) ou informal','Desempregado(a)','Estudante','Aposentado(a) ou pensionista','Outra'];
 var DUR=['Menos de 1 mês','1 a 3 meses','3 a 6 meses','6 meses a 1 ano','1 a 2 anos','2 a 5 anos','5 a 10 anos','Mais de 10 anos'];
 var SEXO=['Feminino','Masculino','Intersexo','Prefiro não informar'];
 var CIVIL=['Solteiro(a)','Casado(a)','União estável','Separado(a)','Divorciado(a)','Viúvo(a)'];
@@ -1913,6 +1923,7 @@ var SEC=[
     {t:'sel',k:'titular',l:'Titular: para quem é o atendimento?',o:TIT,req:1,resp:[T('resp_nome','Nome completo do responsável',{req:1,ac:'name'}),T('resp_cpf','CPF do responsável',{req:1,mask:'cpf',im:'numeric'})]},
     {t:'sel',k:'servico',l:'O que você procura?',o:['Psicoterapia','Avaliação neuropsicológica']},
     {t:'sel',k:'modalidade',l:'Modalidade preferida',o:['Presencial','Online']},
+    {t:'sel',k:'urgencia',l:'Qual a urgência?',o:URG,req:1,alerta:1},
     {t:'sel',k:'recibo',l:'Em nome de quem será emitido o recibo?',o:REC,req:1,
       desc:'O recibo (Receita Saúde) emitido pelo site da Receita Federal é vinculado ao CPF do pagador para fins de dedução do imposto de renda, comprovante de serviço para planos de saúde, etc. Saiba mais pelo site:',href:'https://www.gov.br/receitafederal/pt-br',
       rec:[T('recibo_nome','Nome completo do pagador',{req:1,ac:'off'}),T('recibo_cpf','CPF do pagador',{req:1,mask:'cpf',im:'numeric'})]}
@@ -1955,6 +1966,24 @@ var SEC=[
     {t:'yn',k:'profilatico',l:'10) Faz uso de algum profilático não medicamentoso? (chás, conserva, jejum etc.)',sub:[T('profilatico_qual','Se sim, qual(is)?')]}
   ]},
   {h:'Valores e pagamento',f:[
+    {t:'info',k:'lim_tit',l:'Limitadores para o acesso à psicoterapia',hint:'Marque o que se aplica a você (opcional). Isso nos ajuda a organizar horários, formato e valores.'},
+    {t:'chk',k:'lim_financeiro',v:'SIM',l:'Estou com dificuldades financeiras no momento',sub:[
+      {t:'info',k:'soc_info',l:'Valor reduzido (Emotiss Social)',hint:'As vagas são limitadas e dependem de análise da equipe. Marcar esta opção não garante o desconto. Estas informações servem só para definir o valor e a ordem de atendimento.'},
+      {row:[T('soc_renda','Renda mensal somada da casa (R$)',{req:1,mask:'money',im:'decimal',ph:'Ex.: 3200'}),T('soc_pessoas','Pessoas que vivem dessa renda',{req:1,mask:'num',im:'numeric'})]},
+      {t:'yn',k:'soc_cadunico',l:'Tem inscrição no CadÚnico?'},
+      {t:'sel',k:'soc_trabalho',l:'Situação de trabalho',o:TRAB},
+      {t:'info',k:'soc_c_tit',l:'Algo mais pesa no seu orçamento? (opcional)'},
+      {t:'chk',k:'soc_c_deficiencia',v:'SIM',l:'Pessoa com deficiência ou doença crônica na casa'},
+      {t:'chk',k:'soc_c_filhos',v:'SIM',l:'Filhos ou dependentes menores'},
+      {t:'chk',k:'soc_c_cuida',v:'SIM',l:'Cuida de familiar'},
+      {t:'chk',k:'soc_c_moradia',v:'SIM',l:'Aluguel ou financiamento de moradia'},
+      {t:'chk',k:'soc_c_saude',v:'SIM',l:'Gastos recorrentes com saúde'},
+      {t:'chk',k:'soc_aceite',v:'SIM',req:1,l:'Autorizo o uso dos dados de renda e de situação social para a triagem do valor reduzido.'},
+      {t:'chk',k:'soc_encaminhar',v:'SIM',l:'Se não houver vaga na Emotiss, autorizo encaminhar meu contato a outros psicólogos(as) parceiros(as). (opcional)'}
+    ]},
+    {t:'chk',k:'lim_horario',v:'SIM',l:'Meus horários de trabalho ou estudo são pouco flexíveis'},
+    {t:'chk',k:'lim_transporte',v:'SIM',l:'Distância ou transporte dificultam o atendimento presencial'},
+    {t:'chk',k:'lim_acessibilidade',v:'SIM',l:'Preciso de adaptações de acessibilidade'},
     {t:'sel',k:'pagamento',l:'Como prefiro pagar:',o:PAGQ,desc:'O valor da sessão é definido pelo profissional que irá atendê-lo e consta no contrato. O pagamento é feito por Pix: a cobrança aparece na aba Pagamentos conforme a sua escolha.',
       dt:[T('pagamento_dia','Dia do mês para pagar (de 1 a 28)',{req:1,mask:'dia',im:'numeric',ph:'Ex.: 10'})]}
   ]},
@@ -1979,6 +2008,8 @@ var MASK={
   tel:function(s){var d=dig(s).slice(0,11);return d.length>10?d.replace(/^(\d{2})(\d{5})(\d)/,'($1) $2-$3'):d.replace(/^(\d{2})(\d{4})(\d)/,'($1) $2-$3')}
 };
 MASK.datef=MASK.date;
+MASK.money=function(s){return String(s).replace(/[^\d.,]/g,'').slice(0,12)};
+MASK.num=function(s){return dig(s).slice(0,2)};
 MASK.hora=function(s){var d=dig(s).slice(0,4);return d.replace(/^(\d{2})(\d)/,'$1:$2')};
 function cpfOk(c){c=dig(c);if(c.length!==11||/^(\d)\1+$/.test(c))return false;for(var t=9;t<11;t++){var s=0;for(var i=0;i<t;i++)s+=+c[i]*(t+1-i);if(((s*10)%11)%10!==+c[t])return false}return true}
 function dataOk(d){var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);if(!m)return false;var dt=new Date(+m[3],+m[2]-1,+m[1]);return dt.getFullYear()===+m[3]&&dt.getMonth()===+m[2]-1&&dt.getDate()===+m[1]&&dt<=new Date()&&+m[3]>1900}
@@ -1987,6 +2018,20 @@ function emailOk(e){e=String(e||'').trim();return e.length<=120&&/^[^\s@,;:<>()\
 var CHECKS={cpf:cpfOk,date:dataOk,datef:futOk,email:emailOk,tel:function(s){return dig(s).length>=10}};
 function tick(el){var m=el.dataset&&el.dataset.mask;if(m&&CHECKS[m])el.classList.toggle('valid',!!el.value&&CHECKS[m](el.value))}
 
+/* ---------- Emotiss Social: faixa de valor sugerida (ajuste aqui) ---------- */
+var SOCIAL={integral:150,sm:1621,cadMin:2,faixas:[{n:'Faixa 1',ate:0.5,pct:20},{n:'Faixa 2',ate:1,pct:30},{n:'Faixa 3',ate:1.5,pct:40}]};
+function socNum(v){return Number(String(v==null?'':v).replace(/\./g,'').replace(',','.'))}
+function brl(n){return 'R$ '+n.toFixed(2).replace('.',',')}
+function socialCalc(d){
+  var renda=socNum(d.soc_renda),pes=Math.floor(+d.soc_pessoas);
+  if(d.lim_financeiro!=='SIM'||isNaN(renda)||!(pes>=1))return null;
+  var pc=renda/pes,sm=pc/SOCIAL.sm,i=-1;
+  for(var k=0;k<SOCIAL.faixas.length;k++){if(sm<=SOCIAL.faixas[k].ate){i=k;break}}
+  if(d.soc_cadunico==='SIM'&&SOCIAL.cadMin>0&&(i<0||i>SOCIAL.cadMin-1))i=SOCIAL.cadMin-1;
+  var fx=i>=0?SOCIAL.faixas[i]:null;
+  return {pc:brl(pc)+' ('+sm.toFixed(2).replace('.',',')+' salário mínimo)',
+    faixa:fx?fx.n+': '+fx.pct+'% do valor integral ('+brl(SOCIAL.integral*fx.pct/100)+' sobre a base de '+brl(SOCIAL.integral)+')':'Acima das faixas: valor integral ou encaminhamento'};
+}
 /* ordem e rótulos para a gestão ler a ficha */
 function fichaFlat(fs,out){fs.forEach(function(f){if(f.row)return fichaFlat(f.row,out);if(f.k)out.push(f);['resp','dt','rec','sub'].forEach(function(n){if(f[n])fichaFlat(f[n],out)})});return out}
 function fichaView(fi){
@@ -1998,6 +2043,7 @@ function fichaView(fi){
     kids.push(h('h4',{},sc.h));
     itens.forEach(function(f){kids.push(h('dt',{},f.l),h('dd',{},d[f.k]))});
   });
+  if(S.modo==='gestao'){var sc2=socialCalc(d);if(sc2)kids.push(h('h4',{},'Triagem do valor reduzido (sugestão)'),h('dt',{},'Renda per capita'),h('dd',{},sc2.pc),h('dt',{},'Faixa sugerida'),h('dd',{},sc2.faixa))}
   return h('dl',{class:'fv'},kids.length?kids:h('dd',{},'Ficha vazia.'),h('h4',{},'Enviada em '+brDate(fi.criadoEm)+(fi.atualizadoEm?' · atualizada em '+brDate(fi.atualizadoEm):'')));
 }
 
@@ -2031,12 +2077,15 @@ function buildFicha(){
       else{var s=mk('select');s.id=id;s.name=f.k;s.append(new Option('Selecione',''));f.o.forEach(function(o){s.append(new Option(o,o))});s.addEventListener('change',refresh);w.append(s)}
       if(f.rec){var cb=mk('div','sub2');cb.id='fx_rec';cb.hidden=true;f.rec.forEach(function(x){build(x,cb)});w.append(cb)}
       if(f.dt){var db=mk('div','sub2');db.id='fx_dt';db.hidden=true;f.dt.forEach(function(x){build(x,db)});w.append(db)}
+      if(f.alerta){var ab=mk('div','sub2');ab.id='fx_alerta';ab.hidden=true;ab.append(mk('p','hint','Se você está em sofrimento intenso agora, não espere o nosso retorno: ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure o CAPS ou a UPA mais próxima. Depois você pode continuar a ficha.'));w.append(ab)}
       if(f.resp){var rb=mk('div','sub2');rb.id='fx_resp';rb.hidden=true;var rp=mk('p','hint','Quem solicita o atendimento e assina o contrato. Os dados de quem será atendido são pedidos na próxima etapa.');rp.style.margin='0 0 10px';rb.append(rp);f.resp.forEach(function(x){build(x,rb)});w.append(rb)}
     }else if(f.t==='yn'){
       w.append(mk('span','q',f.l));w.append(pills({k:f.k,l:f.l,o:SN},'yn'));
       if(f.sub){var sb=mk('div','sub');sb.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb)});w.append(sb)}
+    }else if(f.t==='info'){
+      w.append(mk('span','q',f.l));if(f.hint)w.append(mk('p','hint',f.hint));
     }else if(f.t==='chk'){
-      var l=mk('label','chk'),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;l.append(c,mk('span',f.req?'req':'',f.l));w.append(l);
+      var l=mk('label','chk'),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;c.addEventListener('change',refresh);l.append(c,mk('span',f.req?'req':'',f.l));w.append(l);if(f.sub){var sb2=mk('div','sub');sb2.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb2)});w.append(sb2)}
     }
     w.dataset.k=f.k;host.append(w);
   }
@@ -2074,6 +2123,7 @@ function buildFicha(){
     var br=form.querySelector('#fx_resp');if(br)br.hidden=!outro;
     var bc=form.querySelector('#fx_rec');if(bc)bc.hidden=val('recibo')!==REC[1];
     var bd=form.querySelector('#fx_dt');if(bd)bd.hidden=val('pagamento')!==PAGQ[2];
+    var ba=form.querySelector('#fx_alerta');if(ba)ba.hidden=val('urgencia')!==URG[0];
     setLab('paciente',outro?'Nome completo do paciente':'Nome completo');
     setLab('nascimento',outro?'Data de nascimento do paciente':'Data de nascimento');
     setLab('cpf',outro?'CPF do paciente':'CPF');
@@ -2095,6 +2145,7 @@ function buildFicha(){
       Object.keys(r.d).forEach(function(n){form.querySelectorAll('[name="'+n+'"]').forEach(function(x){if(x.type==='radio'||x.type==='checkbox')x.checked=x.value===r.d[n];else x.value=r.d[n];tick(x)})});
       refresh();cur=Math.min(+r.s||0,STEPS.length-1)}catch(x){}
   }
+  function preSocial(){if(!PRE_SOCIAL)return;var c=form.querySelector('[name="lim_financeiro"]');if(c&&!c.checked){c.checked=true;refresh()}PRE_SOCIAL=false;try{sessionStorage.removeItem('siage-social')}catch(e){}}
   function prefill(){var p=S.d.perfil||{};[['email',p.email],['telefone',p.telefone],['paciente',p.nome]].forEach(function(x){var i=form.querySelector('[name="'+x[0]+'"]');if(i&&!i.value&&x[1]){i.value=String(x[1]).replace(/\s*\(.*?\)/g,'');var m=i.dataset.mask;if(m&&MASK[m])i.value=MASK[m](i.value);tick(i)}})}
 
   function mostra(i,rolar){
@@ -2117,15 +2168,17 @@ function buildFicha(){
   function marca(k){var x=form.querySelector('[name="'+k+'"]');if(x)x.classList.add('bad');var w=form.querySelector('.f[data-k="'+k+'"]');if(w)w.classList.add('bad')}
   function erro(d,escopo){
     var no=function(k){return !escopo||escopo.indexOf(k)>=0};
-    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','lgpd'];
+    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','urgencia','lgpd'];
     if(d.titular&&d.titular!==TIT[0])obrig.push('resp_nome','resp_cpf');
     if(d.recibo===REC[1])obrig.push('recibo_nome','recibo_cpf');
     if(d.pagamento===PAGQ[2])obrig.push('pagamento_dia');
+    if(d.lim_financeiro==='SIM')obrig.push('soc_renda','soc_pessoas','soc_cadunico','soc_trabalho','soc_aceite');
     var falta=obrig.filter(function(k){return no(k)&&!d[k]});
     if(falta.length){falta.forEach(marca);return {k:falta[0],m:falta.length===1&&falta[0]==='lgpd'?'Para enviar, confirme o consentimento.':'Faltam '+falta.length+' pergunta(s) obrigatória(s), marcadas em vermelho. Preencha para continuar.'}}
     var tests=[['cep',function(c){return dig(c).length===8},'CEP inválido. Informe os 8 números.'],['cpf',cpfOk,'CPF inválido. Confira os números.'],['nascimento',dataOk,'Data de nascimento inválida. Use dd/mm/aaaa.'],['email',emailOk,'E-mail inválido. Use o formato nome@exemplo.com.'],['agenda_hora',function(v){return /^([01]\d|2[0-3]):[0-5]\d$/.test(v)},'Horário inválido. Use hh:mm, por exemplo 14:00.']];
     if(d.titular&&d.titular!==TIT[0])tests.push(['resp_cpf',cpfOk,'CPF do responsável inválido.']);
     if(d.recibo===REC[1])tests.push(['recibo_cpf',cpfOk,'CPF do pagador inválido.']);
+    if(d.lim_financeiro==='SIM')tests.push(['soc_renda',function(v){var n=socNum(v);return !isNaN(n)&&n>=0},'Renda inválida. Use só números, por exemplo 3200.'],['soc_pessoas',function(v){return +v>=1},'Informe quantas pessoas vivem dessa renda (mínimo 1).']);
     if(no('pagamento_dia')&&d.pagamento===PAGQ[2]&&!(+d.pagamento_dia>=1&&+d.pagamento_dia<=28)){marca('pagamento_dia');return {k:'pagamento_dia',m:'Informe um dia do mês entre 1 e 28.'}}
     for(var i=0;i<tests.length;i++){var t=tests[i];if(no(t[0])&&d[t[0]]&&!t[1](d[t[0]])){marca(t[0]);return {k:t[0],m:t[2]}}}
     return null;
@@ -2138,7 +2191,7 @@ function buildFicha(){
     var eg=erro(d,null);
     if(eg){var alvo=0;stepKeys.forEach(function(ks,i){if(ks.indexOf(eg.k)>=0)alvo=i});if(alvo!==cur)mostra(alvo,true);msg.textContent=eg.m;setTimeout(function(){foca(eg.k)},50);return}
     var LAB={};SEC.forEach(function(sc){fichaFlat(sc.f,[]).forEach(function(f){LAB[f.k]=String(f.l||'').replace(/^\d+\)\s*/,'').replace(/\?$/,'')})});
-    var vazios=Object.keys(d).filter(function(k){return d[k]===''&&k!=='complemento'&&LAB[k]});
+    var vazios=Object.keys(d).filter(function(k){return d[k]===''&&k!=='complemento'&&k.indexOf('lim_')!==0&&k.indexOf('soc_')!==0&&LAB[k]});
     if(vazios.length&&!P.fxOk){
       var primeiro=vazios[0];
       dialogo({titulo:'Algumas perguntas ficaram em branco',
@@ -2152,7 +2205,7 @@ function buildFicha(){
     next.disabled=true;next.textContent='Enviando…';
     api('salvarFicha',ctx(),d).then(function(){
       limpaRascunho();P.fxEdit=false;P.fxJust=true;next.disabled=false;mostra(0,false);return recarregar();
-    }).then(function(){dialogo({titulo:'Ficha enviada ✓',corpo:[h('p',{},'Recebemos a sua ficha. As informações sobre valores, forma de pagamento e dia e horário fixos são necessárias para agilizar a formalização do contrato e qualificar ainda mais o seu agendamento.'),h('p',{class:'meta'},'Você pode atualizá-las quando quiser pela aba Ficha.')],botoes:[{t:'Entendi',cls:'primary'}],fim:function(){P.fxEdit=false;if(S.modo==='paciente'){if(!vigentes().length){S.bkAberto=true;S.bk=novoBk()}go('sessoes');renderBooking()}}})}).catch(function(er){
+    }).then(function(){dialogo({titulo:'Ficha enviada ✓',corpo:[h('p',{},'Recebemos a sua ficha. As informações sobre valores, forma de pagamento e dia e horário fixos são necessárias para agilizar a formalização do contrato e qualificar ainda mais o seu agendamento.'),h('p',{class:'meta'},'Você pode atualizá-las quando quiser pela aba Ficha.'),d.lim_financeiro==='SIM'?h('p',{},'Sobre o valor reduzido: a equipe vai analisar a sua solicitação, que depende da disponibilidade de vagas. O valor combinado constará no contrato.'):null,d.urgencia===URG[0]?h('p',{},'Lembrete: se estiver em sofrimento intenso agora, ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure o CAPS ou a UPA mais próxima.'):null],botoes:[{t:'Entendi',cls:'primary'}],fim:function(){P.fxEdit=false;if(S.modo==='paciente'){if(!vigentes().length){S.bkAberto=true;S.bk=novoBk()}go('sessoes');renderBooking()}}})}).catch(function(er){
       next.disabled=false;next.textContent='Enviar ficha';msg.textContent=er.message;if(/SESSAO_EXPIRADA/.test(er.message))falha(er);
     });
   });
@@ -2161,7 +2214,7 @@ function buildFicha(){
     var f=S.d.ficha,done=!!f&&!P.fxEdit;
     okc.hidden=!done;intro.hidden=done;prog.hidden=done;form.hidden=done;
     if(done)okmsg.textContent=P.fxJust?'Recebemos a sua inscrição. Enviamos uma confirmação para o seu e-mail.':'Ficha enviada em '+brDate(f.atualizadoEm||f.criadoEm)+'. Se algo mudou, você pode enviar uma versão atualizada.';
-    else if(!P.fxPre){P.fxPre=1;restaura();prefill();mostra(cur,false)}
+    else if(!P.fxPre){P.fxPre=1;restaura();prefill();preSocial();mostra(cur,false)}
   };
   P.fxReset=function(){limpaRascunho();form.reset();form.querySelectorAll('.valid,.bad').forEach(function(x){x.classList.remove('valid','bad')});refresh();mostra(0,false);P.fxPre=0;P.fxEdit=false;P.fxJust=false;next.disabled=false};
   return el;
