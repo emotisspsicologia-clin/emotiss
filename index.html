@@ -602,6 +602,48 @@ main{padding:0 16px}
 .subtabs{margin:0 0 16px}
 .nt-tab{padding:9px 16px}
 @media (max-width:560px){.dia2{padding:14px}.dia2-t strong{font-size:1.25rem}.item{padding:14px 16px}.tile b{font-size:1.4rem}}
+
+/* resolução de avisos e pendências */
+.nt.feito,.item.feito{opacity:.82}
+.nt.feito{border-left-color:#2f7d4f}
+.nt-ok{background:color-mix(in srgb,#2f7d4f 14%,var(--surface));color:#2f7d4f;font-weight:700;border-radius:6px;padding:1px 8px;font-size:.72rem}
+.nt-and{background:color-mix(in srgb,#9a6b00 15%,var(--surface));color:#9a6b00;font-weight:700;border-radius:6px;padding:1px 8px;font-size:.72rem}
+.nt-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.alerta{border-left:6px solid var(--warm);display:flex;flex-direction:column;gap:10px}
+.alerta h3{font-size:1.1rem;font-weight:700}
+.al-it{display:flex;justify-content:space-between;align-items:center;gap:10px 14px;flex-wrap:wrap;background:var(--surface-2);border-radius:14px;padding:10px 14px}
+.al-t{display:flex;flex-direction:column;min-width:0;flex:1 1 200px}
+.al-t b{overflow-wrap:anywhere}
+
+/* seções em dourado e ícones */
+.ti{display:inline-flex;align-items:center;justify-content:center;font-size:1rem}
+.tab .ico,.tab .ti .ico{flex:none}
+.tab[aria-selected="true"] .ico{color:var(--gold)}
+@media (prefers-color-scheme: dark){.tab[aria-selected="true"] .ico{color:#17130f}}
+.nt-head.sec{display:flex;align-items:center;gap:16px;background:color-mix(in srgb,var(--gold) 30%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 75%,var(--line));border-radius:20px;padding:14px 20px;box-shadow:0 2px 10px #17130f0d}
+.nt-head.sec .sec-tx{flex:1;min-width:0}
+.nt-head.sec h2{font-size:1.5rem;margin:0 0 2px}
+.nt-head.sec .meta{color:color-mix(in srgb,var(--fg) 70%,var(--surface));font-size:.88rem}
+.sec-ic{flex:none;width:52px;height:52px;border-radius:15px;background:var(--band);color:var(--gold);display:flex;align-items:center;justify-content:center}
+@media (prefers-color-scheme: dark){.nt-head.sec{background:color-mix(in srgb,var(--gold) 13%,var(--surface))}.sec-ic{background:var(--gold);color:#17130f}}
+.stack>h3,.cols .stack>h2{border-left:5px solid var(--gold);padding-left:12px}
+@media (max-width:560px){.nt-head.sec{padding:12px 14px;gap:12px}.sec-ic{width:44px;height:44px}.nt-head.sec h2{font-size:1.25rem}}
+
+/* Fale conosco */
+.btn.wa::before{content:none}
+.btn.wa{background:var(--ok);border-color:var(--ok);gap:8px;align-items:center}
+.btn.wa .ico{flex:none}
+.top .btn.wa{background:none;color:var(--gold);border-color:var(--gold)}
+.top .btn.wa:hover{background:#e8c98f1f}
+.top.pac .hgrid{row-gap:0}
+.hgrid .hact{flex-wrap:wrap;min-width:0}
+.top h1 .sg .nm{display:inline}
+
+/* terracota com moderação: destaques em tinta e dourado */
+.tile.big{background:var(--band);color:#f5f0e8}
+.tile.big .tl,.tile.big .ts{color:var(--gold)}
+.alerta{border-left-color:var(--gold)}
+@media (max-width:720px){.top.pac{padding-bottom:62px}}
 </style>
 </head>
 <body>
@@ -650,6 +692,27 @@ function add(e,kid){
   if(Array.isArray(kid)) return kid.forEach(function(k){add(e,k)});
   e.append(kid.nodeType?kid:document.createTextNode(String(kid)));
 }
+var ICO={
+ calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+ users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.6c2.4.2 4 1.9 4 4.4"/>',
+ bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>',
+ check:'<rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4h6v3H9zM9 14l2 2 4-4"/>',
+ wallet:'<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/>',
+ file:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
+ megaphone:'<path d="M3 11v3h3l8 4V7L6 11z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+ heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 9.5v5M9.5 12h5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+ folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+ clip:'<rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+ chat:'<path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>',
+ inbox:'<path d="M3 13l2.5-7h13L21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 13h5l1 3h6l1-3h5"/>'
+};
+function ico(n,sz){
+  var e=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  [['viewBox','0 0 24 24'],['width',sz||20],['height',sz||20],['fill','none'],['stroke','currentColor'],['stroke-width','1.9'],['stroke-linecap','round'],['stroke-linejoin','round'],['aria-hidden','true'],['class','ico']].forEach(function(a){e.setAttribute(a[0],a[1])});
+  e.innerHTML=ICO[n]||'';return e;
+}
 function pad(n){return n<10?'0'+n:''+n}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function parse(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
@@ -668,7 +731,7 @@ var WHATS='5531988374248';
 var LINK_SISTEMA='https://emotisspsicologia-clin.github.io/emotiss/';
 function waUrl(texto,tel){var n=tel?foneWa(tel):WHATS;return 'https://wa.me/'+n+'?text='+encodeURIComponent(texto||'')}
 function foneWa(t){var d=String(t||'').replace(/\D/g,'');return d.length<=11?'55'+d:d}
-function btnEquipe(texto,cls){return h('a',{class:'btn wa '+(cls||''),href:waUrl(texto),target:'_blank',rel:'noopener noreferrer'},'Falar com a equipe Emotiss')}
+function btnEquipe(texto,cls,rot){return h('a',{class:'btn wa '+(cls||''),href:waUrl(texto),target:'_blank',rel:'noopener noreferrer'},ico('chat',17),rot||'Falar com a equipe Emotiss')}
 var PRE_SERV='';try{var q=new URLSearchParams(location.search).get('servico');if(q){PRE_SERV=q;sessionStorage.setItem('siage-serv',q)}else PRE_SERV=sessionStorage.getItem('siage-serv')||''}catch(e){}
 var TPL=[
  {id:'convite',nome:'Convite para agendar pelo sistema',t:'Olá, {nome}! Foi um prazer conversar com você. Para escolher o dia e o horário que melhor combinam com a sua rotina, é só acessar: {link}\nQualquer dúvida, estou por aqui.'},
@@ -724,7 +787,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -776,11 +839,61 @@ function porCodigo(){var m={};S.d.pacientes.forEach(function(p){m[p.codigo]=p});
 function nomeDe(codigo,iniciais){var p=porCodigo()[codigo];return p?p.nome:(iniciais||codigo)}
 function avisoRef(){return S.avRef!=null?S.avRef:((S.d.perfil&&S.d.perfil.vistoEm)||'')}
 function avisoNovo(a){return (a.criadoEm||'')>avisoRef()}
-function novosAvisos(){return (S.d.avisos||[]).filter(function(a){return (a.criadoEm||'')>((S.d.perfil&&S.d.perfil.vistoEm)||'')}).length}
+function novosAvisos(){return avPend()}
+/* ---- avisos do paciente: cada um leva à aba certa e é resolvido ---- */
+var AV_ACAO={sessao:['Ver minhas sessões','sessoes'],documento:['Abrir Documentos','docs'],material:['Abrir Documentos','docs'],contrato:['Enviar contrato assinado','docs'],pagamento:['Ir para Pagamentos','pagamentos'],ficha:['Ver minha ficha','ficha']};
+function avAcao(a){return AV_ACAO[a.tipo]||null}
+function avTab(a){var x=avAcao(a);return x?x[1]:null}
+function avEst(a){var l=S.d.avisosEstado||[];for(var i=0;i<l.length;i++)if(l[i].chave===a.id)return l[i];return null}
+function avAcionavel(a){return a.tipo==='contrato'||(a.tipo==='pagamento'&&/cobran[çc]as? dispon|não aceito/i.test(a.titulo||''))}
+function avAuto(a){
+  if(a.tipo==='contrato'){
+    var ms=(S.d.materiais||[]).filter(function(m){return m.categoria==='contrato'});
+    var alvo=ms.filter(function(m){return m.titulo&&(a.titulo||'').indexOf(m.titulo)>=0});
+    if(!alvo.length)alvo=ms;
+    return alvo.length&&alvo.every(function(m){return assinadoDe(m)})?'Arquivo assinado enviado':null;
+  }
+  if(a.tipo==='pagamento'&&avAcionavel(a)){
+    var cb=cobrancasP().filter(function(c){return !c.criadoEm||c.criadoEm<=a.criadoEm});
+    if(cb.some(function(c){return c.status==='pendente'}))return null;
+    return cb.some(function(c){return c.status==='comprovante'})?'Comprovante enviado':'Pagamento concluído';
+  }
+  return null;
+}
+function avStatus(a){
+  var e=avEst(a),sit=e?e.situacao:'';
+  if(!e&&S.d.perfil&&S.d.perfil.vistoEm&&(a.criadoEm||'')<=S.d.perfil.vistoEm)sit='vista';
+  var ac=avAcionavel(a),auto=ac?avAuto(a):null;
+  if(sit==='naolida')return {s:'nova'};
+  if(auto)return {s:'resolvida',t:auto};
+  if(sit==='resolvida')return {s:'resolvida',t:(e&&e.resolucao)||'Visto e resolvido'};
+  if(sit==='vista')return ac?{s:'andamento',t:'Vista · falta concluir'}:{s:'resolvida',t:'Visto e resolvido'};
+  return {s:'nova'};
+}
+function avPend(tab){return (S.d.avisos||[]).filter(function(a){return avStatus(a).s!=='resolvida'&&(!tab||avTab(a)===tab)}).length}
+function avSet(ids,sit,res){
+  ids=[].concat(ids);if(!ids.length)return;
+  S.d.avisosEstado=S.d.avisosEstado||[];
+  ids.forEach(function(id){var e=S.d.avisosEstado.filter(function(x){return x.chave===id})[0];
+    if(e){e.situacao=sit;e.resolucao=res||''}else S.d.avisosEstado.push({chave:id,situacao:sit,resolucao:res||''})});
+  renderTabs();renderAvisos();if(P.pAlert)renderAlertaP();
+  api('atualizarAvisos',ctx(),ids,sit,res||'').catch(function(e){falha(e);recarregar(true)});
+}
+function avAbrir(a){
+  var ac=avAcao(a),acion=avAcionavel(a);
+  avSet(a.id,acion&&avStatus(a).s!=='resolvida'?'vista':'resolvida',acion?'':'Visto e resolvido');
+  if(ac)go(ac[1]);
+}
+function avAbriuAba(id){
+  if(id==='avisos'||!S.d||!S.d.avisos)return;
+  var info=S.d.avisos.filter(function(a){return avTab(a)===id&&!avAcionavel(a)&&avStatus(a).s==='nova'}).map(function(a){return a.id});
+  if(info.length)avSet(info,'resolvida','Visto ao abrir a aba');
+}
+function avLida(a){avSet(a.id,'resolvida','Visto e resolvido')}
 function naoLidas(){return S.d.mensagens.filter(function(m){return m.situacao==='nova'}).length}
-function arquivosDe(m){
+function arquivosDe(m,onBaixar){
   var out=[];
-  if(m.arquivoId) out.push(h('button',{type:'button',class:'btn small',onclick:function(ev){abrirArquivo(m.arquivoId,m.arquivoNome,ev.currentTarget)}},'Baixar '+(m.arquivoNome||'arquivo')));
+  if(m.arquivoId) out.push(h('button',{type:'button',class:'btn small',onclick:function(ev){abrirArquivo(m.arquivoId,m.arquivoNome,ev.currentTarget);if(onBaixar)onBaixar()}},'Baixar '+(m.arquivoNome||'arquivo')));
   if(isHttp(m.link)) out.push(h('a',{class:'file',href:m.link,target:'_blank',rel:'noopener noreferrer'},'Abrir link'));
   return out;
 }
@@ -1100,7 +1213,16 @@ function abrirModelos(codigo,modelo){
 
 /* ---------- recepção: quem precisa de retorno ---------- */
 function diasDesde(iso){var d=Math.floor((Date.now()-new Date(iso).getTime())/86400000);return d<=0?'hoje':(d===1?'há 1 dia':'há '+d+' dias')}
-function itensRecepcao(){
+function rsEst(k){var l=S.d.resolucoes||[];for(var i=0;i<l.length;i++)if(l[i].chave===k)return l[i];return null}
+function rsFeito(k){var e=rsEst(k);return !!e&&e.situacao==='resolvida'}
+function rsSet(k,sit,t){
+  S.d.resolucoes=S.d.resolucoes||[];var e=rsEst(k);
+  if(e){e.situacao=sit;e.resolucao=t||''}else S.d.resolucoes.push({chave:k,situacao:sit,resolucao:t||''});
+  renderRecepcao();renderHoje();renderTabs();
+  api('resolverItem',ctx(),k,sit,t||'').catch(function(er){falha(er);recarregar(true)});
+}
+function resolverRec(x,t){var k=x.chave;rsSet(k,'resolvida',t);toastAcao('Resolvido: '+t+'.','Desfazer',function(){rsSet(k,'aberta','')})}
+function itensRecepcao(todos){
   var out=[],ag=S.d.agenda||[],mats=S.d.materiais||[],msgs=S.d.mensagens||[],fichas=S.d.fichas||[];
   (S.d.pacientes||[]).forEach(function(p){
     var viva=ag.some(function(a){return a.codigo===p.codigo&&a.status!=='cancelada'});
@@ -1113,6 +1235,8 @@ function itensRecepcao(){
     if(aceite&&!contratos.length)out.push({p:p,k:'contrato',ordem:2,tit:'Agendou: contrato a enviar',desde:p.criadoEm,tpl:null,cor:'reagendada'});
     if(pendAss.length)out.push({p:p,k:'assinatura',ordem:3,tit:'Contrato enviado, aguardando assinatura',desde:pendAss[0].criadoEm,tpl:'assinatura',cor:'reagendada'});
   });
+  out.forEach(function(x){x.chave=x.p.codigo+'|'+x.k+'|'+(x.desde||'')});
+  if(!todos)out=out.filter(function(x){return !rsFeito(x.chave)});
   return out.sort(function(a,b){return (a.desde||'').localeCompare(b.desde||'')||a.ordem-b.ordem});
 }
 function buildRecepcao(){
@@ -1133,9 +1257,14 @@ function renderRecepcao(){
         h('div',{class:'sx-top'},h('h3',{},linkPac(p.codigo,p.nome)),h('span',{class:'sx-badge'},x.tit)),
         h('p',{class:'meta'},[p.telefone||'Sem telefone',p.email||'Sem e-mail',diasDesde(x.desde)].join(' · ')),
         h('div',{class:'actions'},
-          x.tpl?btn('WhatsApp',function(){abrirModelos(p.codigo,x.tpl)},'primary small'):btn('Gerar contrato',function(){irContrato(p.codigo)},'primary small'),
-          fi?btn('Ver ficha',function(){S.verFicha=p.id;go('pacientes')},'small'):null)));
+          x.tpl?btn('WhatsApp',function(){abrirModelos(p.codigo,x.tpl);resolverRec(x,'contato iniciado por WhatsApp')},'primary small'):btn('Gerar contrato',function(){irContrato(p.codigo);resolverRec(x,'contrato encaminhado')},'primary small'),
+          fi?btn('Ver ficha',function(){S.verFicha=p.id;go('pacientes')},'small'):null,
+          btn('Marcar como resolvido',function(){resolverRec(x,'marcado como resolvido')},'small'))));
   }):[empty('Tudo em dia','Nenhum paciente aguardando retorno agora.')]);
+  var feitos=itensRecepcao(true).filter(function(x){return rsFeito(x.chave)});
+  if(feitos.length)P.rcList.append(h('details',{class:'card fold'},h('summary',{},'Resolvidos ('+feitos.length+')'),h('div',{class:'list',style:'margin-top:10px'},feitos.map(function(x){
+    var e=rsEst(x.chave);
+    return h('article',{class:'item feito'},h('div',{class:'row'},h('h3',{},linkPac(x.p.codigo,x.p.nome)),h('span',{class:'pill confirmada'},'✓ '+((e&&e.resolucao)||'Resolvido'))),h('p',{class:'meta'},x.tit),h('div',{class:'actions'},btn('Reabrir',function(){rsSet(x.chave,'aberta','')},'small')))}))));
 }
 function renderPacientes(){
   var lista=S.d.pacientes.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
@@ -1262,30 +1391,48 @@ function buildEntrada(){
 }
 async function situacao(id,s){try{await api('definirSituacao',ctx(),id,s);await recarregar()}catch(e){falha(e)}}
 var TIPO_ROT={solicitacao:'Pedido de horário',cancelamento:'Cancelamento',agendamento:'Novo agendamento',material:'Documento'};
+function refazerG(){renderEntrada();renderTabs();renderHoje();if(S.pacAberto)renderPacienteG()}
+function resolverMsg(m,texto){
+  var ant=m.situacao;if(ant==='resolvida')return;
+  m.situacao='resolvida';refazerG();
+  api('definirSituacao',ctx(),m.id,'resolvida').catch(function(e){m.situacao=ant;refazerG();falha(e)});
+  toastAcao('Resolvido: '+texto+'.','Desfazer',function(){reabrirMsg(m,ant)});
+}
+function reabrirMsg(m,para){
+  var ant=m.situacao;m.situacao=para||'nova';refazerG();
+  api('definirSituacao',ctx(),m.id,m.situacao).catch(function(e){m.situacao=ant;refazerG();falha(e)});
+}
 function itemAtualizacao(m){
-  var nova=m.situacao==='nova',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
+  var nova=m.situacao==='nova',feita=m.situacao==='resolvida',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
   var rot=TIPO_ROT[m.tipo]||'Atualização';
-  return h('article',{class:'item'+(nova?' unread':'')},
+  return h('article',{class:'item'+(nova?' unread':'')+(feita?' feito':'')},
     h('div',{class:'row'},h('h3',{},nomeDe(m.codigo,m.iniciais)+' · '+(m.titulo||rot)),
-      h('div',{class:'actions'},h('span',{class:'pill '+(nova?'nova':'tag')},nova?'Nova':'Lida'),h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
+      h('div',{class:'actions'},h('span',{class:'pill '+(feita?'confirmada':nova?'nova':'tag')},feita?'✓ Resolvida':nova?'Nova':'Lida'),h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
     limpaRef(m.mensagem)?h('p',{class:'body'},limpaRef(m.mensagem)):null,
     m.tipo==='solicitacao'&&m.dataPreferida?h('p',{class:'meta'},'Data preferida: '+longDay(m.dataPreferida)):null,
-    h('div',{class:'actions'},arquivosDe(m)),
+    h('div',{class:'actions'},arquivosDe(m,feita?null:function(){resolverMsg(m,'arquivo baixado')})),
     h('div',{class:'row'},h('span',{class:'meta'},brDate(m.criadoEm)),
-      h('div',{class:'actions'},
+      h('div',{class:'actions'},feita?btn('Reabrir',function(){reabrirMsg(m)},'small'):[
         nova?btn('Marcar como lida',function(){situacao(m.id,'lida')},'small'):null,
-        req?btn('Reagendar',function(){situacao(m.id,'lida');go('agenda');toggleAgForm({codigo:m.codigo,data:m.dataPreferida})},'small'):null,
-        btn('Enviar retorno',function(){situacao(m.id,'lida');go('materiais');P.lib.para.value=m.codigo;P.lib.titulo.value='Retorno: '+(m.titulo||rot);P.lib.titulo.focus()},'small'),
-        confirmBtn('Arquivar',function(){situacao(m.id,'arquivada')}))));
+        req?btn('Reagendar',function(){resolverMsg(m,'reagendamento iniciado');go('agenda');toggleAgForm({codigo:m.codigo,data:m.dataPreferida})},'small'):null,
+        btn('Enviar retorno',function(){resolverMsg(m,'retorno em preparo');go('materiais');P.lib.para.value=m.codigo;P.lib.titulo.value='Retorno: '+(m.titulo||rot);P.lib.titulo.focus()},'small'),
+        btn('Resolver',function(){resolverMsg(m,'marcada como resolvida')},'primary small'),
+        confirmBtn('Arquivar',function(){situacao(m.id,'arquivada')})])));
+}
+function listaRes(pend,res,tv,tm){
+  var k=pend.length?pend.map(itemAtualizacao):[empty(tv,tm)];
+  if(res.length)k.push(h('details',{class:'card fold'},h('summary',{},'Resolvidas ('+res.length+')'),h('div',{class:'list',style:'margin-top:10px'},res.slice().reverse().map(itemAtualizacao))));
+  return k;
 }
 function renderEntrada(){
   var l=S.d.mensagens.filter(function(m){return m.situacao!=='arquivada'}).sort(function(a,b){return (a.criadoEm||'').localeCompare(b.criadoEm||'')});
-  var docs=l.filter(function(m){return m.tipo==='material'}),ag=l.filter(function(m){return m.tipo!=='material'});
+  var docs=l.filter(function(m){return m.tipo==='material'&&m.situacao!=='resolvida'}),ag=l.filter(function(m){return m.tipo!=='material'&&m.situacao!=='resolvida'});
+  var rdocs=l.filter(function(m){return m.tipo==='material'&&m.situacao==='resolvida'}),rag=l.filter(function(m){return m.tipo!=='material'&&m.situacao==='resolvida'});
   var nv=function(x){return x.filter(function(m){return m.situacao==='nova'}).length};
   P.inAgH.textContent='Agenda'+(nv(ag)?' · '+nv(ag)+' nova(s)':'');
   P.inDocH.textContent='Documentos'+(nv(docs)?' · '+nv(docs)+' nova(s)':'');
-  P.inAg.replaceChildren.apply(P.inAg,ag.length?ag.map(itemAtualizacao):[empty('Sem atualizações de agenda','Pedidos de horário, cancelamentos e novos agendamentos aparecem aqui.')]);
-  P.inDoc.replaceChildren.apply(P.inDoc,docs.length?docs.map(itemAtualizacao):[empty('Sem documentos novos','Materiais e documentos enviados pelos pacientes aparecem aqui.')]);
+  P.inAg.replaceChildren.apply(P.inAg,listaRes(ag,rag,'Sem atualizações de agenda','Pedidos de horário, cancelamentos e novos agendamentos aparecem aqui.'));
+  P.inDoc.replaceChildren.apply(P.inDoc,listaRes(docs,rdocs,'Sem documentos novos','Materiais e documentos enviados pelos pacientes aparecem aqui.'));
 }
 
 /* ================= PACIENTE ================= */
@@ -1296,7 +1443,7 @@ function byNew(a,b){return (b.criadoEm||'').localeCompare(a.criadoEm||'')}
 
 function buildPSessoes(){
   var el=h('section',{class:'stack',role:'tabpanel'});
-  P.pTiles=h('div',{class:'tiles'});P.pNudge=h('div',{class:'nudge'});
+  P.pTiles=h('div',{class:'tiles'});P.pNudge=h('div',{class:'nudge'});P.pAlert=h('div',{class:'card alerta',hidden:true});
   P.pSess=h('div',{class:'list'});P.pHist=h('div',{class:'list'});
   P.pSessSum=h('summary',{},'Próximas sessões');
   P.pSessD=h('details',{class:'card fold',open:true},P.pSessSum,h('div',{class:'stack',style:'margin-top:12px'},h('p',{class:'meta'},'Você pode cancelar uma sessão por aqui até 24 horas antes do horário marcado.'),P.pSess));
@@ -1304,7 +1451,7 @@ function buildPSessoes(){
   P.bkTog=btn('+ Novo agendamento',function(){S.bkAberto=!S.bkAberto;S.bkMsg='';renderBooking()},'primary');
   P.bkMsg=h('div',{});
   P.bkWrap=h('div',{class:'stack'},h('div',{class:'row bk-head'},h('h2',{},'Agendamento'),P.bkTog),P.bkMsg,P.bkBox);
-  el.append(P.pTiles,P.pNudge,P.pSessD,P.bkWrap,
+  el.append(P.pAlert,P.pTiles,P.pNudge,P.pSessD,P.bkWrap,
     h('details',{class:'card fold'},h('summary',{},'Histórico'),h('div',{style:'margin-top:10px'},P.pHist)));
   return el;
 }
@@ -1545,8 +1692,8 @@ function stAviso(a){
 function buildPAvisos(){
   var el=h('section',{class:'stack',role:'tabpanel'});
   S.avFiltro='todos';
-  P.avChips=h('div',{class:'nt-tabs',role:'tablist'});P.avList=h('div',{class:'nt-list'});
-  el.append(h('div',{class:'nt-head'},h('h2',{},'Avisos'),h('p',{class:'meta'},'Novidades sobre sessões, documentos, contrato e comunicados da clínica.')),P.avChips,P.avList);
+  P.avVis=h('div',{class:'nt-tabs',role:'tablist'});P.avChips=h('div',{class:'nt-tabs',role:'tablist'});P.avList=h('div',{class:'nt-list'});S.avVista='pend';
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Avisos'),h('p',{class:'meta'},'Cada aviso leva à aba onde você resolve a questão. Quando ela é concluída, o aviso passa para “Resolvidas”.')),P.avVis,P.avChips,P.avList);
   return el;
 }
 function quandoAviso(iso){
@@ -1555,25 +1702,48 @@ function quandoAviso(iso){
   if(d0===h0)return 'Hoje, '+hr;if(d0===h0-86400000)return 'Ontem, '+hr;
   return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')+', '+hr;
 }
+function avCard(a){
+  var st=avStatus(a),ac=avAcao(a),tp=stAviso(a),nv=st.s==='nova',ok=st.s==='resolvida';
+  return h('article',{class:'nt st-'+tp+(nv?' novo':'')+(ok?' feito':'')},
+    h('div',{class:'nt-ic','aria-hidden':'true'},ok?'✓':(tp==='realizada'&&a.tipo==='sessao'?'✓':(AV_ICO[a.tipo]||'•'))),
+    h('div',{class:'nt-body'},
+      h('div',{class:'nt-meta'},h('span',{class:'nt-tipo'},AV_ROT[a.tipo]||'Aviso'),
+        nv?h('span',{class:'nt-new'},'Novo'):null,
+        st.s==='andamento'?h('span',{class:'nt-and'},st.t):null,
+        ok?h('span',{class:'nt-ok'},'✓ '+st.t):null,
+        h('span',{class:'nt-when'},quandoAviso(a.criadoEm))),
+      h('h3',{},a.titulo||'Aviso'),
+      a.mensagem?h('p',{class:'nt-txt'},limpaRef(a.mensagem)):null,
+      h('div',{class:'nt-act'},
+        ok?btn('Marcar como não lida',function(){avSet(a.id,'naolida')},'small'):[
+          ac?btn(ac[0],function(){avAbrir(a)},'primary small'):null,
+          nv||!ac?btn(ac?'Marcar como lida':'Entendi',function(){avLida(a)},'small'):null])));
+}
 function renderAvisos(){
   if(!P.avList)return;
   var todos=(S.d.avisos||[]).slice().sort(byNew);
+  var pend=todos.filter(function(a){return avStatus(a).s!=='resolvida'}),feitos=todos.filter(function(a){return avStatus(a).s==='resolvida'});
+  var vis=S.avVista||'pend',base=vis==='pend'?pend:feitos;
+  P.avVis.replaceChildren.apply(P.avVis,[['pend','Pendentes',pend.length],['res','Resolvidas',0]].map(function(t){
+    return h('button',{type:'button',role:'tab','aria-selected':vis===t[0]?'true':'false',class:'nt-tab'+(vis===t[0]?' on':''),onclick:function(){S.avVista=t[0];S.avFiltro='todos';renderAvisos()}},t[1],t[2]?h('span',{class:'nt-n'},t[2]):null)}));
   P.avChips.replaceChildren.apply(P.avChips,AV_TIPOS.map(function(t){
-    var q=todos.filter(function(a){return t[0]==='todos'||a.tipo===t[0]});
+    var q=base.filter(function(a){return t[0]==='todos'||a.tipo===t[0]});
     if(t[0]!=='todos'&&!q.length)return null;
-    var nv=q.filter(avisoNovo).length;
-    return h('button',{type:'button',role:'tab','aria-selected':S.avFiltro===t[0]?'true':'false',class:'nt-tab'+(S.avFiltro===t[0]?' on':''),onclick:function(){S.avFiltro=t[0];renderAvisos()}},t[1],nv?h('span',{class:'nt-n'},nv):null);
+    return h('button',{type:'button',role:'tab','aria-selected':S.avFiltro===t[0]?'true':'false',class:'nt-tab'+(S.avFiltro===t[0]?' on':''),onclick:function(){S.avFiltro=t[0];renderAvisos()}},t[1],vis==='pend'&&q.length?h('span',{class:'nt-n'},q.length):null);
   }).filter(Boolean));
-  var l=todos.filter(function(a){return S.avFiltro==='todos'||a.tipo===S.avFiltro});
-  P.avList.replaceChildren.apply(P.avList,l.length?l.map(function(a){
-    var nv=avisoNovo(a),st=stAviso(a);
-    return h('article',{class:'nt st-'+st+(nv?' novo':'')},
-      h('div',{class:'nt-ic','aria-hidden':'true'},st==='realizada'&&a.tipo==='sessao'?'✓':(AV_ICO[a.tipo]||'•')),
-      h('div',{class:'nt-body'},
-        h('div',{class:'nt-meta'},h('span',{class:'nt-tipo'},AV_ROT[a.tipo]||'Aviso'),nv?h('span',{class:'nt-new'},'Novo'):null,h('span',{class:'nt-when'},quandoAviso(a.criadoEm))),
-        h('h3',{},a.titulo||'Aviso'),
-        a.mensagem?h('p',{class:'nt-txt'},limpaRef(a.mensagem)):null));
-  }):[empty('Nenhum aviso','Quando houver novidades, elas aparecem aqui.')]);
+  var l=base.filter(function(a){return S.avFiltro==='todos'||a.tipo===S.avFiltro});
+  P.avList.replaceChildren.apply(P.avList,l.length?l.map(avCard):[vis==='pend'?empty('Tudo em dia','Nenhuma pendência no momento. Quando houver novidades, elas aparecem aqui.'):empty('Nada resolvido ainda','Os avisos concluídos ficam guardados aqui.')]);
+}
+function avLinha(a){
+  var ac=avAcao(a),st=avStatus(a);
+  return h('div',{class:'al-it'},h('div',{class:'al-t'},h('b',{},a.titulo||'Aviso'),st.s==='andamento'?h('span',{class:'meta'},st.t):h('span',{class:'meta'},AV_ROT[a.tipo]||'Aviso')),
+    h('div',{class:'actions'},ac?btn(ac[0],function(){avAbrir(a)},'primary small'):null,!ac||!avAcionavel(a)?btn('Entendi',function(){avLida(a)},'small'):null));
+}
+function renderAlertaP(){
+  if(!P.pAlert)return;
+  var pend=(S.d.avisos||[]).filter(function(a){return avStatus(a).s!=='resolvida'}).sort(byNew);
+  P.pAlert.hidden=!pend.length;
+  P.pAlert.replaceChildren.apply(P.pAlert,pend.length?[h('div',{class:'row'},h('h3',{},'Você tem '+pend.length+(pend.length===1?' pendência':' pendências')),pend.length>3?btn('Ver todas',function(){go('avisos')},'small'):null)].concat(pend.slice(0,3).map(avLinha)):[]);
 }
 
 function buildPContratos(){
@@ -1602,7 +1772,7 @@ function tiles(a){return a.map(function(t){return h('div',{class:'tile'+(t.big?'
 function saudacao(){var x=new Date().getHours();return x>=5&&x<12?'Bom dia':x<18?'Boa tarde':'Boa noite'}
 function primeiroNome(){var n=String((S.d.perfil&&S.d.perfil.nome)||'').replace(/\s*\(.*?\)/g,'').trim().split(/\s+/)[0]||'';return n?n.charAt(0).toUpperCase()+n.slice(1).toLowerCase():''}
 function renderHeader(){
-  var pn=primeiroNome();document.getElementById('h-title').replaceChildren(saudacao()+(pn?', ':''),pn?h('span',{class:'nm'},pn):'','!');
+  var pn=primeiroNome();document.getElementById('h-title').replaceChildren(h('span',{class:'sg'},saudacao()+(pn?', ':''),pn?h('span',{class:'nm'},pn):'','!'),h('span',{class:'sg-r'},'SiAGE | Sistema de Agendamento e Gestão Emotiss'));
   document.getElementById('sub').replaceChildren(h('span',{class:'meta'},'Seu código'),h('span',{class:'code'},S.codigo));
 }
 function renderPaciente(){
@@ -1620,7 +1790,7 @@ function renderPaciente(){
   P.pSess.replaceChildren.apply(P.pSess,prox.length?prox.map(function(a){return sessCard(a,true)}):[empty('Nenhuma sessão marcada','Use "Novo agendamento" para escolher serviço, dia e horário.')]);
   P.pHist.replaceChildren.apply(P.pHist,hist.length?hist.map(function(a){return sessCard(a,false)}):[h('p',{class:'none'},'Sem histórico ainda.')]);
   if(!P.bkInit){P.bkInit=1;renderBooking()}
-  P.fxRender();renderDocs();renderContratos();renderAvisos();
+  P.fxRender();renderDocs();renderContratos();renderAvisos();renderAlertaP();
 }
 
 /* ================= FICHA DE INSCRIÇÃO (dentro do sistema: o e-mail já foi confirmado pelo código) ================= */
@@ -2645,7 +2815,7 @@ function renderHoje(){
   var fila=[];
   conf.forEach(function(c){fila.push({cod:c.codigo,tit:'Comprovante enviado · '+brl(c.valor)+(c.descricao?' · '+c.descricao:''),bs:[btn('Conferir',function(){S.fnFiltro='conferir';S.fnProf='';go('financeiro')},'primary small')]})});
   if(nl)fila.push({tit:nl+(nl===1?' atualização nova':' atualizações novas')+' de pacientes',bs:[btn('Ler',function(){go('entrada')},'primary small')]});
-  rec.forEach(function(x){fila.push({cod:x.p.codigo,nome:x.p.nome,tit:x.tit,bs:[x.k==='contrato'?btn('Gerar contrato',function(){irContrato(x.p.codigo)},'primary small'):btn('WhatsApp',function(){abrirModelos(x.p.codigo,x.tpl)},'primary small')]})});
+  rec.forEach(function(x){fila.push({cod:x.p.codigo,nome:x.p.nome,tit:x.tit,bs:[x.k==='contrato'?btn('Gerar contrato',function(){irContrato(x.p.codigo);resolverRec(x,'contrato encaminhado')},'primary small'):btn('WhatsApp',function(){abrirModelos(x.p.codigo,x.tpl);resolverRec(x,'contato iniciado por WhatsApp')},'primary small')]})});
   sv.forEach(function(x){fila.push({cod:x.codigo,tit:x.motivo,bs:[btn('Definir cobrança',function(){acaoCobrar(x.codigo,{desc:x.desc,prof:x.prof})},'primary small')]})});
   venc.forEach(function(c){fila.push({cod:c.codigo,tit:'Cobrança vencida em '+dbr(c.vencimento)+' · '+brl(c.valor),bs:[btn('Ver',function(){S.fnFiltro='pendente';S.fnProf='';go('financeiro')},'small')]})});
   var mostrar=fila.slice(0,12);
@@ -2658,12 +2828,11 @@ function renderHoje(){
 
 /* ================= casca ================= */
 var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
-var TABS_P=[{id:'sessoes',label:'Minhas sessões'},{id:'avisos',label:'Avisos'},{id:'ficha',label:'Ficha'},{id:'pagamentos',label:'Pagamentos'},{id:'docs',label:'Documentos'},{id:'contratos',label:'Aceite'}];
+var TABS_P=[{id:'sessoes',label:'Minhas sessões',ic:'calendar'},{id:'avisos',label:'Avisos',ic:'bell'},{id:'ficha',label:'Ficha',ic:'clip'},{id:'pagamentos',label:'Pagamentos',ic:'wallet'},{id:'docs',label:'Documentos',ic:'folder'},{id:'contratos',label:'Aceite',ic:'file'}];
 function go(id){
   if(S.modo==='gestao'&&id!==S.tab){S.prev={tab:S.tab,y:window.scrollY};S.ultSub=S.ultSub||{};if(id!=='paciente_g')S.ultSub[grupoDe(id).id]=id}
   S.tab=id;
   if(S.modo==='paciente'){
-    if(id==='avisos'){S.avRef=(S.d.perfil&&S.d.perfil.vistoEm)||'';marcarVistos()}else S.avRef=null;
   }
   renderShell();
 }
@@ -2672,13 +2841,13 @@ async function marcarVistos(){
   try{var t=await api('marcarAvisosVistos',ctx());if(t&&S.d.perfil){S.d.perfil.vistoEm=t;renderTabs()}}catch(e){}
 }
 var GRUPOS=[
-  {id:'hoje',label:'Hoje',ic:'📅',subs:[['hoje','Painel'],['agenda','Agenda'],['recepcao','Recepção'],['entrada','Atualizações']]},
-  {id:'pacientes',label:'Pacientes',ic:'👥',subs:[['pacientes','Lista'],['contratos_g','Contratos']]},
-  {id:'financeiro',label:'Financeiro',ic:'💳',subs:[['financeiro','Financeiro']]},
-  {id:'materiais',label:'Publicar',ic:'📣',subs:[['materiais','Avisos e materiais']]},
-  {id:'clinica',label:'Clínica',ic:'🏥',subs:[['profissionais','Profissionais'],['disp','Disponibilidade']]}];
+  {id:'hoje',label:'Hoje',ic:'sun',subs:[['hoje','Painel'],['agenda','Agenda'],['recepcao','Recepção'],['entrada','Atualizações']]},
+  {id:'pacientes',label:'Pacientes',ic:'users',subs:[['pacientes','Lista'],['contratos_g','Contratos']]},
+  {id:'financeiro',label:'Financeiro',ic:'wallet',subs:[['financeiro','Financeiro']]},
+  {id:'materiais',label:'Publicar',ic:'megaphone',subs:[['materiais','Avisos e materiais']]},
+  {id:'clinica',label:'Clínica',ic:'heart',subs:[['profissionais','Profissionais'],['disp','Disponibilidade']]}];
 function grupoDe(leaf){if(leaf==='paciente_g')leaf='pacientes';return GRUPOS.filter(function(g){return g.subs.some(function(x){return x[0]===leaf})})[0]||GRUPOS[0]}
-function badgeDe(id){return id==='entrada'?naoLidas():id==='recepcao'?itensRecepcao().length:id==='financeiro'?aConferir().length:id==='pagamentos'?abertasP().length:id==='avisos'?novosAvisos():(id==='ficha'&&!S.d.ficha?'!':0)}
+function badgeDe(id){return id==='entrada'?naoLidas():id==='recepcao'?itensRecepcao().length:id==='financeiro'?aConferir().length:id==='pagamentos'?abertasP().length:id==='avisos'?avPend():id==='ficha'?(!S.d.ficha?'!':avPend('ficha')):(id==='sessoes'||id==='docs')?avPend(id):0}
 function pendenciasG(){return itensRecepcao().length+naoLidas()+aConferir().length}
 function voltar(){var v=S.prev;if(v&&v.tab&&v.tab!=='paciente_g'){go(v.tab);setTimeout(function(){window.scrollTo(0,v.y||0)},0)}else go('pacientes')}
 function renderTabs(){
@@ -2693,7 +2862,7 @@ function renderTabs(){
       var n=0;g.subs.forEach(function(x){var b=badgeDe(x[0]);if(typeof b==='number')n+=b});
       tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':gAtual.id===g.id?'true':'false',onclick:function(){
         if(S.tab==='paciente_g'&&g.id==='pacientes')go('pacientes');
-        else go((S.ultSub&&S.ultSub[g.id])||g.subs[0][0])}},h('i',{class:'ti','aria-hidden':'true'},g.ic),h('span',{},g.label),n?h('span',{class:'badge'},n):null));
+        else go((S.ultSub&&S.ultSub[g.id])||g.subs[0][0])}},h('i',{class:'ti','aria-hidden':'true'},ico(g.ic,20)),h('span',{},g.label),n?h('span',{class:'badge'},n):null));
     });
     if(sub){
       var mostra=gAtual.subs.length>1&&S.tab!=='paciente_g';
@@ -2705,16 +2874,16 @@ function renderTabs(){
   }else{
     tabs.classList.remove('gtabs');if(sub)sub.hidden=true;
     TABS_P.forEach(function(t){var n=badgeDe(t.id);
-      tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){go(t.id)}},t.label,n?h('span',{class:'badge'},n):null));
+      tabs.append(h('button',{class:'tab',type:'button',role:'tab','aria-selected':S.tab===t.id?'true':'false',onclick:function(){avAbriuAba(t.id);go(t.id)}},ico(t.ic,18),t.label,n?h('span',{class:'badge'},n):null));
     });
   }
 }
 function renderShell(){
   var g=S.modo==='gestao';
   document.getElementById('role-label').textContent=g?'Gestão':'Área do paciente';
-  document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações.':'';document.getElementById('hsearch').hidden=!g;document.querySelector('.top').classList.toggle('pac',!g);
+  document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações.':'';document.getElementById('hsearch').hidden=!g;if(g)document.getElementById('h-title').replaceChildren(h('span',{class:'sg'},'SiAGE'),h('span',{class:'sg-r'},'Sistema de Agendamento e Gestão Emotiss'));document.querySelector('.top').classList.toggle('pac',!g);
   if(P.fab)P.fab.hidden=!g;
-  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?h('button',{type:'button',class:'btn small novo novo-h',onclick:function(ev){novoAbrir(false,ev.currentTarget)}},'+ Novo ▾'):null,g?null:btnEquipe('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.','small'),btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small')].filter(Boolean));
+  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?h('button',{type:'button',class:'btn small novo novo-h',onclick:function(ev){novoAbrir(false,ev.currentTarget)}},'+ Novo ▾'):null,g?null:btnEquipe('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.','small','Fale conosco'),btn('Atualizar',function(){recarregar()},'small'),btn('Sair',function(){sair()},'small')].filter(Boolean));
   Object.keys(PANELS).forEach(function(k){PANELS[k].hidden=true});
   PANELS[g?S.tab:'p_'+S.tab].hidden=false;
   renderTabs();renderDados();
@@ -2742,6 +2911,11 @@ function refreshSelects(){
 }
 
 /* ---------- início ---------- */
+var SECS={
+ hoje:['Hoje','sun'],agenda:['Agenda','calendar','Sessões da semana por dia, profissional e serviço.'],pacientes:['Pacientes','users','Cadastro, fichas e ações de cada paciente.'],
+ recepcao:['Recepção','check'],financeiro:['Financeiro','wallet','Cobranças, comprovantes e pagamentos.'],contratos_g:['Contratos','file','Emissão e acompanhamento das assinaturas.'],
+ profissionais:['Profissionais','heart','Equipe, serviços e dados de recebimento.'],materiais:['Avisos e materiais','megaphone'],disp:['Disponibilidade','clock','Janelas de atendimento que geram os horários.'],
+ entrada:['Atualizações','inbox'],p_sessoes:['Minhas sessões','calendar','Suas próximas sessões e agendamentos.'],p_avisos:['Avisos','bell'],p_pagamentos:['Pagamentos','wallet'],p_docs:['Documentos','folder','Materiais recebidos e arquivos que você envia.']};
 var main=document.getElementById('main');
 PANELS.gate=buildGate();
 PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();PANELS.paciente_g=buildPacienteG();PANELS.hoje=buildHoje();
@@ -2749,6 +2923,13 @@ P.subEl=h('nav',{class:'subtabs nt-tabs',id:'subtabs','aria-label':'Subseções'
 P.fab=h('button',{type:'button',class:'fab-novo',hidden:true,onclick:function(){novoAbrir(true)}},'+ Novo');document.body.append(P.fab);
 document.getElementById('hsearch').addEventListener('click',ckAbrir);
 PANELS.p_sessoes=buildPSessoes();PANELS.p_avisos=buildPAvisos();PANELS.p_ficha=buildFicha();PANELS.p_pagamentos=buildPPagamentos();PANELS.p_docs=buildPDocs();PANELS.p_contratos=buildPContratos();
+Object.keys(SECS).forEach(function(k){
+  var el=PANELS[k],c=SECS[k];if(!el)return;
+  var head=el.querySelector(':scope>.nt-head');
+  if(!head){head=h('div',{class:'nt-head'},h('h2',{},c[0]),c[2]?h('p',{class:'meta'},c[2]):null);el.prepend(head)}
+  var kids=[].slice.call(head.childNodes),tx=h('div',{class:'sec-tx'});kids.forEach(function(n){tx.append(n)});
+  head.classList.add('sec');head.append(tx);head.prepend(h('span',{class:'sec-ic','aria-hidden':'true'},ico(c[1],26)));
+});
 Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true;main.append(PANELS[k])});
 })();
 </script>
