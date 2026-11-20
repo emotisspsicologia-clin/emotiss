@@ -644,6 +644,17 @@ main{padding:0 16px}
 .tile.big .tl,.tile.big .ts{color:var(--gold)}
 .alerta{border-left-color:var(--gold)}
 @media (max-width:720px){.top.pac{padding-bottom:62px}}
+
+/* abas recolhíveis em destaque */
+details.card.fold{padding:0;overflow:hidden;border:1px solid color-mix(in srgb,var(--gold) 70%,var(--line))}
+details.card.fold>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 20px;font:700 1.08rem var(--font-display);color:var(--fg);background:color-mix(in srgb,var(--gold) 30%,var(--surface));cursor:pointer;user-select:none}
+details.card.fold>summary::-webkit-details-marker{display:none}
+details.card.fold>summary::before{content:'';flex:none;width:9px;height:9px;border-right:2.5px solid var(--fg);border-bottom:2.5px solid var(--fg);transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px}
+details.card.fold[open]>summary::before{transform:rotate(45deg)}
+details.card.fold>summary:hover{background:color-mix(in srgb,var(--gold) 42%,var(--surface))}
+details.card.fold[open]>summary{border-bottom:1px solid color-mix(in srgb,var(--gold) 70%,var(--line))}
+details.card.fold>*:not(summary){margin:0;padding:16px 20px 20px}
+@media (prefers-color-scheme: dark){details.card.fold>summary{background:color-mix(in srgb,var(--gold) 14%,var(--surface))}details.card.fold>summary:hover{background:color-mix(in srgb,var(--gold) 22%,var(--surface))}}
 </style>
 </head>
 <body>
@@ -787,7 +798,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -802,6 +813,10 @@ async function api(fn){
 var S={modo:null,token:'',codigo:'',tab:'agenda',semana:mondayOf(new Date()),
   d:{config:null,pacientes:[],agenda:[],materiais:[],mensagens:[],disponibilidade:[],contratos:[],fichas:[],ficha:null,perfil:null},timer:null,editPac:null,slots:{},bk:null};
 function ctx(){return S.modo==='gestao'?{modo:'gestao',token:S.token}:{modo:'paciente',codigo:S.codigo,token:S.ptoken}}
+function srvAntigo(e,tambemSituacao){
+  if(/Operação não permitida/.test(e.message)||(tambemSituacao&&/Situação inválida/.test(e.message))){
+    toast('O servidor está desatualizado: publique o novo Code.gs (Apps Script > Implantar > Gerenciar implantações > Editar > Nova versão). Por enquanto a mudança vale só nesta tela.');return true}
+  return false}
 function falha(e){
   if(/SESSAO_EXPIRADA/.test(e.message)){sair('Sua sessão expirou. Entre de novo.');return}
   toast(e.message);
@@ -877,7 +892,7 @@ function avSet(ids,sit,res){
   ids.forEach(function(id){var e=S.d.avisosEstado.filter(function(x){return x.chave===id})[0];
     if(e){e.situacao=sit;e.resolucao=res||''}else S.d.avisosEstado.push({chave:id,situacao:sit,resolucao:res||''})});
   renderTabs();renderAvisos();if(P.pAlert)renderAlertaP();
-  api('atualizarAvisos',ctx(),ids,sit,res||'').catch(function(e){falha(e);recarregar(true)});
+  api('atualizarAvisos',ctx(),ids,sit,res||'').catch(function(e){if(srvAntigo(e))return;falha(e);recarregar(true)});
 }
 function avAbrir(a){
   var ac=avAcao(a),acion=avAcionavel(a);
@@ -1219,7 +1234,7 @@ function rsSet(k,sit,t){
   S.d.resolucoes=S.d.resolucoes||[];var e=rsEst(k);
   if(e){e.situacao=sit;e.resolucao=t||''}else S.d.resolucoes.push({chave:k,situacao:sit,resolucao:t||''});
   renderRecepcao();renderHoje();renderTabs();
-  api('resolverItem',ctx(),k,sit,t||'').catch(function(er){falha(er);recarregar(true)});
+  api('resolverItem',ctx(),k,sit,t||'').catch(function(er){if(srvAntigo(er))return;falha(er);recarregar(true)});
 }
 function resolverRec(x,t){var k=x.chave;rsSet(k,'resolvida',t);toastAcao('Resolvido: '+t+'.','Desfazer',function(){rsSet(k,'aberta','')})}
 function itensRecepcao(todos){
@@ -1395,12 +1410,12 @@ function refazerG(){renderEntrada();renderTabs();renderHoje();if(S.pacAberto)ren
 function resolverMsg(m,texto){
   var ant=m.situacao;if(ant==='resolvida')return;
   m.situacao='resolvida';refazerG();
-  api('definirSituacao',ctx(),m.id,'resolvida').catch(function(e){m.situacao=ant;refazerG();falha(e)});
+  api('definirSituacao',ctx(),m.id,'resolvida').catch(function(e){if(srvAntigo(e,true))return;m.situacao=ant;refazerG();falha(e)});
   toastAcao('Resolvido: '+texto+'.','Desfazer',function(){reabrirMsg(m,ant)});
 }
 function reabrirMsg(m,para){
   var ant=m.situacao;m.situacao=para||'nova';refazerG();
-  api('definirSituacao',ctx(),m.id,m.situacao).catch(function(e){m.situacao=ant;refazerG();falha(e)});
+  api('definirSituacao',ctx(),m.id,m.situacao).catch(function(e){if(srvAntigo(e,true))return;m.situacao=ant;refazerG();falha(e)});
 }
 function itemAtualizacao(m){
   var nova=m.situacao==='nova',feita=m.situacao==='resolvida',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
