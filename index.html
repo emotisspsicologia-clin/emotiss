@@ -655,6 +655,23 @@ details.card.fold>summary:hover{background:color-mix(in srgb,var(--gold) 42%,var
 details.card.fold[open]>summary{border-bottom:1px solid color-mix(in srgb,var(--gold) 70%,var(--line))}
 details.card.fold>*:not(summary){margin:0;padding:16px 20px 20px}
 @media (prefers-color-scheme: dark){details.card.fold>summary{background:color-mix(in srgb,var(--gold) 14%,var(--surface))}details.card.fold>summary:hover{background:color-mix(in srgb,var(--gold) 22%,var(--surface))}}
+
+/* trilha com etapas bloqueadas e diálogos */
+.trail li.lock{color:var(--muted)}
+.trail li.lock .n{background:var(--surface-2);color:var(--muted);border-style:dashed}
+.trail button.lk{cursor:not-allowed;opacity:.85}
+.trail li.done .n{background:var(--band);border-color:var(--band);color:var(--gold)}
+.trail li.done::before,.trail li.cur::before{background:var(--gold)}
+.trail li.cur .n{background:var(--gold);border-color:var(--gold);color:#17130f}
+.dlg-ov{position:fixed;inset:0;z-index:90;background:#17130f99;backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:16px}
+.dlg{background:var(--surface);color:var(--fg);border-radius:22px;border-top:6px solid var(--gold);max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px 24px;box-shadow:0 24px 60px #0006;display:flex;flex-direction:column;gap:14px}
+.dlg h3{font-size:1.3rem;font-weight:700}
+.dlg-l{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.dlg-a{display:flex;flex-direction:column;gap:8px}
+.dlg-a .btn{width:100%;justify-content:center}
+@media (min-width:560px){.dlg-a{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}.dlg-a .btn{width:auto}}
+.btn.salvar{display:inline-flex;align-items:center;gap:6px;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 28%,var(--surface))}
+.stack>.nt-head.sec{order:-3}
 </style>
 </head>
 <body>
@@ -717,12 +734,22 @@ var ICO={
  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
  clip:'<rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
  chat:'<path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
  inbox:'<path d="M3 13l2.5-7h13L21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 13h5l1 3h6l1-3h5"/>'
 };
 function ico(n,sz){
   var e=document.createElementNS('http://www.w3.org/2000/svg','svg');
   [['viewBox','0 0 24 24'],['width',sz||20],['height',sz||20],['fill','none'],['stroke','currentColor'],['stroke-width','1.9'],['stroke-linecap','round'],['stroke-linejoin','round'],['aria-hidden','true'],['class','ico']].forEach(function(a){e.setAttribute(a[0],a[1])});
   e.innerHTML=ICO[n]||'';return e;
+}
+function dialogo(o){
+  var ov=h('div',{class:'dlg-ov',role:'dialog','aria-modal':'true','aria-label':o.titulo});
+  function esc(e){if(e.key==='Escape')fecha()}
+  function fecha(){ov.remove();document.removeEventListener('keydown',esc)}
+  var box=h('div',{class:'dlg'},h('h3',{},o.titulo),h('div',{class:'dlg-b stack'},o.corpo||[]),
+    h('div',{class:'dlg-a'},o.botoes.map(function(b){return btn(b.t,function(){fecha();if(b.fn)b.fn()},(b.cls||'')+' pillb',b.off?{disabled:true}:null)})));
+  ov.append(box);ov.addEventListener('click',function(e){if(e.target===ov)fecha()});document.addEventListener('keydown',esc);document.body.append(ov);
+  var f=box.querySelector('button.primary:not([disabled])')||box.querySelector('button');if(f)f.focus();
 }
 function pad(n){return n<10?'0'+n:''+n}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -798,7 +825,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -864,7 +891,8 @@ function avAcionavel(a){return a.tipo==='contrato'||(a.tipo==='pagamento'&&/cobr
 function avAuto(a){
   if(a.tipo==='contrato'){
     var ms=(S.d.materiais||[]).filter(function(m){return m.categoria==='contrato'});
-    var alvo=ms.filter(function(m){return m.titulo&&(a.titulo||'').indexOf(m.titulo)>=0});
+    var base=function(t){return String(t||'').replace(/\s*\(\d.{0,2}via\)/,'').trim()};
+    var alvo=ms.filter(function(m){return m.titulo&&(a.titulo||'').indexOf(base(m.titulo))>=0});
     if(!alvo.length)alvo=ms;
     return alvo.length&&alvo.every(function(m){return assinadoDe(m)})?'Arquivo assinado enviado':null;
   }
@@ -1417,12 +1445,22 @@ function reabrirMsg(m,para){
   var ant=m.situacao;m.situacao=para||'nova';refazerG();
   api('definirSituacao',ctx(),m.id,m.situacao).catch(function(e){if(srvAntigo(e,true))return;m.situacao=ant;refazerG();falha(e)});
 }
+async function salvarNaPasta(m,el){
+  if(el)el.disabled=true;
+  try{
+    var r=await api('salvarEnvioNaPasta',ctx(),m.id);
+    S.d.resolucoes=S.d.resolucoes||[];S.d.resolucoes.push({chave:'salvo:'+m.id,situacao:'resolvida',resolucao:r.pasta==='CONTRATOS'?'Salvo em CONTRATOS':'Salvo na pasta do paciente'});
+    if(m.situacao!=='resolvida'){m.situacao='resolvida';api('definirSituacao',ctx(),m.id,'resolvida').catch(function(){})}
+    refazerG();
+    if(isHttp(r.url))toastAcao('Salvo em “'+r.pasta+'” ✓','Abrir pasta',function(){window.open(r.url,'_blank','noopener')});else toast('Salvo em “'+r.pasta+'” ✓');
+  }catch(e){if(el)el.disabled=false;if(!srvAntigo(e))falha(e)}
+}
 function itemAtualizacao(m){
   var nova=m.situacao==='nova',feita=m.situacao==='resolvida',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
   var rot=TIPO_ROT[m.tipo]||'Atualização';
   return h('article',{class:'item'+(nova?' unread':'')+(feita?' feito':'')},
     h('div',{class:'row'},h('h3',{},nomeDe(m.codigo,m.iniciais)+' · '+(m.titulo||rot)),
-      h('div',{class:'actions'},h('span',{class:'pill '+(feita?'confirmada':nova?'nova':'tag')},feita?'✓ Resolvida':nova?'Nova':'Lida'),h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
+      h('div',{class:'actions'},h('span',{class:'pill '+(feita?'confirmada':nova?'nova':'tag')},feita?'✓ Resolvida':nova?'Nova':'Lida'),m.tipo==='material'&&rsFeito('salvo:'+m.id)?h('span',{class:'pill confirmada'},'📁 '+((rsEst('salvo:'+m.id)||{}).resolucao||'Salvo')):null,h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
     limpaRef(m.mensagem)?h('p',{class:'body'},limpaRef(m.mensagem)):null,
     m.tipo==='solicitacao'&&m.dataPreferida?h('p',{class:'meta'},'Data preferida: '+longDay(m.dataPreferida)):null,
     h('div',{class:'actions'},arquivosDe(m,feita?null:function(){resolverMsg(m,'arquivo baixado')})),
@@ -1431,6 +1469,7 @@ function itemAtualizacao(m){
         nova?btn('Marcar como lida',function(){situacao(m.id,'lida')},'small'):null,
         req?btn('Reagendar',function(){resolverMsg(m,'reagendamento iniciado');go('agenda');toggleAgForm({codigo:m.codigo,data:m.dataPreferida})},'small'):null,
         btn('Enviar retorno',function(){resolverMsg(m,'retorno em preparo');go('materiais');P.lib.para.value=m.codigo;P.lib.titulo.value='Retorno: '+(m.titulo||rot);P.lib.titulo.focus()},'small'),
+        m.tipo==='material'&&m.arquivoId&&!rsFeito('salvo:'+m.id)?h('button',{type:'button',class:'btn small salvar',title:'Contrato assinado: 1ª via na pasta do paciente, 2ª via em CONTRATOS. Demais envios: pasta do paciente.',onclick:function(ev){salvarNaPasta(m,ev.currentTarget)}},ico('folder',16),'Salvar na pasta'):null,
         btn('Resolver',function(){resolverMsg(m,'marcada como resolvida')},'primary small'),
         confirmBtn('Arquivar',function(){situacao(m.id,'arquivada')})])));
 }
@@ -1453,6 +1492,8 @@ function renderEntrada(){
 /* ================= PACIENTE ================= */
 function svcs(){return (S.d.config&&S.d.config.servicos)||[]}
 function svcNome(id){var s=svcs().filter(function(x){return x.id===id})[0];return s?s.nome:''}
+function vigentes(){return (S.d.agenda||[]).filter(function(a){return (a.status==='agendada'||a.status==='confirmada')&&inicioA(a)>Date.now()}).sort(function(a,b){return inicioA(a)-inicioA(b)})}
+function inicioA(a){var d=parse(a.data),p=String(a.hora||'0:0').split(':');return new Date(d.getFullYear(),d.getMonth(),d.getDate(),+p[0],+p[1]).getTime()}
 function novoBk(){return {passo:1,servico:'',prof:'',mod:'',mes:null,data:'',hora:'',aceite:false,busy:false,ok:''}}
 function byNew(a,b){return (b.criadoEm||'').localeCompare(a.criadoEm||'')}
 
@@ -1463,14 +1504,30 @@ function buildPSessoes(){
   P.pSessSum=h('summary',{},'Próximas sessões');
   P.pSessD=h('details',{class:'card fold',open:true},P.pSessSum,h('div',{class:'stack',style:'margin-top:12px'},h('p',{class:'meta'},'Você pode cancelar uma sessão por aqui até 24 horas antes do horário marcado.'),P.pSess));
   P.bkBox=h('div',{class:'card panel-form wiz'});
-  P.bkTog=btn('+ Novo agendamento',function(){S.bkAberto=!S.bkAberto;S.bkMsg='';renderBooking()},'primary');
+  P.bkTog=btn('+ Novo agendamento',function(){
+    if(S.bkAberto){S.bkAberto=false;S.bkMsg='';renderBooking();return}
+    var v=vigentes();S.bkMsg='';
+    if(!v.length||!S.d.ficha){S.bk=novoBk();S.bkAberto=true;renderBooking();return}
+    var a=v[0],q=function(x){return longDay(x.data)+' às '+x.hora+(x.profissional?' com '+x.profissional:'')};
+    dialogo({titulo:'Você já tem um agendamento vigente',
+      corpo:[h('p',{},v.length===1?'Sua sessão marcada: ':'Suas sessões marcadas: '),h('ul',{class:'dlg-l'},v.map(function(x){return h('li',{},q(x))})),h('p',{class:'meta'},'Deseja mesmo fazer um novo agendamento?')],
+      botoes:[{t:'Quero agendar mesmo assim',cls:'primary',fn:function(){
+        var pode=podeCancelar(a);
+        dialogo({titulo:'O que fazer com a sessão atual?',
+          corpo:[h('p',{},'Sessão atual: '+q(a)+'.'),
+            pode?h('p',{class:'meta'},'Se escolher substituir, a sessão atual é cancelada somente quando você confirmar a nova.'):h('p',{class:'meta'},'Esta sessão começa em menos de '+CANCELAR_H()+' horas e não pode ser cancelada pelo painel. Você pode agendar outra e manter esta, ou falar com a clínica.')],
+          botoes:[{t:'Cancelar a atual e substituir pela nova',cls:'primary',off:!pode,fn:function(){S.bk=novoBk();S.bk.substituir=a.id;S.bk.substituirTxt=q(a);S.bkAberto=true;renderBooking();toast('A sessão atual será substituída quando você confirmar a nova.')}},
+                  {t:'Agendar outra e manter a atual',fn:function(){S.bk=novoBk();S.bkAberto=true;renderBooking();toast('A sessão atual será mantida.')}},
+                  {t:'Voltar'}]})}},
+        {t:'Voltar'}]});
+  },'primary');
   P.bkMsg=h('div',{});
   P.bkWrap=h('div',{class:'stack'},h('div',{class:'row bk-head'},h('h2',{},'Agendamento'),P.bkTog),P.bkMsg,P.bkBox);
   el.append(P.pAlert,P.pTiles,P.pNudge,P.pSessD,P.bkWrap,
     h('details',{class:'card fold'},h('summary',{},'Histórico'),h('div',{style:'margin-top:10px'},P.pHist)));
   return el;
 }
-var CANCEL_HORAS=24;
+var CANCEL_HORAS=24;function CANCELAR_H(){return CANCEL_HORAS}
 function podeCancelar(a){var d=parse(a.data),p=String(a.hora||'0:0').split(':');return new Date(d.getFullYear(),d.getMonth(),d.getDate(),+p[0],+p[1]).getTime()-Date.now()>=CANCEL_HORAS*3600000}
 function pedidoForm(a){
   var ta=h('textarea',{placeholder:'Conte qual dia ou horário você prefere, ou o motivo.',maxlength:'500'});
@@ -1544,22 +1601,25 @@ function calendario(slots){
 async function confirmarAgendamento(){
   var b=S.bk;b.busy=true;syncConfirm();
   try{
-    await api('agendarSessao',ctx(),{servico:b.servico,profissional:b.prof,data:b.data,hora:b.hora,modalidade:b.mod,aceite:true});
+    await api('agendarSessao',ctx(),{servico:b.servico,profissional:b.prof,data:b.data,hora:b.hora,modalidade:b.mod,aceite:true,substituir:b.substituir||undefined});
     var info=longDay(b.data)+' às '+b.hora;
-    S.bk=novoBk();S.bkAberto=false;S.bkMsg='Sessão agendada para '+info+'. Seu contrato está sendo emitido e será enviado a você para assinatura.';S.slots={};
-    await recarregar();renderBooking();toast('Sessão agendada.');
+    S.bk=novoBk();S.bkAberto=false;S.bkMsg=(b.substituir?'A sessão anterior foi cancelada. ':'')+'Sessão agendada para '+info+'. Seu contrato está sendo emitido e será enviado a você para assinatura.';S.slots={};
+    await recarregar();renderBooking();toast(b.substituir?'Sessão substituída ✓':'Sessão agendada ✓');
   }catch(e){
     b.busy=false;b.hora='';b.passo=2;falha(e);
     if(b.servico)await carregarSlots();else renderBooking();
   }
 }
 var PASSOS=['Ficha','Serviço','Dia e horário','Confirmação'];
+var DICA=['Preencha a ficha cadastral.','Escolha o serviço e a modalidade.','Escolha o dia e o horário.','Confira e confirme o aceite.'];
 function trilha(b){
   var fichaOk=!!S.d.ficha,cur=fichaOk?b.passo+1:1;
   return h('ol',{class:'trail','aria-label':'Etapas do agendamento'},PASSOS.map(function(n,i){
-    var k=i+1,cls=k<cur?'done':(k===cur?'cur':'');
-    var inner=[h('span',{class:'n','aria-hidden':'true'},k<cur?'✓':k),h('span',{class:'tn'},n)];
-    var conteudo=(k<cur&&k>1)?h('button',{type:'button','aria-label':'Voltar para '+n,onclick:function(){b.passo=k-1;b.ok='';renderBooking()}},inner):h('div',{class:'tl-in'},inner);
+    var k=i+1,cls=k<cur?'done':(k===cur?'cur':'lock');
+    var inner=[h('span',{class:'n','aria-hidden':'true'},k<cur?'✓':(k===cur?k:ico('lock',15))),h('span',{class:'tn'},n)];
+    var conteudo=(k<cur&&k>1)?h('button',{type:'button','aria-label':'Voltar para '+n,onclick:function(){b.passo=k-1;b.ok='';renderBooking()}},inner)
+      :k>cur?h('button',{type:'button',class:'lk','aria-disabled':'true','aria-label':n+' (bloqueada)',onclick:function(){toast('Etapa '+k+' bloqueada. Antes: '+DICA[cur-1].toLowerCase())}},inner)
+      :h('div',{class:'tl-in'},inner);
     var li=h('li',{class:cls},conteudo);if(k===cur)li.setAttribute('aria-current','step');return li;
   }));
 }
@@ -1568,9 +1628,10 @@ function nav(voltar,avancar){return h('div',{class:'wiz-nav'},voltar||h('span',{
 function renderBooking(){
   var b=S.bk,lista=svcs(),sv=lista.filter(function(s){return s.id===b.servico})[0];
   if(!sv&&b.passo>1)b.passo=1;
-  if(S.bkAberto===undefined)S.bkAberto=!S.d.agenda.some(function(a){return a.status!=='cancelada'});
+  if(S.bkAberto===undefined)S.bkAberto=!vigentes().length;
   P.bkBox.hidden=!S.bkAberto;P.bkTog.textContent=S.bkAberto?'Fechar':'+ Novo agendamento';
   P.bkMsg.replaceChildren.apply(P.bkMsg,S.bkMsg?[h('div',{class:'ok-box',role:'status'},S.bkMsg)]:[]);
+  P.bkWrap.style.order=(S.bkAberto&&!vigentes().length)?'-1':'';if(P.pAlert)P.pAlert.style.order=(S.bkAberto&&!vigentes().length)?'-2':'';
   if(!S.bkAberto)return;
   if(!S.d.ficha){
     P.bkBox.replaceChildren(trilha(b),
@@ -1590,7 +1651,7 @@ function renderBooking(){
   if(b.passo===1){
     kids.push(guia(b,'Escolha o serviço desejado'+(sv&&sv.modalidades.length>1?' e como prefere ser atendido.':'.')));
     kids.push(h('div',{class:'svc-grid'},lista.map(function(s){
-      return h('button',{type:'button',class:'svc'+(s.id===b.servico?' sel':''),'aria-pressed':s.id===b.servico?'true':'false',onclick:function(){escolherServico(s.id)}},
+      return h('button',{type:'button',class:'svc'+(s.id===b.servico?' sel':''),'aria-pressed':s.id===b.servico?'true':'false',onclick:function(){escolherServico(s.id);toast('Serviço selecionado: '+s.nome)}},
         h('strong',{},s.nome),h('span',{class:'body'},s.descricao),
         h('span',{class:'kv'},h('b',{},'Valor: '),s.valor),
         h('span',{class:'kv'},h('b',{},'Profissional: '),profsDe(s.id).map(function(p){return p.nome}).join(', ')||s.profissional||'Definido pela clínica'),
@@ -1608,7 +1669,7 @@ function renderBooking(){
       }))));
       else if(lp.length===1)kids.push(h('div',{class:'step'},h('h3',{},'Profissional'),h('div',{class:'prof'},avatar(lp[0],48),h('div',{},h('strong',{},lp[0].nome),lp[0].descricao?h('p',{class:'meta'},lp[0].descricao):null))));
     }
-    kids.push(nav(null,btn('Continuar →',function(){b.passo=2;b.data='';b.hora='';b.mes=null;if(!S.slots[chaveSlots(b)])carregarSlots();renderBooking()},'primary pillb',{disabled:!(sv&&b.mod&&(profsDe(sv.id).length<2||b.prof))})));
+    kids.push(nav(null,btn('Continuar →',function(){b.passo=2;b.data='';b.hora='';b.mes=null;b.ok='Etapa 2 concluída: '+sv.nome+(b.mod?' ('+b.mod.toLowerCase()+')':'')+'. Etapa 3 liberada: escolha o dia e o horário.';toast('Serviço escolhido ✓ Etapa 3 liberada.');if(!S.slots[chaveSlots(b)])carregarSlots();renderBooking()},'primary pillb',{disabled:!(sv&&b.mod&&(profsDe(sv.id).length<2||b.prof))})));
   }
 
   else if(b.passo===2){
@@ -1618,10 +1679,10 @@ function renderBooking(){
     kids.push(!pronto?(slots==='carregando'?h('p',{class:'meta'},'Carregando horários…'):h('div',{class:'stack'},h('p',{class:'meta'},'Não foi possível carregar os horários.'),btn('Tentar novamente',function(){carregarSlots()},'pillb')))
       :Object.keys(slots).length?h('div',{class:'cols two'},calendario(slots),
         h('div',{},h('strong',{class:'weeklabel'},b.data?longDay(b.data):'Horários'),
-          b.data?h('div',{class:'hours',style:'margin-top:8px'},hs.map(function(x){return h('button',{type:'button',class:'btn pillb'+(b.hora===x?' primary':''),'aria-pressed':b.hora===x?'true':'false',onclick:function(){b.hora=x;renderBooking()}},x)}))
+          b.data?h('div',{class:'hours',style:'margin-top:8px'},hs.map(function(x){return h('button',{type:'button',class:'btn pillb'+(b.hora===x?' primary':''),'aria-pressed':b.hora===x?'true':'false',onclick:function(){b.hora=x;toast('Horário selecionado: '+x);renderBooking()}},x)}))
           :h('p',{class:'none',style:'margin-top:8px'},'Escolha um dia destacado no calendário.')))
       :empty('Sem horários disponíveis','No momento não há horários abertos para este serviço. Tente novamente em breve ou fale com a clínica.'));
-    kids.push(nav(btn('← Voltar',function(){b.passo=1;renderBooking()},'pillb'),btn('Continuar →',function(){b.passo=3;renderBooking()},'primary pillb',{disabled:!(b.data&&b.hora)})));
+    kids.push(nav(btn('← Voltar',function(){b.passo=1;renderBooking()},'pillb'),btn('Continuar →',function(){b.passo=3;b.ok='Etapa 3 concluída: '+longDay(b.data)+' às '+b.hora+'. Última etapa liberada: confira e confirme.';toast('Horário escolhido ✓ Falta só a confirmação.');renderBooking()},'primary pillb',{disabled:!(b.data&&b.hora)})));
   }
 
   else{
@@ -1632,11 +1693,12 @@ function renderBooking(){
       linha('Duração',sv.duracao+' min'),linha('Modalidade',b.mod),linha('Data',longDay(b.data)),linha('Horário',b.hora)));
     kids.push(h('div',{class:'actions'},btn('Alterar serviço',function(){b.passo=1;renderBooking()},'small pillb'),btn('Alterar dia e horário',function(){b.passo=2;renderBooking()},'small pillb')));
     var chk=h('input',{id:'bk-aceite',type:'checkbox'});chk.checked=b.aceite;
-    chk.addEventListener('change',function(){b.aceite=chk.checked;syncConfirm()});
+    chk.addEventListener('change',function(){b.aceite=chk.checked;if(chk.checked)toast('Aceite registrado ✓ Já pode confirmar.');syncConfirm()});
     kids.push(h('div',{class:'notice',role:'note'},h('div',{class:'ttl'},'Aceite'),
       h('p',{},(S.d.config&&S.d.config.contrato)||''),h('p',{class:'meta'},'Este sistema não emite contrato: o profissional o envia a você para assinatura.'),
       h('label',{class:'f check'},chk,h('span',{},'Li e aceito as informações, os valores e as condições do serviço escolhido.'))));
-    P.bkConfirm=h('button',{type:'button',class:'btn primary pillb',onclick:confirmarAgendamento},'Confirmar agendamento');
+    if(b.substituir)kids.splice(kids.length-1,0,h('div',{class:'notice',role:'alert'},h('div',{class:'ttl'},'Substituição'),h('p',{},'Ao confirmar, a sessão atual ('+b.substituirTxt+') será cancelada e trocada por esta.')));
+    P.bkConfirm=h('button',{type:'button',class:'btn primary pillb',onclick:confirmarAgendamento},b.substituir?'Confirmar e substituir':'Confirmar agendamento');
     kids.push(nav(btn('← Voltar',function(){b.passo=2;renderBooking()},'pillb'),P.bkConfirm));
     syncConfirm();
   }
@@ -1841,15 +1903,16 @@ var SEC=[
   {h:'Dados sociodemográficos',f:[
     {row:[{t:'sel',k:'sexo',l:'Sexo',o:SEXO},{t:'sel',k:'orientacao',l:'Orientação sexual',o:ORIENT}]},
     {row:[{t:'sel',k:'estado_civil',l:'Estado civil',o:CIVIL},{t:'sel',k:'raca',l:'Cor (autodeclaração racial)',o:RACA}]},
+    {row:[T('nacionalidade','Nacionalidade',{ph:'Ex.: brasileira',ac:'country-name',hint:'Informe o país de origem. Se for brasileira(o), escreva “brasileira” ou “brasileiro”.'})]},
     {row:[{t:'sel',k:'escolaridade',l:'Escolaridade',o:ESCOL},T('ocupacao','Ocupação')]},
     {t:'yn',k:'religiao',l:'Possui alguma religião?',sub:[T('religiao_qual','Qual?')]},
-    {row:[T('mae','Nome da mãe'),T('pai','Nome do pai')]}
+    {row:[T('mae','Nome da mãe',{req:1,ac:'off'}),T('pai','Nome do pai')]}
   ]},
   {h:'Endereço',f:[
-    {row:[T('cep','CEP',{mask:'cep',im:'numeric',ac:'postal-code'}),T('numero','Número')]},
-    T('logradouro','Rua / Avenida',{ac:'street-address'}),
-    {row:[T('complemento','Complemento'),T('bairro','Bairro')]},
-    {row:[T('cidade','Cidade'),{t:'sel',k:'uf',l:'UF',o:UFS}]}
+    {row:[T('cep','CEP',{req:1,mask:'cep',im:'numeric',ac:'postal-code'}),T('numero','Número',{req:1})]},
+    T('logradouro','Rua / Avenida',{req:1,ac:'street-address'}),
+    {row:[T('complemento','Complemento (opcional)'),T('bairro','Bairro',{req:1})]},
+    {row:[T('cidade','Cidade',{req:1}),{t:'sel',k:'uf',l:'UF',o:UFS,req:1}]}
   ]},
   {h:'Queixa principal',f:[{t:'area',k:'demanda',l:'Conte o que o trouxe até aqui',req:1,hint:'O que sente · quando começou · como se apresenta · em quais circunstâncias acontece.'}]},
   {h:'História clínica pregressa',f:[
@@ -2020,13 +2083,13 @@ function buildFicha(){
   function marca(k){var x=form.querySelector('[name="'+k+'"]');if(x)x.classList.add('bad');var w=form.querySelector('.f[data-k="'+k+'"]');if(w)w.classList.add('bad')}
   function erro(d,escopo){
     var no=function(k){return !escopo||escopo.indexOf(k)>=0};
-    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','demanda','lgpd'];
+    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','lgpd'];
     if(d.titular&&d.titular!==TIT[0])obrig.push('resp_nome','resp_cpf');
     if(d.recibo===REC[1])obrig.push('recibo_nome','recibo_cpf');
     if(d.pagamento===PAGQ[2])obrig.push('pagamento_dia');
     var falta=obrig.filter(function(k){return no(k)&&!d[k]});
-    if(falta.length){falta.forEach(marca);return {k:falta[0],m:falta.length===1&&falta[0]==='lgpd'?'Para enviar, confirme o consentimento.':'Confira os campos marcados em vermelho.'}}
-    var tests=[['cpf',cpfOk,'CPF inválido. Confira os números.'],['nascimento',dataOk,'Data de nascimento inválida. Use dd/mm/aaaa.'],['email',emailOk,'E-mail inválido. Use o formato nome@exemplo.com.']];
+    if(falta.length){falta.forEach(marca);return {k:falta[0],m:falta.length===1&&falta[0]==='lgpd'?'Para enviar, confirme o consentimento.':'Faltam '+falta.length+' pergunta(s) obrigatória(s), marcadas em vermelho. Preencha para continuar.'}}
+    var tests=[['cep',function(c){return dig(c).length===8},'CEP inválido. Informe os 8 números.'],['cpf',cpfOk,'CPF inválido. Confira os números.'],['nascimento',dataOk,'Data de nascimento inválida. Use dd/mm/aaaa.'],['email',emailOk,'E-mail inválido. Use o formato nome@exemplo.com.']];
     if(d.titular&&d.titular!==TIT[0])tests.push(['resp_cpf',cpfOk,'CPF do responsável inválido.']);
     if(d.recibo===REC[1])tests.push(['recibo_cpf',cpfOk,'CPF do pagador inválido.']);
     if(no('pagamento_dia')&&d.pagamento===PAGQ[2]&&!(+d.pagamento_dia>=1&&+d.pagamento_dia<=28)){marca('pagamento_dia');return {k:'pagamento_dia',m:'Informe um dia do mês entre 1 e 28.'}}
@@ -2040,10 +2103,22 @@ function buildFicha(){
     if(cur<STEPS.length-1){var er=erro(d,stepKeys[cur]);if(er){msg.textContent=er.m;foca(er.k);return}mostra(cur+1,true);return}
     var eg=erro(d,null);
     if(eg){var alvo=0;stepKeys.forEach(function(ks,i){if(ks.indexOf(eg.k)>=0)alvo=i});if(alvo!==cur)mostra(alvo,true);msg.textContent=eg.m;setTimeout(function(){foca(eg.k)},50);return}
+    var LAB={};SEC.forEach(function(sc){fichaFlat(sc.f,[]).forEach(function(f){LAB[f.k]=String(f.l||'').replace(/^\d+\)\s*/,'').replace(/\?$/,'')})});
+    var vazios=Object.keys(d).filter(function(k){return d[k]===''&&k!=='complemento'&&LAB[k]});
+    if(vazios.length&&!P.fxOk){
+      var primeiro=vazios[0];
+      dialogo({titulo:'Algumas perguntas ficaram em branco',
+        corpo:[h('p',{class:'meta'},'Você pode enviar assim e completar depois, mas respostas completas ajudam a preparar o seu atendimento. Em branco:'),
+          h('ul',{class:'dlg-l'},vazios.slice(0,12).map(function(k){return h('li',{},LAB[k])}).concat(vazios.length>12?[h('li',{},'e mais '+(vazios.length-12)+'…')]:[]))],
+        botoes:[{t:'Voltar e preencher',cls:'primary',fn:function(){var alvo=0;stepKeys.forEach(function(ks,i){if(ks.indexOf(primeiro)>=0)alvo=i});mostra(alvo,true);setTimeout(function(){foca(primeiro)},50)}},
+                {t:'Enviar mesmo assim',fn:function(){P.fxOk=true;form.requestSubmit?form.requestSubmit():form.dispatchEvent(new Event('submit',{cancelable:true}))}}]});
+      return;
+    }
+    P.fxOk=false;
     next.disabled=true;next.textContent='Enviando…';
     api('salvarFicha',ctx(),d).then(function(){
       limpaRascunho();P.fxEdit=false;P.fxJust=true;next.disabled=false;mostra(0,false);return recarregar();
-    }).then(function(){toast('Ficha enviada.');if(S.modo==='paciente'&&!S.d.agenda.some(function(a){return a.status!=='cancelada'})){S.bkAberto=true;go('sessoes')}}).catch(function(er){
+    }).then(function(){toast('Ficha enviada ✓ Etapa 2 liberada: escolha o serviço.');if(S.modo==='paciente'&&!vigentes().length){S.bkAberto=true;S.bk=novoBk();S.bk.ok='Etapa 1 concluída: ficha enviada. Etapa 2 liberada: escolha o serviço desejado.';go('sessoes');renderBooking()}}).catch(function(er){
       next.disabled=false;next.textContent='Enviar ficha';msg.textContent=er.message;if(/SESSAO_EXPIRADA/.test(er.message))falha(er);
     });
   });
@@ -2127,6 +2202,7 @@ function buildProfissionais(){
   f.svc=h('div',{class:'stack',style:'gap:8px'});
   f.ativo=h('input',{id:'pf-ativo',type:'checkbox'});f.ativo.checked=true;
   f.crp=h('input',{id:'pf-crp',type:'text',autocomplete:'off',placeholder:'04/85394',maxlength:20});
+  f.end=h('textarea',{id:'pf-end',rows:2,maxlength:300,placeholder:'Rua, número, sala, bairro, cidade/UF e CEP'});
   f.pixc=h('input',{id:'pf-pixc',type:'text',autocomplete:'off',placeholder:'e-mail, CPF/CNPJ, +5531… ou chave aleatória'});
   f.pixn=h('input',{id:'pf-pixn',type:'text',autocomplete:'off',placeholder:'Nome completo do titular da chave'});
   f.pixcid=h('input',{id:'pf-pixcid',type:'text',autocomplete:'off',value:'Belo Horizonte'});
@@ -2145,12 +2221,12 @@ function buildProfissionais(){
     try{f.foto=await reduzirFoto(f.arq.files[0]);f.msg.textContent='';preview()}catch(e){f.msg.textContent=e.message;f.arq.value=''}
   });
   f.limpar=function(){
-    f.id='';f.foto='';f.sel=[];f.valores={};f.nome.value='';f.desc.value='';f.email.value='';f.tel.value='';f.arq.value='';f.crp.value='';f.pixc.value='';f.pixn.value='';f.pixcid.value='Belo Horizonte';f.ativo.checked=true;f.msg.textContent='';
+    f.id='';f.foto='';f.sel=[];f.valores={};f.nome.value='';f.desc.value='';f.email.value='';f.tel.value='';f.arq.value='';f.crp.value='';f.end.value='';f.pixc.value='';f.pixn.value='';f.pixcid.value='Belo Horizonte';f.ativo.checked=true;f.msg.textContent='';
     f.ok.textContent='Cadastrar profissional';f.cancel.hidden=true;f.sum.textContent='+ Cadastrar profissional';preview();renderProfSvc();
   };
   f.cancel.addEventListener('click',f.limpar);
   var form=h('form',{class:'panel-form',style:'margin-top:12px'},
-    h('div',{class:'fields'},field('Nome',f.nome),field('E-mail',f.email),field('Telefone / WhatsApp',f.tel),field('Foto',f.arq),field('CRP (aparece no contrato)',f.crp),field('Apresentação',f.desc,true)),
+    h('div',{class:'fields'},field('Nome',f.nome),field('E-mail',f.email),field('Telefone / WhatsApp',f.tel),field('Foto',f.arq),field('CRP (aparece no contrato)',f.crp),field('Endereço do atendimento presencial (preenche o contrato)',f.end,true),field('Apresentação',f.desc,true)),
     f.prev,h('div',{class:'step'},h('h3',{},'Recebimento por Pix'),h('p',{class:'meta'},'Cada profissional recebe na própria chave. Deixe a chave em branco para remover o Pix deste profissional. A chave só aparece para o paciente dentro de uma cobrança dele.'),
       h('div',{class:'fields'},field('Chave Pix',f.pixc),field('Nome do titular',f.pixn),field('Cidade',f.pixcid))),
     h('div',{class:'step'},h('h3',{},'Serviços que atende e valor da sessão'),h('p',{class:'meta'},'Marque os serviços e informe o valor de cada sessão. Com valor preenchido, a cobrança é criada sozinha quando a sessão é agendada. Sem valor (ex.: avaliação neuropsicológica, que depende do total de sessões), nada é cobrado automaticamente e o item aparece no painel Hoje como valor a definir.'),f.svc),
@@ -2159,7 +2235,7 @@ function buildProfissionais(){
   form.addEventListener('submit',async function(ev){
     ev.preventDefault();f.ok.disabled=true;f.msg.textContent='Salvando…';
     try{
-      await api('salvarProfissional',ctx(),{id:f.id||undefined,nome:f.nome.value,descricao:f.desc.value,email:f.email.value,telefone:f.tel.value,servicos:f.sel.slice(),valores:valoresLimpos(f),foto:f.foto,ativo:f.ativo.checked,crp:f.crp.value,pixChave:f.pixc.value,pixNome:f.pixn.value,pixCidade:f.pixcid.value});
+      await api('salvarProfissional',ctx(),{id:f.id||undefined,nome:f.nome.value,descricao:f.desc.value,email:f.email.value,telefone:f.tel.value,servicos:f.sel.slice(),valores:valoresLimpos(f),foto:f.foto,ativo:f.ativo.checked,crp:f.crp.value,endereco:f.end.value,pixChave:f.pixc.value,pixNome:f.pixn.value,pixCidade:f.pixcid.value});
       var editou=!!f.id;f.limpar();P.pfBox.open=false;await recarregar();toast(editou?'Profissional atualizado.':'Profissional cadastrado.');
     }catch(e){f.msg.textContent=e.message}
     f.ok.disabled=false;
@@ -2184,7 +2260,7 @@ function renderProfSvc(){
 }
 function editarProf(p){
   var f=P.pf;
-  f.id=p.id;f.foto=p.foto||'';f.sel=profServ(p);try{f.valores=JSON.parse(p.valores||'{}')}catch(e){f.valores={}}f.nome.value=p.nome;f.desc.value=p.descricao||'';f.email.value=p.email||'';f.tel.value=p.telefone||'';f.crp.value=p.crp||'';f.pixc.value=p.pixChave||'';f.pixn.value=p.pixNome||'';f.pixcid.value=p.pixCidade||'Belo Horizonte';f.arq.value='';
+  f.id=p.id;f.foto=p.foto||'';f.sel=profServ(p);try{f.valores=JSON.parse(p.valores||'{}')}catch(e){f.valores={}}f.nome.value=p.nome;f.desc.value=p.descricao||'';f.email.value=p.email||'';f.tel.value=p.telefone||'';f.crp.value=p.crp||'';f.end.value=p.endereco||'';f.pixc.value=p.pixChave||'';f.pixn.value=p.pixNome||'';f.pixcid.value=p.pixCidade||'Belo Horizonte';f.arq.value='';
   f.ativo.checked=p.ativo!=='nao';f.msg.textContent='';f.ok.textContent='Salvar alterações';f.cancel.hidden=false;f.sum.textContent='Editando: '+p.nome;
   f.preview();renderProfSvc();P.pfBox.open=true;P.pfBox.scrollIntoView({block:'nearest'});f.nome.focus();
 }
@@ -2208,7 +2284,7 @@ function renderProfs(){
     var tags=profServ(p).map(function(id){var v=valorProf(p,id);return h('span',{class:'pill tag'},(svcNome(id)||id)+(v?' · R$ '+v:' · valor a definir'))});
     return h('article',{class:'item'},h('div',{class:'prof'},avatar(p,64),h('div',{class:'stack',style:'flex:1;gap:6px'},
       h('div',{class:'row'},h('h3',{},dot(p.cor||'#6b6358'),p.nome),
-        h('div',{class:'actions'},h('span',{class:'pill '+(p.ativo==='nao'?'tag':'confirmada')},p.ativo==='nao'?'Inativo':'Ativo'),h('span',{class:'pill '+(p.pixChave?'confirmada':'tag')},p.pixChave?'Pix ativo ✓':'Sem Pix'),p.crp?h('span',{class:'pill tag'},'CRP '+p.crp):h('span',{class:'pill tag'},'Sem CRP'),h('span',{class:'pill tag'},fut+' sessão(ões) futura(s)'))),
+        h('div',{class:'actions'},h('span',{class:'pill '+(p.ativo==='nao'?'tag':'confirmada')},p.ativo==='nao'?'Inativo':'Ativo'),h('span',{class:'pill '+(p.pixChave?'confirmada':'tag')},p.pixChave?'Pix ativo ✓':'Sem Pix'),p.crp?h('span',{class:'pill tag'},'CRP '+p.crp):h('span',{class:'pill tag'},'Sem CRP'),h('span',{class:'pill '+(p.endereco?'confirmada':'tag')},p.endereco?'Endereço presencial ✓':'Sem endereço presencial'),h('span',{class:'pill tag'},fut+' sessão(ões) futura(s)'))),
       p.descricao?h('p',{class:'body'},p.descricao):null,
       contatos.length?h('div',{class:'chips meta'},contatos):h('p',{class:'meta'},'Sem contatos cadastrados.'),
       tags.length?h('div',{class:'tags'},tags):h('p',{class:'meta'},'Nenhum serviço vinculado: o paciente não o encontra no agendamento.'),
@@ -2508,26 +2584,26 @@ function buildContratos(){
   f.menorBox.hidden=true;f.menor=h('input',{type:'checkbox',id:'ct-menor'});
   f.menor.addEventListener('change',function(){f.menorBox.hidden=!f.menor.checked});
   f.objeto=h('div',{class:'fields'},h('div',{class:'f'},h('span',{},'Serviços'),grp(f.sv,['Psicoterapia','Neuropsicologia'])),h('div',{class:'f'},h('span',{},'Modalidade'),grp(f.md,['Presencial','Online'])),
-    txt('aval','Nº de sessões da avaliação (se neuropsicologia)',{attrs:{inputmode:'numeric',maxlength:3}}),txt('local','Endereço do atendimento presencial',{area:1,wide:1}),txt('link','Link da sala online',{wide:1}));
+    txt('aval','Nº de sessões da avaliação (se neuropsicologia)',{attrs:{inputmode:'numeric',maxlength:3}}),txt('local','Endereço do atendimento presencial (vem do cadastro do profissional)',{area:1,wide:1}),txt('link','Link da sala online',{wide:1}));
   f.pag=h('div',{class:'fields'},txt('valor','Valor por sessão (R$)',{attrs:{inputmode:'decimal',placeholder:'150,00'}}),sel('forma','Forma de pagamento',['Pix','Transferência']),
     txt('pix','Chave Pix'),txt('conta','Conta para transferência',{area:1,wide:1}),
     h('div',{class:'f'},h('span',{},'Quando se paga'),grp(f.qd,CT_QUANDO.map(function(q){return q[1]}))),txt('dia','Dia do mês (se mensal)',{attrs:{inputmode:'numeric',maxlength:2}}));
   f.ag=h('div',{class:'fields'},sel('diasem','Dia da semana',CT_DIAS),txt('hora','Horário (hh:mm)',{attrs:{inputmode:'numeric',maxlength:5,placeholder:'14:00'}}));
-  f.pub=h('input',{type:'checkbox',id:'ct-pub'});f.pub.checked=true;
   f.bPrev=btn('Pré-visualizar',function(){acaoContrato('prev')},'pillb');
   f.bDown=btn('Baixar as 2 vias',function(){acaoContrato('baixar')},'pillb');
-  f.bSave=btn('Gerar e guardar no Drive',function(){acaoContrato('drive')},'primary pillb');
+  f.bSave=btn('Enviar ao paciente',function(){acaoContrato('enviar')},'primary pillb');
+  f.bClear=btn('Fechar e limpar',function(){limparContrato()},'pillb');
   f.ficha=h('p',{class:'govbr',hidden:true});
   var card=function(t,k){return h('div',{class:'step'},h('h3',{},t),k)};
   var form=h('form',{class:'panel-form',style:'margin-top:12px',onsubmit:function(e){e.preventDefault()}},
     f.ficha,card('Dados do contrato',cabec),card('Identificação do contratante',f.dados),h('label',{class:'f check'},f.menor,h('span',{},'Contratante menor de idade (representado por responsável)')),f.menorBox,
     card('Objeto do contrato',f.objeto),card('Valores e condições de pagamento',f.pag),card('Agendamento (dia e horário fixos)',f.ag),
-    h('label',{class:'f check'},f.pub,h('span',{},'Publicar a 1ª via para o paciente assinar (ele recebe um aviso e devolve assinada na aba Aceite).')),
-    f.msg,h('div',{class:'actions'},f.bPrev,f.bDown,f.bSave));
+    h('p',{class:'meta'},'“Enviar ao paciente” encaminha as duas vias direto à aba Aceite dele, sem guardar nas pastas do Drive. Depois que ele devolver assinado, use “Salvar na pasta” no envio recebido.'),
+    f.msg,h('div',{class:'actions'},f.bClear,f.bPrev,f.bDown,f.bSave));
   f.pac.addEventListener('change',function(){preencherContrato(true)});
   f.prof.addEventListener('change',function(){preencherContrato(false)});
   f.sv.forEach(function(c){c.addEventListener('change',atualizaCod)});
-  el.append(h('div',{class:'nt-head'},h('h2',{},'Contratos'),h('p',{class:'meta'},'Gera o contrato de prestação de serviços em PDF (duas vias) com os dados da ficha, guarda na pasta do paciente no Drive e, se quiser, publica para o paciente assinar.')),
+  el.append(h('div',{class:'nt-head'},h('h2',{},'Contratos'),h('p',{class:'meta'},'Gera o contrato de prestação de serviços em PDF (duas vias) com os dados da ficha e do profissional e o envia direto à aba Aceite do paciente para assinatura.')),
     h('div',{class:'card'},form));
   return el;
 }
@@ -2549,7 +2625,7 @@ function preencherContrato(trocouPac){
     f.ficha.hidden=!!fi;f.ficha.textContent=fi?'':'Este paciente ainda não enviou a ficha. Os dados abaixo precisam ser digitados e a data de nascimento é necessária para criar a pasta no Drive.';
     fi=fi||{};
     f.nome.value=fi.paciente||pac.nome||'';f.cpf.value=fi.cpf||'';f.tel.value=fi.telefone||pac.telefone||'';f.email.value=fi.email||pac.email||'';
-    f.civil.value=CT_CIVIL.indexOf(fi.estado_civil)>=0?fi.estado_civil:'';f.end.value=ctEndereco(fi);
+    f.civil.value=CT_CIVIL.indexOf(fi.estado_civil)>=0?fi.estado_civil:'';f.end.value=ctEndereco(fi);if(fi.nacionalidade)f.nac.value=fi.nacionalidade;
     var men=/menor/i.test(String(fi.titular||''));f.menor.checked=men;f.menorBox.hidden=!men;f.resp.value=men?(fi.resp_nome||''):'';f.respcpf.value=men?(fi.resp_cpf||''):'';
     var sv=String(fi.servico||'');f.sv[0].checked=/psicoter/i.test(sv);f.sv[1].checked=/neuro/i.test(sv);
     var md=String(fi.modalidade||'');f.md[0].checked=/presencial/i.test(md);f.md[1].checked=/online/i.test(md);
@@ -2564,6 +2640,7 @@ function preencherContrato(trocouPac){
     pr=profDoCt();
   }
   if(pr){
+    if(pr.endereco&&(!f.local.value.trim()||f.local.dataset.auto==='1')){f.local.value=pr.endereco;f.local.dataset.auto='1'}
     if(pr.pixChave&&!f.pix.value)f.pix.value=pr.pixChave;
     if(!f.forma.value)f.forma.value=pr.pixChave?'Pix':'';
   }
@@ -2594,7 +2671,7 @@ function dadosContrato(){
 function bufB64(buf){var u=new Uint8Array(buf),s='';for(var i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
 async function acaoContrato(modo){
   var f=P.ct;f.msg.textContent='';
-  var bs=[f.bPrev,f.bDown,f.bSave];bs.forEach(function(b){b.disabled=true});
+  var bs=[f.bPrev,f.bDown,f.bSave,f.bClear];bs.forEach(function(b){b.disabled=true});
   try{
     var r=dadosContrato();
     f.msg.textContent='Preparando o PDF…';await carregarPdf();
@@ -2612,16 +2689,24 @@ async function acaoContrato(modo){
         var u=URL.createObjectURL(C.build(J,r.d,now,p[1]).output('blob'));var a=h('a',{href:u,download:p[0]});document.body.append(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},30000)},i*500)});
       f.msg.textContent='As duas vias foram baixadas.';
     }else{
-      f.msg.textContent='Guardando no Drive…';
+      f.msg.textContent='Enviando ao paciente…';
       var a1={nome:n1,base64:bufB64(C.build(J,r.d,now,'paciente').output('arraybuffer'))},a2={nome:n2,base64:bufB64(C.build(J,r.d,now,'contratado').output('arraybuffer'))};
-      var res=await api('salvarContrato',ctx(),{codigo:r.pac.codigo,publicar:f.pub.checked,titulo:'Contrato de prestação de serviços'},a1,a2);
+      await api('enviarContratoAoPaciente',ctx(),{codigo:r.pac.codigo,titulo:'Contrato de prestação de serviços'},a1,a2);
       await recarregar();
-      f.msg.replaceChildren(document.createTextNode('Pronto. 1ª via na pasta “'+res.pasta+'” e 2ª via em CONTRATOS, no Drive.'+(res.publicado?' O paciente foi avisado para assinar. ':' ')),
-        isHttp(res.pastaUrl)?h('a',{href:res.pastaUrl,target:'_blank',rel:'noopener noreferrer'},'Abrir pasta do paciente'):'');
-      toastAcao(res.publicado?'Contrato guardado e enviado ao paciente.':'Contrato guardado no Drive.','Criar cobranças',function(){acaoCobrar(r.pac.codigo)});
+      f.msg.textContent='Pronto. As duas vias foram enviadas à aba Aceite de '+r.pac.nome+', que recebeu um aviso. Nada foi guardado no Drive.';
+      toastAcao('Contrato enviado ao paciente ✓','Criar cobranças',function(){acaoCobrar(r.pac.codigo)});
     }
   }catch(e){f.msg.textContent=e.message}
   bs.forEach(function(b){b.disabled=false});
+}
+function limparContrato(){
+  var f=P.ct;if(!f)return;
+  ['nome','nac','cpf','tel','email','end','cod','data','resp','respcpf','aval','local','link','valor','pix','conta','dia','hora'].forEach(function(k){if(f[k]){f[k].value='';if(f[k].dataset)delete f[k].dataset.auto}});
+  ['civil','forma','diasem','pac','prof'].forEach(function(k){if(f[k])f[k].value=''});
+  f.sv.concat(f.md,f.qd,[f.menor]).forEach(function(c){c.checked=false});
+  f.menorBox.hidden=true;f.ficha.hidden=true;f.msg.textContent='';
+  var volta=S.ctOrigem&&S.ctOrigem!=='contratos_g'?S.ctOrigem:'hoje';S.ctOrigem=null;
+  toast('Contrato fechado e preenchimento limpo.');go(volta);
 }
 function renderContratos(){if(P.ct)refreshSelects()}
 
@@ -2657,7 +2742,7 @@ function novoAbrir(emCima,ancora){
 }
 function novoFechar(){if(!NV.aberto)return;NV.aberto=false;NV.el.remove();document.removeEventListener('click',NV.fora)}
 
-function irContrato(c){go('contratos_g');if(P.ct){P.ct.pac.value=c;P.ct.pac.dispatchEvent(new Event('change'))}}
+function irContrato(c){S.ctOrigem=S.tab;go('contratos_g');if(P.ct){P.ct.pac.value=c;P.ct.pac.dispatchEvent(new Event('change'))}}
 function acaoMaterial(c){go('materiais');P.lib.para.value=c;P.lib.titulo.focus()}
 var CK={aberto:false,sel:0,itens:[]};
 var NAV_ROT={agenda:'Agenda',pacientes:'Pacientes',recepcao:'Recepção',financeiro:'Financeiro',contratos_g:'Contratos',profissionais:'Profissionais',materiais:'Materiais',disp:'Disponibilidade',entrada:'Atualizações'};
