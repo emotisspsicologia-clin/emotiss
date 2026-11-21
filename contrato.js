@@ -204,7 +204,7 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
   const ctKeys = {
     ct_num: { max: 3 }, ct_data: { max: 10 }, ct_nac: { max: 40 }, ct_end: { max: 200 }, ct_menor: { max: 3 },
     ct_resp: { max: 120 }, ct_resp_cpf: { max: 14 }, ct_serv: { arr: 1, max: 20 }, ct_mod: { arr: 1, max: 20 },
-    ct_aval: { max: 3 }, ct_valor: { max: 12 }, ct_forma: { max: 20 }, ct_quando: { max: 6 }, ct_dia: { max: 2 },
+    ct_aval: { max: 3 }, ct_pag_neuro: { max: 40 }, ct_relacao_sessoes: { max: 3 }, ct_valor: { max: 12 }, ct_forma: { max: 20 }, ct_quando: { max: 6 }, ct_dia: { max: 2 },
     ct_diasem: { max: 20 }, ct_hora: { max: 5 },
     ct_pix: { max: 80 }, ct_conta: { max: 200 }, ct_local: { max: 200 }, ct_link: { max: 160 }
   };
@@ -419,10 +419,20 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
     if (sv.indexOf('Neuropsicologia') >= 0) para(['**A avaliação neuropsicológica:** ' + CT.t_neuro]);
     y += 2;
     heading(++n, 'VALORES E CONDIÇÕES DE PAGAMENTO');
-    para(['**Honorários:** O valor por sessão é de **R$ ' + (String(d.ct_valor || '').trim() || '150,00') + '**.']);
-    para(['**Forma de Pagamento:** O pagamento deverá ser efetuado via ', { val: d.ct_forma, blank: 14 }, ': ', { box: d.ct_quando === 'antes' }, ' antes da sessão / ', { box: d.ct_quando === 'apos' }, ' após cada sessão / ', { box: d.ct_quando === 'dia' }, ' mensal - dia (', { val: d.ct_dia, blank: 3 }, ') do mês.']);
+    const neuroC = sv.indexOf('Neuropsicologia') >= 0, psiC = sv.indexOf('Psicoterapia') >= 0, pgN = String(d.ct_pag_neuro || '');
+    const valorTxt = String(d.ct_valor || '').trim() || '150,00';
+    const neuroTotal = neuroC && !psiC && /integral|vezes/i.test(pgN); // avaliação paga em parcela única ou em 3 vezes: o valor informado é o total
+    if (neuroTotal) {
+      para(['**Honorários:** O valor total da avaliação neuropsicológica é de **R$ ' + valorTxt + '**, a ser pago em ' + (/vezes/i.test(pgN) ? '**3 (três) parcelas**.' : '**parcela única**.')]);
+      para(['**Forma de Pagamento:** O pagamento deverá ser efetuado via ', { val: d.ct_forma, blank: 14 }, '.']);
+    } else {
+      para(['**Honorários:** O valor por sessão é de **R$ ' + valorTxt + '**.']);
+      para(['**Forma de Pagamento:** O pagamento deverá ser efetuado via ', { val: d.ct_forma, blank: 14 }, ': ', { box: d.ct_quando === 'antes' }, ' antes da sessão / ', { box: d.ct_quando === 'apos' }, ' após cada sessão / ', { box: d.ct_quando === 'dia' }, ' mensal - dia (', { val: d.ct_dia, blank: 3 }, ') do mês.']);
+      if (neuroC && pgN) para(['**Avaliação neuropsicológica:** forma de pagamento escolhida: ' + pgN.charAt(0).toLowerCase() + pgN.slice(1) + '.']);
+    }
     if (d.ct_forma === 'Pix') para(['**Chave PIX:** ', { val: d.ct_pix || '', blank: 30 }]);
     if (d.ct_forma === 'Transferência') para(['**Dados da conta para transferência:** ', { val: d.ct_conta || '', blank: 30 }]);
+    if (neuroC) para(['**Relação das sessões:** Concluída a avaliação neuropsicológica, a(o) CONTRATADA(O) entregará à(ao) CONTRATANTE a relação das sessões realizadas, assinada e anexada a este contrato.']);
     para(['**Reajuste:** ' + CT.reajuste]);
     y += 2;
     heading(++n, 'AGENDAMENTO E CANCELAMENTO (POLÍTICA DE FALTAS)');

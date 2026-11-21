@@ -822,6 +822,13 @@ body.gx-on .top{display:none!important}
   .gx-fl{display:none}.gx-fs{display:inline}
 }
 @media (prefers-reduced-motion:reduce){.gx-btn{transition:none}.gx-btn:hover{transform:none}}
+
+.nota-neuro{background:var(--warnbg);border:2px solid var(--warnbd);color:var(--warnfg);border-radius:14px;padding:12px 14px}
+.nota-neuro .q{color:var(--warnfg)}.nota-neuro .hint{color:var(--warnfg);font-weight:600}
+.nm-menor{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;line-height:1.2}
+.nm-t{font-weight:800;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nm-b{background:var(--gold);color:#17130f;border-radius:99px;padding:2px 10px;font:800 .68rem var(--font-body);letter-spacing:.06em;text-transform:uppercase}
+.nm-s{font-size:.82rem;font-weight:600;color:var(--ink2)}
 </style>
 </head>
 <body>
@@ -983,7 +990,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -1133,7 +1140,7 @@ function contratoCard(m){
 }
 function materialCard(m,gestao){
   if(!gestao&&m.categoria==='contrato')return contratoCard(m);
-  var aud=(({fatura:'Fatura/recibo',documento:'Documento psicológico',contrato:'Contrato',outro:'Outros'})[m.categoria]||'Material de apoio')+' · '+(m.para==='todos'?'Todos os pacientes':'Para '+nomeDe(m.para,m.para));
+  var aud=(({fatura:'Fatura/recibo',documento:'Documento psicológico',contrato:'Contrato',outro:'Outros'})[m.categoria]||'Material de apoio')+' · '+(m.para==='todos'?'Todos os pacientes':'Para '+nomeTxt(m.para,nomeDe(m.para,m.para)));
   return h('article',{class:'item'},
     h('div',{class:'row'},h('h3',{},m.titulo||'Sem título'),gestao?h('span',{class:'pill tag'},aud):null),
     m.descricao?h('p',{class:'body'},m.descricao):null,
@@ -1738,7 +1745,7 @@ function renderPacientes(){
     var prox=S.d.agenda.filter(function(a){return a.codigo===p.codigo&&a.data>=todayKey&&(a.status==='agendada'||a.status==='confirmada')}).sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})[0];
     var avisosOn=p.avisos==='sim'&&p.email;var fi=(S.d.fichas||[]).filter(function(x){return x.codigo===p.codigo})[0];
     return h('article',{class:'item pat-item'},
-      h('div',{class:'row'},h('h3',{},linkPac(p.codigo,p.nome)),h('span',{class:'code'},p.codigo)),
+      h('div',{class:'row'},h('h3',{},linkPac(p.codigo,nomeRico(p.codigo,p.nome))),h('span',{class:'code'},p.codigo)),
       h('div',{class:'meta'},[p.telefone||'Sem telefone',avisosOn?'Avisos por e-mail ativos':(p.email?'E-mail cadastrado, avisos desativados':'Sem e-mail'),fi?('Ficha enviada'+(limFinG(p.codigo)?(p.liberado==='sim'?' · agendamento liberado':' · agendamento em avaliação (valor reduzido)'):'')):'Ficha pendente',prox?'Próxima sessão: '+longDay(prox.data)+' às '+prox.hora:'Sem sessão marcada'].join(' · ')),
       null,
       null,
@@ -1884,7 +1891,7 @@ function itemAtualizacao(m){
   var nova=m.situacao==='nova',feita=m.situacao==='resolvida',req=m.tipo==='solicitacao'||m.tipo==='cancelamento',doc=m.tipo==='material';
   var rot=TIPO_ROT[m.tipo]||'Atualização';
   return h('article',{class:'item'+(nova?' unread':'')+(feita?' feito':'')},
-    h('div',{class:'row'},h('h3',{},nomeDe(m.codigo,m.iniciais)+' · '+(m.titulo||rot)),
+    h('div',{class:'row'},h('h3',{},nomeRico(m.codigo,nomeDe(m.codigo,m.iniciais)),' · '+(m.titulo||rot)),
       h('div',{class:'actions'},h('span',{class:'pill '+(feita?'confirmada':nova?'nova':'tag')},feita?'✓ Resolvida':nova?'Nova':'Lida'),m.tipo==='material'&&rsFeito('salvo:'+m.id)?h('span',{class:'pill confirmada'},'📁 '+((rsEst('salvo:'+m.id)||{}).resolucao||'Salvo')):null,h('span',{class:'pill '+(doc?'tag':m.tipo)},rot))),
     limpaRef(m.mensagem)?h('p',{class:'body'},limpaRef(m.mensagem)):null,
     m.tipo==='solicitacao'&&m.dataPreferida?h('p',{class:'meta'},'Data preferida: '+longDay(m.dataPreferida)):null,
@@ -2351,13 +2358,16 @@ var ORIENT=['Heterossexual','Homossexual','Bissexual','Pansexual','Assexual','Ou
 var RACA=['Preta','Parda','Branca','Indígena','Amarela','Prefiro não informar'];
 var UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 var TIT=['Para mim mesmo','Para outra pessoa maior de idade','Para um filho menor de idade'];
+var CONTATO=['Somente o responsável','O responsável e o paciente'];
 var REC=['Meu próprio nome','No nome de outra pessoa'];
 var PAGQ=['Antes de cada sessão','Depois de cada sessão','Em um dia fixo do mês'];
+var SERV=['Psicoterapia','Avaliação neuropsicológica'];
+var NEUPAG=['Valor integral em parcela única','Dividido em 3 vezes','Por sessão realizada'];
 var T=function(k,l,o){o=o||{};o.t='text';o.k=k;o.l=l;return o};
 var SEC=[
   {h:'Atendimento',f:[
     {t:'sel',k:'titular',l:'Titular: para quem é o atendimento?',o:TIT,req:1,resp:[T('resp_nome','Nome completo do responsável',{req:1,ac:'name'}),T('resp_cpf','CPF do responsável',{req:1,mask:'cpf',im:'numeric'})]},
-    {t:'sel',k:'servico',l:'O que você procura?',o:['Psicoterapia','Avaliação neuropsicológica']},
+    {t:'sel',k:'servico',l:'O que você procura?',o:SERV},
     {t:'sel',k:'modalidade',l:'Modalidade preferida',o:['Presencial','Online']},
     {t:'sel',k:'urgencia',l:'Qual a urgência?',o:URG,req:1,alerta:1},
     {t:'sel',k:'recibo',l:'Em nome de quem será emitido o recibo?',o:REC,req:1,
@@ -2367,10 +2377,13 @@ var SEC=[
   {h:'Dados do paciente',f:[
     T('paciente','Nome completo',{req:1,ac:'name'}),
     {row:[T('nascimento','Data de nascimento',{req:1,mask:'date',ph:'dd/mm/aaaa',im:'numeric'}),T('cpf','CPF',{req:1,mask:'cpf',im:'numeric'})]},
+    {t:'info',k:'menor_info',l:'Contatos do responsável',hint:'Para pacientes menores de 18 anos, os contatos são os do responsável. Preenchemos automaticamente com os dados da sua conta; corrija se precisar.'},
     {row:[T('telefone','Telefone (WhatsApp)',{req:1,mask:'tel',ac:'tel',type:'tel'}),T('email','E-mail',{req:1,ac:'email',type:'email',im:'email',ph:'nome@exemplo.com'})]},
+    {t:'sel',k:'contato_quem',l:'Quem deve ser contactado para as comunicações sobre os atendimentos?',o:CONTATO,req:1,
+      pac:[T('pac_telefone','Telefone (WhatsApp) do paciente',{req:1,mask:'tel',type:'tel',ac:'off'}),T('pac_email','E-mail do paciente (opcional)',{type:'email',im:'email',ac:'off',ph:'nome@exemplo.com'})]},
     {row:[T('telefone_ref','Telefone de uma pessoa de referência (opcional)',{mask:'tel',type:'tel',hint:'Pessoas de referência são aquelas que você pode acionar e que podem te oferecer apoio.'})]}
   ]},
-  {h:'Dados sociodemográficos',f:[
+  {h:'Dados sociodemográficos do paciente',f:[
     {row:[{t:'sel',k:'sexo',l:'Sexo',o:SEXO},{t:'sel',k:'orientacao',l:'Orientação sexual',o:ORIENT}]},
     {row:[{t:'sel',k:'estado_civil',l:'Estado civil',o:CIVIL},{t:'sel',k:'raca',l:'Cor (autodeclaração racial)',o:RACA}]},
     {row:[T('nacionalidade','Nacionalidade',{ph:'Ex.: brasileira',ac:'country-name',hint:'Informe o país de origem. Se for brasileira(o), escreva “brasileira” ou “brasileiro”.'})]},
@@ -2420,6 +2433,8 @@ var SEC=[
     {t:'chk',k:'lim_horario',v:'SIM',l:'Meus horários de trabalho ou estudo são pouco flexíveis'},
     {t:'chk',k:'lim_transporte',v:'SIM',l:'Distância ou transporte dificultam o atendimento presencial'},
     {t:'chk',k:'lim_acessibilidade',v:'SIM',l:'Preciso de adaptações de acessibilidade'},
+    {t:'info',k:'neuro_aviso',only:'neuro',cls:'nota-neuro',l:'Avaliação neuropsicológica',hint:'Você receberá, após a conclusão, uma relação das sessões realizadas, assinada e anexada ao contrato.'},
+    {t:'sel',k:'pagamento_neuro',only:'neuro',l:'Como prefiro pagar:',o:NEUPAG,desc:'O valor da avaliação consta no contrato. O pagamento é feito por Pix.'},
     {t:'sel',k:'pagamento',l:'Como prefiro pagar:',o:PAGQ,desc:'O valor da sessão é definido pelo profissional que irá atendê-lo e consta no contrato. O pagamento é feito por Pix: a cobrança aparece na aba Pagamentos conforme a sua escolha.',
       dt:[T('pagamento_dia','Dia do mês para pagar (de 1 a 28)',{req:1,mask:'dia',im:'numeric',ph:'Ex.: 10'})]}
   ]},
@@ -2473,8 +2488,9 @@ function fichaView(fi){
     var itens=fichaFlat(sc.f,[]).filter(function(f){return d[f.k]&&f.t!=='info'});
     if(!itens.length)return;tot+=itens.length;
     var g=h('dl',{class:'fvx-g'},itens.map(function(f){
-      var v=String(d[f.k]),sn=/^(sim|não|nao)$/i.test(v),longo=v.length>64||f.t==='area';
-      return h('div',{class:'fvx-i'+(longo?' wide':'')},h('dt',{},f.l.replace(/^\d+\)\s*/,'')),h('dd',{},sn?h('span',{class:'fvx-p '+(/^sim$/i.test(v)?'s':'n')},v.toUpperCase()):v));
+      var v=String(d[f.k]),sn=/^(sim|não|nao)$/i.test(v),longo=v.length>64||f.t==='area',rot=f.l;
+      if(d.titular===TIT[2]){if(f.k==='telefone')rot='Telefone do responsável (WhatsApp)';else if(f.k==='email')rot='E-mail do responsável'}
+      return h('div',{class:'fvx-i'+(longo?' wide':'')},h('dt',{},rot.replace(/^\d+\)\s*/,'')),h('dd',{},sn?h('span',{class:'fvx-p '+(/^sim$/i.test(v)?'s':'n')},v.toUpperCase()):v));
     }));
     secs.push(h('section',{class:'fvx-s'},h('h4',{},h('span',{class:'fvx-n'},String(secs.length+1)),sc.h),g));
   });
@@ -2493,7 +2509,7 @@ function verFichaPopup(){var f=S.d.ficha;if(!f)return;dialogo({titulo:'Minha fic
 function buildFicha(){
   var el=h('section',{class:'fx',role:'tabpanel'});
   var form=h('form',{novalidate:true,autocomplete:'on'});
-  var keys=[],stepKeys=[],cur=0,tm=null;
+  var keys=[],stepKeys=[],cur=0,tm=null,wasMenor=null;
   function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
   function lab(f,id){var l=mk('label',f.req?'req':'',f.l);if(id)l.htmlFor=id;return l}
   function pills(f,cls){
@@ -2519,6 +2535,7 @@ function buildFicha(){
       else{var s=mk('select');s.id=id;s.name=f.k;s.append(new Option('Selecione',''));f.o.forEach(function(o){s.append(new Option(o,o))});s.addEventListener('change',refresh);w.append(s)}
       if(f.rec){var cb=mk('div','sub2');cb.id='fx_rec';cb.hidden=true;f.rec.forEach(function(x){build(x,cb)});w.append(cb)}
       if(f.dt){var db=mk('div','sub2');db.id='fx_dt';db.hidden=true;f.dt.forEach(function(x){build(x,db)});w.append(db)}
+      if(f.pac){var pb=mk('div','sub2');pb.id='fx_pac';pb.hidden=true;f.pac.forEach(function(x){build(x,pb)});w.append(pb)}
       if(f.alerta){var ab=mk('div','sub2');ab.id='fx_alerta';ab.hidden=true;ab.append(mk('p','hint','Se você está em sofrimento intenso agora, não espere o nosso retorno: ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure o CAPS ou a UPA mais próxima. Depois você pode continuar a ficha.'));w.append(ab)}
       if(f.resp){var rb=mk('div','sub2');rb.id='fx_resp';rb.hidden=true;var rp=mk('p','hint','Quem solicita o atendimento e assina o contrato. Os dados de quem será atendido são pedidos na próxima etapa.');rp.style.margin='0 0 10px';rb.append(rp);f.resp.forEach(function(x){build(x,rb)});w.append(rb)}
     }else if(f.t==='yn'){
@@ -2529,7 +2546,7 @@ function buildFicha(){
     }else if(f.t==='chk'){
       var l=mk('label','chk'+((f.k==='lgpd'||f.k==='ciente')?' consent':'')),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;c.addEventListener('change',refresh);l.append(c,mk('span',f.req?'req':'',f.l));w.append(l);if(f.sub){var sb2=mk('div','sub');sb2.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb2)});w.append(sb2)}
     }
-    w.dataset.k=f.k;host.append(w);
+    w.dataset.k=f.k;if(f.only)w.dataset.only=f.only;if(f.cls)w.className+=' '+f.cls;host.append(w);
   }
   STEPS.forEach(function(st,i){
     var k0=keys.length,card=h('section',{class:'card fstep'+(st.n==='Consentimento'?' consent-step':''),'data-i':i});
@@ -2562,6 +2579,10 @@ function buildFicha(){
   function setLab(k,t){var l=form.querySelector('label[for="q_'+k+'"]');if(l)l.textContent=t}
   function refresh(){
     form.querySelectorAll('.sub').forEach(function(s){s.hidden=val(s.dataset.when)!=='SIM'});
+    var neuro=val('servico')===SERV[1];
+    form.querySelectorAll('.f[data-only="neuro"]').forEach(function(w){w.hidden=!neuro});
+    var fpg=form.querySelector('.f[data-k="pagamento"]');
+    if(fpg){fpg.hidden=neuro&&val('pagamento_neuro')!==NEUPAG[2];var qq=fpg.querySelector('.q');if(qq)qq.textContent=neuro?'Pagando por sessão realizada: quando prefere pagar?':'Como prefiro pagar:'}
     var tv=val('titular'),outro=!!tv&&tv!==TIT[0];
     var br=form.querySelector('#fx_resp');if(br)br.hidden=!outro;
     var bc=form.querySelector('#fx_rec');if(bc)bc.hidden=val('recibo')!==REC[1];
@@ -2572,10 +2593,51 @@ function buildFicha(){
     setLab('cpf',outro?'CPF do paciente':'CPF');
     setLab('resp_nome',tv===TIT[2]?'Nome completo do responsável (pai, mãe ou responsável legal)':'Nome completo de quem solicita');
     setLab('resp_cpf',tv===TIT[2]?'CPF do responsável':'CPF de quem solicita');
+    /* paciente menor de 18 anos: contatos do responsável (vêm da conta) e pergunta de quem contactar */
+    var menor=tv===TIT[2];
+    aplicaMenor(menor);
+    var fq=form.querySelector('.f[data-k="contato_quem"]');if(fq)fq.hidden=!menor;
+    var fm=form.querySelector('.f[data-k="menor_info"]');if(fm)fm.hidden=!menor;
+    var bp=form.querySelector('#fx_pac');if(bp)bp.hidden=!(menor&&val('contato_quem')===CONTATO[1]);
+    setLab('telefone',menor?'Telefone do responsável (WhatsApp)':'Telefone (WhatsApp)');
+    setLab('email',menor?'E-mail do responsável':'E-mail');
+    /* idade do paciente: até 13 anos a pergunta de orientação sexual não se aplica */
+    var idade=idadeNasc();
+    var os=form.querySelector('select[name="orientacao"]');
+    if(os){
+      var nao=idade!==null&&idade<=13,opt=os.querySelector('option[data-na]');
+      if(nao){if(!opt){opt=new Option('Não se aplica','Não se aplica');opt.dataset.na='1';os.append(opt)}os.value='Não se aplica';os.disabled=true}
+      else{if(opt){if(os.value==='Não se aplica')os.value='';opt.remove()}os.disabled=false}
+      notaCampo('orientacao','fx_na','Para pacientes até 13 anos esta pergunta não se aplica e será registrada como "não se aplica".',nao);
+    }
+    notaCampo('nascimento','fx_idade','Paciente menor de 18 anos: volte à etapa Atendimento e escolha "Para um filho menor de idade" para informar os dados do responsável.',idade!==null&&idade<18&&!menor);
+  }
+  function idadeNasc(){
+    var i=form.querySelector('[name="nascimento"]'),m=i&&/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(i.value);
+    if(!m||!dataOk(m[0]))return null;
+    var hj=new Date(),a=hj.getFullYear()-(+m[3]);
+    if(hj.getMonth()+1<+m[2]||(hj.getMonth()+1===+m[2]&&hj.getDate()<+m[1]))a--;
+    return a;
+  }
+  function notaCampo(k,id,txt,mostrar){
+    var w=form.querySelector('.f[data-k="'+k+'"]');if(!w)return;
+    var p=w.querySelector('#'+id);
+    if(!p){p=mk('p','hint',txt);p.id=id;w.append(p)}
+    p.hidden=!mostrar;
+  }
+  /* ao escolher "filho menor de idade", o nome da conta (responsável) vai para o campo do responsável */
+  function aplicaMenor(menor){
+    if(wasMenor===menor)return;wasMenor=menor;
+    var nome=String(((S.d&&S.d.perfil)||{}).nome||'').replace(/\s*\(.*?\)/g,'');
+    var fp=form.querySelector('[name="paciente"]'),fr=form.querySelector('[name="resp_nome"]');
+    if(!nome||!fp||!fr)return;
+    if(menor){if(fp.value===nome)fp.value='';if(!fr.value)fr.value=nome}
+    else if(fr.value===nome&&!fp.value){fp.value=nome;fr.value=''}
+    salvaSoon();
   }
   refresh();
   function limpa(t){if(t.classList)t.classList.remove('bad');var w=t.closest&&t.closest('.f');if(w)w.classList.remove('bad')}
-  form.addEventListener('input',function(e){var m=e.target.dataset&&e.target.dataset.mask;if(m&&MASK[m])e.target.value=MASK[m](e.target.value);tick(e.target);limpa(e.target);salvaSoon()});
+  form.addEventListener('input',function(e){var m=e.target.dataset&&e.target.dataset.mask;if(m&&MASK[m])e.target.value=MASK[m](e.target.value);tick(e.target);limpa(e.target);if(e.target.name==='nascimento')refresh();salvaSoon()});
   form.addEventListener('change',function(e){limpa(e.target);salvaSoon()});
   form.addEventListener('change',function(e){
     var t=e.target;if(!t||t.name!=='lim_financeiro'||t.checked)return;
@@ -2596,7 +2658,7 @@ function buildFicha(){
       refresh();cur=Math.min(+r.s||0,STEPS.length-1)}catch(x){}
   }
   function preSocial(){if(!PRE_SOCIAL)return;var c=form.querySelector('[name="lim_financeiro"]');if(c&&!c.checked){c.checked=true;refresh()}PRE_SOCIAL=false;try{sessionStorage.removeItem('siage-social')}catch(e){}}
-  function prefill(){var p=S.d.perfil||{};[['email',p.email],['telefone',p.telefone],['paciente',p.nome]].forEach(function(x){var i=form.querySelector('[name="'+x[0]+'"]');if(i&&!i.value&&x[1]){i.value=String(x[1]).replace(/\s*\(.*?\)/g,'');var m=i.dataset.mask;if(m&&MASK[m])i.value=MASK[m](i.value);tick(i)}})}
+  function prefill(){var p=S.d.perfil||{},men=val('titular')===TIT[2];[['email',p.email],['telefone',p.telefone],['paciente',men?'':p.nome,1],['resp_nome',men?p.nome:'',1]].forEach(function(x){var i=form.querySelector('[name="'+x[0]+'"]');if(i&&!i.value&&x[1]){i.value=x[2]?String(x[1]).replace(/\s*\(.*?\)/g,''):String(x[1]);var m=i.dataset.mask;if(m&&MASK[m])i.value=MASK[m](i.value);tick(i)}})}
 
   function mostra(i,rolar){
     cur=i;form.querySelectorAll('.fstep').forEach(function(s){s.hidden=+s.dataset.i!==i});
@@ -2611,7 +2673,7 @@ function buildFicha(){
 
   function coleta(){
     var d={};
-    keys.forEach(function(k){var x=form.querySelector('[name="'+k+'"]');if(!x)return;if(x.closest('.sub[hidden], .sub2[hidden]'))return;
+    keys.forEach(function(k){var x=form.querySelector('[name="'+k+'"]');if(!x)return;if(x.closest('.sub[hidden], .sub2[hidden], .f[hidden]'))return;
       if(x.type==='radio')d[k]=val(k);else if(x.type==='checkbox')d[k]=x.checked?x.value:'';else d[k]=x.value.trim()});
     return d;
   }
@@ -2620,13 +2682,16 @@ function buildFicha(){
     var no=function(k){return !escopo||escopo.indexOf(k)>=0};
     var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','urgencia','lgpd'];
     if(d.titular&&d.titular!==TIT[0])obrig.push('resp_nome','resp_cpf');
+    if(d.titular===TIT[2]){obrig.push('contato_quem');if(d.contato_quem===CONTATO[1])obrig.push('pac_telefone')}
     if(d.recibo===REC[1])obrig.push('recibo_nome','recibo_cpf');
+    if(d.servico===SERV[1])obrig.push('pagamento_neuro');
     if(d.pagamento===PAGQ[2])obrig.push('pagamento_dia');
     if(d.lim_financeiro==='SIM')obrig.push('soc_renda','soc_pessoas','soc_cadunico','soc_trabalho','soc_aceite');
     var falta=obrig.filter(function(k){return no(k)&&!d[k]});
     if(falta.length){falta.forEach(marca);return {k:falta[0],m:falta.length===1&&falta[0]==='lgpd'?'Para enviar, confirme o consentimento.':'Faltam '+falta.length+' pergunta(s) obrigatória(s), marcadas em vermelho. Preencha para continuar.'}}
     var tests=[['cep',function(c){return dig(c).length===8},'CEP inválido. Informe os 8 números.'],['cpf',cpfOk,'CPF inválido. Confira os números.'],['nascimento',dataOk,'Data de nascimento inválida. Use dd/mm/aaaa.'],['email',emailOk,'E-mail inválido. Use o formato nome@exemplo.com.']];
     if(d.titular&&d.titular!==TIT[0])tests.push(['resp_cpf',cpfOk,'CPF do responsável inválido.']);
+    tests.push(['pac_telefone',function(v){return dig(v).length>=10},'Telefone do paciente inválido. Informe o DDD e o número.'],['pac_email',emailOk,'E-mail do paciente inválido. Use o formato nome@exemplo.com.']);
     if(d.recibo===REC[1])tests.push(['recibo_cpf',cpfOk,'CPF do pagador inválido.']);
     if(d.lim_financeiro==='SIM')tests.push(['soc_renda',function(v){var n=socNum(v);return !isNaN(n)&&n>=0},'Renda inválida. Use só números, por exemplo 3200.'],['soc_pessoas',function(v){return +v>=1},'Informe quantas pessoas vivem dessa renda (mínimo 1).']);
     if(no('pagamento_dia')&&d.pagamento===PAGQ[2]&&!(+d.pagamento_dia>=1&&+d.pagamento_dia<=28)){marca('pagamento_dia');return {k:'pagamento_dia',m:'Informe um dia do mês entre 1 e 28.'}}
@@ -3122,7 +3187,8 @@ function buildContratos(){
   f.menor.addEventListener('change',function(){f.menorBox.hidden=!f.menor.checked});
   f.objeto=h('div',{class:'fields'},h('div',{class:'f'},h('span',{},'Serviços'),grp(f.sv,['Psicoterapia','Neuropsicologia'])),h('div',{class:'f'},h('span',{},'Modalidade'),grp(f.md,['Presencial','Online'])),
     txt('aval','Nº de sessões da avaliação (se neuropsicologia)',{attrs:{inputmode:'numeric',maxlength:3}}),txt('local','Endereço do atendimento presencial (vem do cadastro do profissional)',{area:1,wide:1}),txt('link','Link da sala online',{wide:1}));
-  f.pag=h('div',{class:'fields'},txt('valor','Valor por sessão (R$)',{attrs:{inputmode:'decimal',placeholder:'150,00'}}),sel('forma','Forma de pagamento',['Pix','Transferência']),
+  f.pagneuBox=sel('pagneu','Pagamento da avaliação neuropsicológica (escolha do paciente)',NEUPAG);f.pagneuBox.hidden=true;
+  f.pag=h('div',{class:'fields'},txt('valor','Valor por sessão (R$) ou, na neuropsicologia em parcela única ou 3 vezes, valor total',{attrs:{inputmode:'decimal',placeholder:'150,00'}}),f.pagneuBox,sel('forma','Forma de pagamento',['Pix','Transferência']),
     txt('pix','Chave Pix'),txt('conta','Conta para transferência',{area:1,wide:1}),
     h('div',{class:'f'},h('span',{},'Como prefiro pagar:'),grp(f.qd,CT_QUANDO.map(function(q){return q[1]}))),txt('dia','Dia do mês (se mensal)',{attrs:{inputmode:'numeric',maxlength:2}}));
   f.ag=h('div',{class:'fields'},sel('diasem','Dia da semana',CT_DIAS),txt('hora','Horário (hh:mm)',{attrs:{inputmode:'numeric',maxlength:5,placeholder:'14:00'}}));
@@ -3140,7 +3206,7 @@ function buildContratos(){
     f.msg,h('div',{class:'actions'},f.bClear,f.bPrev,f.bDown,f.bSave));
   f.pac.addEventListener('change',function(){preencherContrato(true)});
   f.prof.addEventListener('change',function(){preencherContrato(false)});
-  f.sv.forEach(function(c){c.addEventListener('change',atualizaCod)});
+  f.sv.forEach(function(c){c.addEventListener('change',function(){atualizaCod();f.pagneuBox.hidden=!f.sv[1].checked})});
   el.append(h('div',{class:'nt-head'},h('h2',{},'Contratos'),h('p',{class:'meta'},'Gera o contrato de prestação de serviços em PDF (duas vias) com os dados da ficha e do profissional e o envia direto à aba Aceite do paciente para assinatura.')),
     h('div',{class:'card'},form));
   return el;
@@ -3167,6 +3233,7 @@ function preencherContrato(trocouPac){
     var men=/menor/i.test(String(fi.titular||''));f.menor.checked=men;f.menorBox.hidden=!men;f.resp.value=men?(fi.resp_nome||''):'';f.respcpf.value=men?(fi.resp_cpf||''):'';
     var sv=String(fi.servico||'');f.sv[0].checked=/psicoter/i.test(sv);f.sv[1].checked=/neuro/i.test(sv);
     var md=String(fi.modalidade||'');f.md[0].checked=/presencial/i.test(md);f.md[1].checked=/online/i.test(md);
+    f.pagneuBox.hidden=!f.sv[1].checked;f.pagneu.value=NEUPAG.indexOf(fi.pagamento_neuro)>=0?fi.pagamento_neuro:'';
     f.cod.value='';atualizaCod();
     var pq=String(fi.pagamento||'');f.qd.forEach(function(rd){rd.checked=(rd.value==='antes'&&/antes/i.test(pq))||(rd.value==='apos'&&/depois/i.test(pq))||(rd.value==='dia'&&/dia fixo/i.test(pq))});
     if(/dia fixo/i.test(pq)&&fi.pagamento_dia)f.dia.value=fi.pagamento_dia;
@@ -3199,14 +3266,17 @@ function dadosContrato(){
   if(!md.length)throw new Error('Marque a modalidade de atendimento.');
   if(!/^(\d{1,3}(\.\d{3})*(,\d{1,2})?|\d{1,5}([.,]\d{1,2})?)$/.test(f.valor.value.trim()))throw new Error('Informe o valor por sessão (ex.: 150,00).');
   if(!f.forma.value)throw new Error('Escolha a forma de pagamento.');
-  var q=f.qd.filter(function(r){return r.checked})[0];if(!q)throw new Error('Marque quando o pagamento é feito.');
-  if(q.value==='dia'&&!f.dia.value.trim())throw new Error('Informe o dia do mês do pagamento.');
+  var neuroSo=f.sv[1].checked&&!f.sv[0].checked;
+  if(f.sv[1].checked&&!f.pagneu.value)throw new Error('Escolha como o paciente vai pagar a avaliação neuropsicológica.');
+  var q=f.qd.filter(function(r){return r.checked})[0],semQuando=neuroSo&&f.pagneu.value!==NEUPAG[2];
+  if(!q&&!semQuando)throw new Error('Marque quando o pagamento é feito.');
+  if(q&&q.value==='dia'&&!f.dia.value.trim())throw new Error('Informe o dia do mês do pagamento.');
   if(f.menor.checked&&!f.resp.value.trim())throw new Error('Informe o responsável do menor.');
   var partes=pr.nome.trim().split(/\s+/);
   var d={paciente:f.nome.value.trim(),cpf:f.cpf.value.trim(),telefone:f.tel.value.trim(),email:f.email.value.trim(),estado_civil:f.civil.value,ct_nac:f.nac.value.trim(),ct_end:f.end.value.trim(),
     ct_data:f.data.value.trim(),prontuario:f.cod.value.trim(),ct_menor:f.menor.checked?'SIM':'',ct_resp:f.resp.value.trim(),ct_resp_cpf:f.respcpf.value.trim(),
     ct_serv:sv,ct_mod:md,ct_aval:f.aval.value.trim(),ct_local:f.local.value.trim(),ct_link:f.link.value.trim(),ct_valor:f.valor.value.trim(),ct_forma:f.forma.value,
-    ct_pix:f.pix.value.trim(),ct_conta:f.conta.value.trim(),ct_quando:q.value,ct_dia:f.dia.value.trim(),ct_diasem:f.diasem.value,ct_hora:f.hora.value.trim(),
+    ct_pix:f.pix.value.trim(),ct_conta:f.conta.value.trim(),ct_quando:q?q.value:'',ct_pag_neuro:f.sv[1].checked?f.pagneu.value:'',ct_relacao_sessoes:f.sv[1].checked?'SIM':'',ct_dia:f.dia.value.trim(),ct_diasem:f.diasem.value,ct_hora:f.hora.value.trim(),
     profissional:pr.nome,__prof:{nome:pr.nome,curto:partes.length>1?partes[0]+' '+partes[partes.length-1]:partes[0],crpn:pr.crp,crpe:pr.crp.replace('/','—')}};
   return {d:d,pac:pac,prof:pr};
 }
@@ -3244,9 +3314,9 @@ async function acaoContrato(modo){
 function limparContrato(){
   var f=P.ct;if(!f)return;
   ['nome','nac','cpf','tel','email','end','cod','data','resp','respcpf','aval','local','link','valor','pix','conta','dia','hora'].forEach(function(k){if(f[k]){f[k].value='';if(f[k].dataset)delete f[k].dataset.auto}});
-  ['civil','forma','diasem','pac','prof'].forEach(function(k){if(f[k])f[k].value=''});
+  ['civil','forma','diasem','pac','prof','pagneu'].forEach(function(k){if(f[k])f[k].value=''});
   f.sv.concat(f.md,f.qd,[f.menor]).forEach(function(c){c.checked=false});
-  f.menorBox.hidden=true;f.ficha.hidden=true;f.msg.textContent='';
+  f.menorBox.hidden=true;f.pagneuBox.hidden=true;f.ficha.hidden=true;f.msg.textContent='';
   var volta=S.ctOrigem&&S.ctOrigem!=='contratos_g'?S.ctOrigem:'hoje';S.ctOrigem=null;
   toast('Contrato fechado e preenchimento limpo.');go(volta);
 }
@@ -3255,6 +3325,12 @@ function renderContratos(){if(P.ct)refreshSelects()}
 
 /* ================= PROPOSTA C: busca global ================= */
 function norm(t){return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function pacMenor(codigo){var f=fichaDoPac(codigo);return (f&&f.titular===TIT[2]&&f.paciente)?f:null}
+function nomeRico(codigo,nome){
+  var f=pacMenor(codigo);if(!f)return nome;
+  return h('span',{class:'nm-menor'},h('span',{class:'nm-t'},f.paciente,h('span',{class:'nm-b'},'Menor de idade')),h('span',{class:'nm-s'},(f.resp_nome||nome)+' (responsável)'));
+}
+function nomeTxt(codigo,nome){var f=pacMenor(codigo);return f?f.paciente+' (menor de idade, responsável: '+(f.resp_nome||nome)+')':nome}
 function linkPac(codigo,label,cls){return h('button',{type:'button',class:'plink '+(cls||''),title:'Abrir página do paciente',onclick:function(){abrirPaciente(codigo)}},label)}
 function abrirPaciente(codigo,sub){S.pgFechado=false;S.pacAberto=codigo;S.pacSub=sub||'resumo';go('paciente_g');window.scrollTo({top:0})}
 function acaoAgendar(c){go('agenda');toggleAgForm({codigo:c})}
@@ -3373,8 +3449,8 @@ function renderPacienteG(){
       h('div',{class:'actions'},
         p.telefone?h('a',{class:'btn small',href:waUrl('',p.telefone),target:'_blank',rel:'noopener noreferrer'},'Falar no WhatsApp'):null,
         btn('Mensagens prontas',function(){abrirModelos(c)},'small'))),
-    h('div',{class:'pg-id'},h('span',{class:'pg-av','aria-hidden':'true'},iniciais2(p.nome)),
-      h('div',{class:'pg-tx'},h('h2',{class:'pg-name'},p.nome),
+    h('div',{class:'pg-id'},h('span',{class:'pg-av','aria-hidden':'true'},iniciais2(pacMenor(c)?pacMenor(c).paciente:p.nome)),
+      h('div',{class:'pg-tx'},h('h2',{class:'pg-name'},nomeRico(c,p.nome)),
         h('div',{class:'pg-info'},h('span',{class:'code'},p.codigo),h('span',{},p.telefone||'Sem telefone'),h('span',{},p.email||'Sem e-mail')))));
   P.pgSubs.replaceChildren.apply(P.pgSubs,PG_SUBS.map(function(t){
     var n=t[0]==='pagamentos'?pgAbertas(c).length:0;
