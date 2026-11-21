@@ -878,6 +878,8 @@ function add(e,kid){
   e.append(kid.nodeType?kid:document.createTextNode(String(kid)));
 }
 var ICO={
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ unlock:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
  calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>',
  users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.6c2.4.2 4 1.9 4 4.4"/>',
  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>',
@@ -885,6 +887,7 @@ var ICO={
  wallet:'<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/>',
  file:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
  megaphone:'<path d="M3 11v3h3l8 4V7L6 11z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+ sparkles:'<path d="M12 3l1.8 5.7a2 2 0 0 0 1.3 1.3L21 12l-5.7 1.8a2 2 0 0 0-1.3 1.3L12 21l-1.8-5.7a2 2 0 0 0-1.3-1.3L3 12l5.7-1.8a2 2 0 0 0 1.3-1.3z"/><path d="M19 3v4M17 5h4M5 17v4M3 19h4"/>',
  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 9.5v5M9.5 12h5"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
@@ -990,7 +993,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -1753,6 +1756,7 @@ function renderPacientes(){
         btn('Abrir paciente',function(){abrirPaciente(p.codigo)},'primary small'),
         btn('Agendar sessão',function(){go('agenda');toggleAgForm({codigo:p.codigo})},'small'),
         btn('Mensagem WhatsApp',function(){abrirModelos(p.codigo)},'small'),
+        btn('Boas-vindas',function(){irBoasVindas(p.codigo)},'small'),
         btn('Enviar material',function(){go('materiais');P.lib.para.value=p.codigo;P.lib.titulo.focus()},'small'),
         fi?btn('Ver ficha',function(){verFichaG(p.codigo)},'small'):null,
         btnLiberar(p),
@@ -3342,7 +3346,7 @@ function novoPaciente(){go('pacientes');P.pcBox.open=true;P.pcBox.scrollIntoView
 /* ===== + Novo ===== */
 var NV={aberto:false};
 var NOVO=[['Agendar sessão','S',function(){go('agenda');toggleAgForm()}],['Cadastrar paciente','P',novoPaciente],['Nova cobrança','C',function(){go('financeiro');P.fnBox.open=true;P.fnBox.scrollIntoView({block:'nearest'})}],
-  ['Gerar contrato','',function(){go('contratos_g')}],['Publicar aviso','',function(){go('materiais');var e=document.getElementById('av-titulo');if(e)e.focus()}],['Enviar material','',function(){go('materiais');P.lib.titulo.focus()}]];
+  ['Gerar contrato','',function(){go('contratos_g')}],['Boas-vindas','',function(){go('boas_vindas')}],['Publicar aviso','',function(){go('materiais');var e=document.getElementById('av-titulo');if(e)e.focus()}],['Enviar material','',function(){go('materiais');P.lib.titulo.focus()}]];
 function novoAbrir(emCima,ancora){
   if(S.modo!=='gestao')return;
   if(NV.aberto){novoFechar();return}
@@ -3438,6 +3442,111 @@ function buildPacienteG(){
 function pgDe(c){return S.d.pacientes.filter(function(p){return p.codigo===c})[0]}
 function pgContratos(c){return (S.d.materiais||[]).filter(function(m){return m.categoria==='contrato'&&m.para===c}).sort(byNew)}
 function pgAbertas(c){return cobrancasG().filter(function(x){return x.codigo===c&&(x.status==='pendente'||x.status==='comprovante')})}
+
+/* ================= FERRAMENTAS CLÍNICAS (Subaba Ficha do Paciente) ================= */
+var FERRAMENTAS_LISTA=[
+  ['todas','Menu com todas as ferramentas'],
+  ['esperanca','Fomentando Esperança'],
+  ['metas','Metas Terapêuticas'],
+  ['agenda','Agenda de Sessão'],
+  ['diario','Diário do Encontro'],
+  ['quem','Quem Eu Sou'],
+  ['versoes','Viajando pelas Minhas Versões'],
+  ['amigo','Como Ajudar um Amigo'],
+  ['panela','Panela de Pressão'],
+  ['desencadeadores','Desencadeadores das Emoções'],
+  ['estresse','Lidando com o Estresse']
+];
+var URL_FERRAMENTAS_PADRAO='https://script.google.com/macros/s/AKfycbz-9RMB1WPksIjxsqctonzbTkYN_N8MsF9XMMNR4w85s9TRBnP7pmWzuyoINQD2cb3Tww/exec';
+
+function buildPgFerramentasCard(p, c){
+  S.ferramentasLiberadas = S.ferramentasLiberadas || {};
+  var liberado = S.ferramentasLiberadas[c];
+
+  var card = h('div', { class: 'card pg-ferramentas-card', style: 'flex:1 1 360px;min-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;' });
+
+  if(!liberado){
+    var selProf = h('select', { style: 'width:100%;height:38px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);' },
+      profsAtivos().map(function(pr){ return opt(pr.nome, pr.nome); }));
+    
+    var btnLiberar = btn('Liberar envio de ferramentas', function(){
+      var profEscolhido = selProf.value || (profsAtivos()[0] && profsAtivos()[0].nome) || 'Profissional';
+      S.ferramentasLiberadas[c] = { profissional: profEscolhido, data: new Date() };
+      toast('Envio de ferramentas liberado por ' + profEscolhido + '.');
+      renderPacienteG();
+    }, 'primary small');
+
+    card.append(
+      h('div', { class: 'row', style: 'align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px;' },
+        ico('lock', 20),
+        h('div', {},
+          h('h3', { style: 'margin:0;font-size:1.05rem;' }, 'Ferramentas Clínicas'),
+          h('span', { class: 'pill tag', style: 'background:rgba(211,47,47,.1);color:#d32f2f;margin-top:4px;' }, 'Bloqueado'))),
+      h('p', { class: 'meta', style: 'margin-bottom:12px;' }, 'O envio dos links de ferramentas e escalas terapêuticas para o paciente requer liberação por um profissional responsável.'),
+      field('Profissional que autoriza', selProf),
+      h('div', { class: 'actions', style: 'margin-top:14px;' }, btnLiberar));
+    return card;
+  }
+
+  var selTool = h('select', { style: 'width:100%;height:38px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);' },
+    FERRAMENTAS_LISTA.map(function(item){ return opt(item[0], item[1]); }));
+
+  var inLink = h('input', { type: 'text', readOnly: true, style: 'width:100%;height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font-family:monospace;font-size:.85rem;' });
+  inLink.addEventListener('focus', function(){ inLink.select(); });
+
+  var btnZap = h('a', { class: 'btn small', target: '_blank', rel: 'noopener noreferrer', role: 'button' }, 'Enviar por WhatsApp');
+  var btnAbre = h('a', { class: 'btn small', target: '_blank', rel: 'noopener noreferrer', role: 'button' }, 'Abrir página');
+
+  function atualizaLink(){
+    var tid = selTool.value;
+    var link = URL_FERRAMENTAS_PADRAO + '?f=' + tid;
+    inLink.value = link;
+
+    var priNome = (p.nome || '').trim().split(/\s+/)[0];
+    var oi = priNome ? 'Olá, ' + priNome + '! ' : 'Olá! ';
+    var toolNome = tid === 'todas' ? 'das ferramentas' : 'da ferramenta “' + selTool.options[selTool.selectedIndex].text + '”';
+    var msg = oi + 'Segue o link ' + toolNome + ' da Emotiss. Preencha e envie, é rápido:\n' + link;
+
+    btnZap.href = waUrl(msg, p.telefone);
+    btnAbre.href = link;
+    return { link: link, msg: msg };
+  }
+
+  selTool.addEventListener('change', atualizaLink);
+
+  var btnCopiarLink = btn('Copiar link', function(){
+    var x = atualizaLink();
+    navigator.clipboard.writeText(x.link).then(function(){ toast('Link copiado!'); });
+  }, 'primary small');
+
+  var btnCopiarMsg = btn('Copiar mensagem', function(){
+    var x = atualizaLink();
+    navigator.clipboard.writeText(x.msg).then(function(){ toast('Mensagem copiada!'); });
+  }, 'small');
+
+  var btnBloquear = btn('Bloquear', function(){
+    delete S.ferramentasLiberadas[c];
+    toast('Envio de ferramentas bloqueado.');
+    renderPacienteG();
+  }, 'small');
+
+  card.append(
+    h('div', { class: 'row', style: 'align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;' },
+      h('div', { style: 'display:flex;align-items:center;gap:8px;' },
+        ico('unlock', 18),
+        h('h3', { style: 'margin:0;font-size:1.05rem;' }, 'Ferramentas Clínicas')),
+      btnBloquear),
+    h('div', { style: 'margin-bottom:10px;' },
+      h('span', { class: 'pill tag', style: 'background:rgba(46,125,50,.12);color:#2e7d32;' }, '✓ Liberado por ' + liberado.profissional)),
+    field('Ferramenta para envio', selTool),
+    field('Link gerado para o paciente', inLink),
+    h('div', { class: 'actions', style: 'margin-top:12px;gap:8px;flex-wrap:wrap;' },
+      btnCopiarLink, btnCopiarMsg, btnZap, btnAbre));
+
+  atualizaLink();
+  return card;
+}
+
 function renderPacienteG(){
   if(!P.pgBody)return;
   var p=S.pacAberto?pgDe(S.pacAberto):null;
@@ -3469,7 +3578,10 @@ function renderPacienteG(){
         btn('Gerar contrato',function(){irContrato(c)},'small'),btn('Enviar material',function(){acaoMaterial(c)},'small'),
         btnLiberar(p),btn('E-mail e avisos',function(){abrirEmailPopup(p)},'small')))];
   }else if(sub==='ficha'){
-    body=[fi?(S.pgFechado?h('p',{class:'meta'},'Resumo recolhido. Clique em “Ficha” para abrir novamente.'):h('div',{class:'card'},fichaView(fi))):empty('Ficha pendente','Este paciente ainda não enviou a ficha.'),
+    var fichaBox = fi?(S.pgFechado?h('p',{class:'meta'},'Resumo recolhido. Clique em “Ficha” para abrir novamente.'):h('div',{class:'card',style:'flex:1 1 540px;min-width:320px;'},fichaView(fi))):h('div',{style:'flex:1 1 540px;min-width:320px;'},empty('Ficha pendente','Este paciente ainda não enviou a ficha.'));
+    var ferramentasBox = buildPgFerramentasCard(p, c);
+    var layoutFicha = h('div',{class:'pg-ficha-cols',style:'display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;'},fichaBox,ferramentasBox);
+    body=[layoutFicha,
       h('div',{class:'actions'},btn('Mensagem sobre a ficha',function(){abrirModelos(c,fi?'ficha':'semficha')},'small'))];
   }else if(sub==='agenda'){
     var ses=S.d.agenda.filter(function(a){return a.codigo===c}).sort(function(a,b){return (b.data+b.hora).localeCompare(a.data+a.hora)});
@@ -3543,7 +3655,7 @@ function renderHoje(){
 }
 
 /* ================= casca ================= */
-var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Materiais'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
+var TABS_G=[{id:'agenda',label:'Agenda'},{id:'pacientes',label:'Pacientes'},{id:'recepcao',label:'Recepção'},{id:'financeiro',label:'Financeiro'},{id:'contratos_g',label:'Contratos'},{id:'profissionais',label:'Profissionais'},{id:'materiais',label:'Publicações'},{id:'boas_vindas',label:'Boas-vindas'},{id:'disp',label:'Disponibilidade'},{id:'entrada',label:'Atualizações'}];
 var TABS_P=[{id:'sessoes',label:'Minhas sessões',ic:'calendar'},{id:'avisos',label:'Avisos',ic:'bell'},{id:'ficha',label:'Ficha',ic:'clip'},{id:'pagamentos',label:'Pagamentos',ic:'wallet'},{id:'docs',label:'Documentos',ic:'folder'},{id:'contratos',label:'Aceite',ic:'file'}];
 function fecharAba(){
   if(S.modo==='gestao'){if(S.tab==='paciente_g')voltar();else go('hoje');window.scrollTo(0,0)}
@@ -3570,7 +3682,7 @@ var GRUPOS=[
   {id:'hoje',label:'Hoje',ic:'sun',subs:[['hoje','Painel'],['agenda','Agenda'],['recepcao','Recepção'],['entrada','Atualizações']]},
   {id:'pacientes',label:'Pacientes',ic:'users',subs:[['pacientes','Lista'],['contratos_g','Contratos']]},
   {id:'financeiro',label:'Financeiro',ic:'wallet',subs:[['financeiro','Financeiro']]},
-  {id:'materiais',label:'Publicar',ic:'megaphone',subs:[['materiais','Avisos e materiais']]},
+  {id:'materiais',label:'Publicações',ic:'megaphone',subs:[['materiais','Avisos e materiais'],['boas_vindas','Boas-vindas']]},
   {id:'clinica',label:'Clínica',ic:'heart',subs:[['profissionais','Profissionais'],['disp','Disponibilidade']]}];
 function grupoDe(leaf){if(leaf==='paciente_g')leaf='pacientes';return GRUPOS.filter(function(g){return g.subs.some(function(x){return x[0]===leaf})})[0]||GRUPOS[0]}
 function badgeDe(id){return id==='entrada'?naoLidas():id==='recepcao'?itensRecepcao().length:id==='financeiro'?aConferir().length:id==='pagamentos'?abertasP().length:id==='avisos'?avPend():id==='ficha'?(!S.d.ficha?'!':avPend('ficha')):(id==='sessoes'||id==='docs'||id==='contratos')?avPend(id):0}
@@ -3615,7 +3727,7 @@ function renderShell(){
   renderTabs();renderDados();
 }
 function renderDados(){
-  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderFinanceiro();renderContratos();renderProfs();renderMateriais();renderAvisosGestao();renderDisp();renderEntrada();renderPacienteG();renderHoje();renderTabs()}
+  if(S.modo==='gestao'){refreshSelects();renderAgenda();renderPacientes();renderRecepcao();renderFinanceiro();renderContratos();renderProfs();renderMateriais();renderBoasVindas();renderAvisosGestao();renderDisp();renderEntrada();renderPacienteG();renderHoje();renderTabs()}
   else if(S.modo==='paciente'){renderPaciente();renderPagamentos()}
 }
 function refreshSelects(){
@@ -3636,15 +3748,618 @@ function refreshSelects(){
   });
 }
 
+
+/* ================= BOAS-VINDAS (Módulo de Acolhimento) ================= */
+/* Boas-vindas ao paciente (Proposta B): e-mail em texto formatado + imagem para WhatsApp. Usa os dados do Contratos e do Profissional. */
+(function (root) {
+  'use strict';
+  const K = { bg: '#FBF8F3', ink: '#17130F', muted: '#5E5649', coral: '#E8664A', coralSoft: '#F08A70', band: '#F1E9DB', rose: '#F6DDD3', cream: '#F5F0E8' };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const arr = (v) => (Array.isArray(v) ? v : []);
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const DIAS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const TIT = { luana: 'Psicóloga' };
+  const NOMES = { gabriel: 'Gabriel G. de Oliveira', luana: 'Luana de J. Amorim' };
+  const FONT_D = "Poppins, Manrope, 'Segoe UI', Arial, sans-serif";
+  const FONT_B = "Manrope, 'Segoe UI', Arial, sans-serif";
+  const EMOJI = "'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji'";
+  const T = {
+    intro: 'Agradecemos por confiar e por nos escolher para caminhar ao seu lado nessa jornada de autoconhecimento e de cuidado com a saúde mental!',
+    corpo: 'A terapia é um processo de autoconhecimento, uma forma de fazermos amizade com nossa própria história e investirmos na pessoa que desejamos ser. Nem sempre será fácil ou agradável, mas é recompensador quando nos percebemos mudando aspectos que desejamos e mais felizes. Os psicólogos acreditam que temos a força para isso, se desejarmos, e seguirão nos ajudando no processo.',
+    regras: 'Sessões de 50 minutos · remarcação com 24 h de antecedência'
+  };
+
+  /* data dd/mm/aaaa -> Date (ou null) */
+  function parseBR(s) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(s || '').trim());
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1] ? d : null;
+  }
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  function primeiroNome(n) {
+    const w = String(n || '').replace(/\([^)]*\)/g, ' ').trim().split(/\s+/)[0] || '';
+    return w ? cap(w) : '';
+  }
+
+  /* reúne tudo o que a mensagem precisa a partir do estado do formulário */
+  function data(st, opt) {
+    st = st || {}; opt = opt || {};
+    const Core = root.Core, pf = Core.profOf(st);
+    const serv = arr(st.ct_serv).length ? arr(st.ct_serv) : (st.servico === 'Avaliação neuropsicológica' ? ['Neuropsicologia'] : ['Psicoterapia']);
+    const mod = arr(st.ct_mod).length ? arr(st.ct_mod) : (st.modalidade ? [st.modalidade] : []);
+    const pres = mod.indexOf('Presencial') >= 0, onl = mod.indexOf('Online') >= 0;
+    const d1 = parseBR(st.bv_data);
+    const dia = st.ct_diasem || (d1 ? DIAS[d1.getDay()] : '');
+    const hora = String(st.ct_hora || '').trim();
+    const valor = String(st.ct_valor || '').trim() || '150,00';
+    const quando = { antes: 'antes da sessão', apos: 'após cada sessão', dia: st.ct_dia ? 'todo dia ' + st.ct_dia : 'mensal' }[st.ct_quando] || '';
+    const pagto = [st.ct_forma, quando].filter(Boolean).join(' · ');
+    const local = [];
+    if (pres) local.push(String(st.ct_local || '').trim());
+    if (onl) local.push(String(st.ct_link || '').trim() || 'Link da sala enviado antes da sessão');
+    const faltam = [];
+    if (!primeiroNome(st.paciente)) faltam.push('nome do paciente (aba Prontuário)');
+    if (!dia) faltam.push('dia da semana (aba Contratos)');
+    if (!hora) faltam.push('horário (aba Contratos)');
+    if (!mod.length) faltam.push('modalidade (aba Contratos)');
+    if (pres && !local[0]) faltam.push('endereço do atendimento presencial (aba Contratos)');
+    const aviso = [];
+    if (st.bv_data && !d1) aviso.push('A data do primeiro atendimento não é válida (use dd/mm/aaaa).');
+    if (d1 && st.ct_diasem && DIAS[d1.getDay()] !== st.ct_diasem) aviso.push('A data informada cai em ' + DIAS[d1.getDay()].toLowerCase() + ', mas o dia combinado no contrato é ' + st.ct_diasem.toLowerCase() + '.');
+    return {
+      nome: primeiroNome(st.paciente), email: String(st.email || '').trim(), fone: String(st.telefone || '').replace(/\D/g, ''),
+      servico: serv.join(' + '), modalidade: mod.length === 2 ? 'Presencial e online' : (mod[0] || ''),
+      dia, hora, primeiro: d1 ? d1.getDate() + ' de ' + MESES[d1.getMonth()] + ' de ' + d1.getFullYear() : '',
+      local: local.filter(Boolean), localRotulo: pres && onl ? 'Presencial e online' : (onl ? 'Online' : 'Presencial'),
+      valor: 'R$ ' + valor + ' por sessão', pagto, pix: st.ct_forma === 'Pix' ? String(st.ct_pix || '').trim() : '',
+      contrato: opt.contrato !== false, valores: opt.valores !== false,
+      prof: { nome: NOMES[pf.id] || pf.nome, tit: TIT[pf.id] || 'Psicólogo', crp: 'CRP ' + pf.crpn },
+      faltam, aviso
+    };
+  }
+  const notaContrato = (w, canal) => canal === 'email'
+    ? ['Em anexo, o ', 'contrato', ' de prestação de serviços em duas vias. Assine-as digitalmente pelo ', 'Gov.br', ' e devolva respondendo a este mesmo e-mail.']
+    : ['O ', 'contrato', ' de prestação de serviços foi enviado por e-mail, em duas vias. Assine-as digitalmente pelo ', 'Gov.br', ' e devolva respondendo a ele.'];
+  const assunto = (w) => 'Boas-vindas à Emotiss, ' + w.nome;
+  const ctt = 'Emotiss · (31) 98837-4248 · emotiss.psicologia@gmail.com';
+
+  /* ---------- e-mail: HTML com estilos inline (tabelas), pronto para colar no Gmail/Outlook ---------- */
+  function emailHTML(w, logo) {
+    const lg = logo ? '<img src="' + logo.data + '" width="280" alt="Emotiss — Psicologia Clínica &amp; Neuropsicologia" style="display:block;margin:0 auto;border:0;width:280px;max-width:100%;height:auto">' : '<div style="font:600 40px/1 ' + FONT_D + ';text-align:center;color:' + K.ink + '">Emotiss<span style="color:' + K.coral + '">.</span></div>';
+    const loc = w.local.length ? w.local.map((l) => esc(l)).join('<br>') : '';
+    const nc = notaContrato(w, 'email');
+    const caixa = (rot, val, sub) => '<td width="50%" valign="top" style="padding:0 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1.5px solid ' + K.ink + ';border-radius:16px"><tr><td style="padding:14px 16px"><div style="font:700 11px/1.3 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + K.muted + '">' + rot + '</div><div style="font:600 17px/1.35 ' + FONT_D + ';color:' + K.ink + ';margin-top:5px">' + esc(val) + '</div>' + (sub ? '<div style="font:500 12px/1.4 ' + FONT_B + ';color:' + K.muted + ';margin-top:4px">' + esc(sub) + '</div>' : '') + '</td></tr></table></td>';
+    return '<div style="background:' + K.bg + ';padding:28px 12px;font-family:' + FONT_B + ';color:' + K.ink + '">' +
+      '<table role="presentation" align="center" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;background:' + K.bg + '">' +
+      '<tr><td align="center" style="padding:6px 0 26px">' + lg + '</td></tr>' +
+      '<tr><td style="padding:0 8px"><div style="font:600 32px/1.2 ' + FONT_D + ';color:' + K.ink + '">Olá, ' + esc(w.nome) + '! 💛<br>Boas-vindas à Emotiss.</div>' +
+      '<p style="margin:14px 0 0;font:700 16px/1.55 ' + FONT_B + ';color:' + K.ink + '">' + T.intro + '</p></td></tr>' +
+      '<tr><td style="padding:22px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.band + ';border-radius:22px"><tr><td style="padding:24px 26px;font:500 16px/1.7 ' + FONT_B + ';color:' + K.ink + '">' + T.corpo + '</td></tr></table></td></tr>' +
+      '<tr><td style="padding:22px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.ink + ';border-radius:26px"><tr><td style="padding:28px 28px 26px;color:' + K.cream + '">' +
+      '<div style="font:700 12px/1.4 ' + FONT_B + ';letter-spacing:.16em;text-transform:uppercase;color:' + K.cream + ';opacity:.85">🗓️ Seu atendimento · ' + esc(w.servico) + '</div>' +
+      '<div style="margin-top:12px;font:600 40px/1.1 ' + FONT_D + ';color:' + K.cream + '">' + esc(w.dia) + ' <span style="color:' + K.coralSoft + ';white-space:nowrap">' + esc(w.hora) + '</span></div>' +
+      (w.primeiro ? '<div style="margin-top:8px;font:600 15px/1.4 ' + FONT_B + ';color:' + K.cream + '">Primeiro encontro: ' + esc(w.primeiro) + '</div>' : '') +
+      '<div style="height:1px;line-height:1px;font-size:1px;background:#4a443c;margin:18px 0 16px">&nbsp;</div>' +
+      '<div style="font:700 11px/1.4 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + K.cream + ';opacity:.85">📍 Local · ' + esc(w.localRotulo) + '</div>' +
+      (loc ? '<div style="margin-top:8px;font:600 19px/1.4 ' + FONT_D + ';color:' + K.cream + '">' + loc + '</div>' : '') +
+      '<div style="margin-top:14px;font:500 13px/1.5 ' + FONT_B + ';color:' + K.cream + ';opacity:.9">' + T.regras + '</div>' +
+      '</td></tr></table></td></tr>' +
+      (w.valores ? '<tr><td style="padding:18px 2px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + caixa('Honorários', w.valor) + caixa('Pagamento', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '') + '</tr></table></td></tr>' : '') +
+      (w.contrato ? '<tr><td style="padding:18px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.rose + ';border-radius:16px"><tr><td align="center" style="padding:16px 20px;font:500 14px/1.6 ' + FONT_B + ';color:' + K.ink + '">📎 ' + esc(nc[0]) + '<b>' + nc[1] + '</b>' + esc(nc[2]) + '<b>' + nc[3] + '</b>' + esc(nc[4]) + '</td></tr></table></td></tr>' : '') +
+      '<tr><td align="center" style="padding:26px 8px 4px;font:500 13px/1.7 ' + FONT_B + ';color:' + K.muted + '"><b style="color:' + K.ink + '">' + esc(w.prof.nome) + '</b> · ' + w.prof.tit + ' · ' + esc(w.prof.crp) + '<br>' + esc(ctt) + '</td></tr>' +
+      '</table></div>';
+  }
+  function emailText(w) {
+    const nc = notaContrato(w, 'email').join('').replace(/\s+/g, ' ');
+    return ['Olá, ' + w.nome + '! 💛', 'Boas-vindas à Emotiss.', '', T.intro, '', T.corpo, '',
+      '🗓️ SEU ATENDIMENTO · ' + w.servico.toUpperCase(),
+      w.dia + ' às ' + w.hora + (w.primeiro ? ' (primeiro encontro: ' + w.primeiro + ')' : ''),
+      '📍 Local · ' + w.localRotulo, w.local.join('\n'), T.regras, '',
+      w.valores ? 'Honorários: ' + w.valor + '\nPagamento: ' + (w.pagto || 'a combinar') + (w.pix ? '\nChave Pix: ' + w.pix : '') + '\n' : null,
+      w.contrato ? '📎 ' + nc + '\n' : null,
+      w.prof.nome + ' · ' + w.prof.tit + ' · ' + w.prof.crp, ctt].filter((x) => x !== null).join('\n');
+  }
+  /* mensagem curta que acompanha a imagem no WhatsApp */
+  const zapTexto = (w) => 'Olá, ' + w.nome + '! 💛 Seja bem-vindo(a) à Emotiss. Seguem as informações do seu atendimento: ' + w.dia + ' às ' + w.hora + '.';
+
+  /* ---------- imagem para WhatsApp (canvas, 720 px de largura lógica, 2x) ---------- */
+  const loadImg = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  async function fontes() {
+    if (!document.fonts || !document.fonts.load) return;
+    const ls = ['600 36px Poppins', '600 20px Poppins', '500 18px Manrope', '700 16px Manrope', '800 12px Manrope'];
+    try { await Promise.race([Promise.all(ls.map((f) => document.fonts.load(f, 'Aáç'))), new Promise((r) => setTimeout(r, 2500))]); } catch (e) { /* usa a fonte reserva */ }
+  }
+  async function renderImage(w, logo) {
+    await fontes();
+    const lg = logo ? await loadImg(logo.data) : null;
+    const S = 2, W = 720, PX = 56, CW = W - PX * 2;
+    const cv = document.createElement('canvas');
+    const ctx = cv.getContext('2d');
+    const f = (wt, sz, fam) => wt + ' ' + sz + 'px ' + (fam === 'd' ? FONT_D : FONT_B) + ', ' + EMOJI + ', sans-serif';
+    const wrap = (txt, maxW) => {
+      const out = [];
+      String(txt).split('\n').forEach((par) => {
+        let cur = '';
+        par.split(/\s+/).filter(Boolean).forEach((word) => {
+          const t = cur ? cur + ' ' + word : word;
+          if (cur && ctx.measureText(t).width > maxW) { out.push(cur); cur = word; } else cur = t;
+        });
+        out.push(cur);
+      });
+      return out;
+    };
+    const rr = (x, y, ww, hh, r, fill, stroke, lw) => {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + ww, y, x + ww, y + hh, r); ctx.arcTo(x + ww, y + hh, x, y + hh, r); ctx.arcTo(x, y + hh, x, y, r); ctx.arcTo(x, y, x + ww, y, r); ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = lw || 1; ctx.strokeStyle = stroke; ctx.stroke(); }
+    };
+    const spaced = (txt, x, y, ls, align) => {
+      let tw = 0; for (const ch of txt) tw += ctx.measureText(ch).width + ls; tw -= ls;
+      let cx = align === 'center' ? x - tw / 2 : x;
+      ctx.textAlign = 'left';
+      for (const ch of txt) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + ls; }
+    };
+    /* uma passagem mede, a outra desenha; devolve a altura total */
+    function layout(draw) {
+      let y = 52;
+      ctx.textBaseline = 'alphabetic';
+      /* logo centralizada */
+      if (lg) { const lw = 320, lh = lw / (lg.width / lg.height); if (draw) ctx.drawImage(lg, (W - lw) / 2, y, lw, lh); y += lh; }
+      else { if (draw) { ctx.fillStyle = K.ink; ctx.font = f(600, 46, 'd'); ctx.textAlign = 'center'; ctx.fillText('Emotiss.', W / 2, y + 44); } y += 56; }
+      y += 34;
+      /* saudação */
+      ctx.font = f(600, 36, 'd'); ctx.textAlign = 'left';
+      ['Olá, ' + w.nome + '! 💛', 'Boas-vindas à Emotiss.'].forEach((l, i) => { if (draw) { ctx.fillStyle = K.ink; ctx.fillText(l, PX, y + 34 + i * 41); } });
+      y += 82 + 14;
+      ctx.font = f(700, 17, 'b');
+      wrap(T.intro, CW).forEach((l) => { if (draw) { ctx.fillStyle = K.ink; ctx.fillText(l, PX, y + 20); } y += 26.4; });
+      y += 26;
+      /* parágrafo em faixa */
+      ctx.font = f(500, 18, 'b');
+      const pl = wrap(T.corpo, CW - 56), ph = pl.length * 30.6 + 52;
+      if (draw) { rr(PX, y, CW, ph, 22, K.band); ctx.fillStyle = K.ink; ctx.font = f(500, 18, 'b'); pl.forEach((l, i) => ctx.fillText(l, PX + 28, y + 26 + 21 + i * 30.6 - 8)); }
+      y += ph + 26;
+      /* cartão do atendimento (destaque) */
+      const cx = PX + 32, cw = CW - 64;
+      ctx.font = f(600, 50, 'd');
+      const dw = ctx.measureText(w.dia + ' ').width, hw = ctx.measureText(w.hora).width;
+      const quebra = dw + hw > cw;
+      ctx.font = f(600, 22, 'd');
+      const ll = w.local.length ? wrap(w.local.join('\n'), cw) : [];
+      let ch = 32 + 16 + (quebra ? 112 : 58) + (w.primeiro ? 30 : 0) + 18 + 1 + 18 + 14 + 16 + ll.length * 31 + 14 + 20 + 28;
+      if (draw) {
+        rr(PX, y, CW, ch, 26, K.ink);
+        let yy = y + 32 + 12; ctx.fillStyle = K.cream;
+        ctx.globalAlpha = .85; ctx.font = f(800, 12, 'b'); spaced('🗓️ SEU ATENDIMENTO · ' + w.servico.toUpperCase(), cx, yy, 1.9, 'left'); ctx.globalAlpha = 1;
+        yy += 16 + 46;
+        ctx.font = f(600, 50, 'd'); ctx.textAlign = 'left'; ctx.fillStyle = K.cream;
+        if (quebra) { ctx.fillText(w.dia, cx, yy); yy += 56; ctx.fillStyle = K.coralSoft; ctx.fillText(w.hora, cx, yy); }
+        else { ctx.fillText(w.dia + ' ', cx, yy); ctx.fillStyle = K.coralSoft; ctx.fillText(w.hora, cx + dw, yy); }
+        if (w.primeiro) { yy += 32; ctx.fillStyle = K.cream; ctx.font = f(700, 16, 'b'); ctx.fillText('Primeiro encontro: ' + w.primeiro, cx, yy); }
+        yy += 24; ctx.globalAlpha = .25; ctx.fillStyle = K.cream; ctx.fillRect(cx, yy, cw, 1); ctx.globalAlpha = 1;
+        yy += 18 + 14; ctx.fillStyle = K.cream; ctx.globalAlpha = .85; ctx.font = f(800, 11.5, 'b'); spaced('📍 LOCAL · ' + w.localRotulo.toUpperCase(), cx, yy, 1.7, 'left'); ctx.globalAlpha = 1;
+        yy += 10; ctx.font = f(600, 22, 'd'); ctx.fillStyle = K.cream;
+        ll.forEach((l, i) => ctx.fillText(l, cx, yy + 22 + i * 31));
+        yy += ll.length * 31 + 14 + 22; ctx.globalAlpha = .9; ctx.font = f(500, 14, 'b'); ctx.fillText(T.regras, cx, yy); ctx.globalAlpha = 1;
+      }
+      y += ch + 24;
+      /* honorários e pagamento */
+      if (w.valores) {
+        const bw = (CW - 12) / 2, vals = [['HONORÁRIOS', w.valor, ''], ['PAGAMENTO', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '']];
+        ctx.font = f(600, 18, 'd');
+        const ls = vals.map((v) => wrap(v[1], bw - 34)); const sl = vals.map((v) => (v[2] ? wrap(v[2], bw - 34) : []));
+        const hh = 14 + 11 + 8 + Math.max(ls[0].length, ls[1].length) * 24 + Math.max(sl[0].length, sl[1].length) * 17 + 14 + 4;
+        vals.forEach((v, i) => {
+          if (!draw) return;
+          const bx = PX + i * (bw + 12);
+          rr(bx, y, bw, hh, 16, null, K.ink, 1.5);
+          ctx.fillStyle = K.muted; ctx.font = f(800, 11, 'b'); spaced(v[0], bx + 17, y + 14 + 11, 1.5, 'left');
+          ctx.fillStyle = K.ink; ctx.font = f(600, 18, 'd'); ls[i].forEach((l, j) => ctx.fillText(l, bx + 17, y + 14 + 11 + 8 + 18 + j * 24));
+          ctx.fillStyle = K.muted; ctx.font = f(500, 13, 'b'); sl[i].forEach((l, j) => ctx.fillText(l, bx + 17, y + 14 + 11 + 8 + 18 + ls[i].length * 24 + 12 + j * 17));
+        });
+        y += hh + 24;
+      }
+      /* aviso do contrato */
+      if (w.contrato) {
+        const nc = notaContrato(w, 'zap'), plain = '📎 ' + nc.join('');
+        ctx.font = f(500, 15, 'b');
+        const nl = wrap(plain, CW - 40), nh = nl.length * 24 + 32;
+        if (draw) { rr(PX, y, CW, nh, 16, K.rose); ctx.fillStyle = K.ink; ctx.textAlign = 'center'; ctx.font = f(500, 15, 'b'); nl.forEach((l, i) => ctx.fillText(l, W / 2, y + 16 + 17 + i * 24)); ctx.textAlign = 'left'; }
+        y += nh + 28;
+      }
+      /* assinatura da clínica e do profissional */
+      ctx.textAlign = 'center';
+      if (draw) {
+        ctx.fillStyle = K.ink; ctx.font = f(800, 13, 'b'); const a = w.prof.nome, b = ' · ' + w.prof.tit + ' · ' + w.prof.crp;
+        const wa = ctx.measureText(a).width; ctx.font = f(500, 13, 'b'); const wb = ctx.measureText(b).width; const sx = W / 2 - (wa + wb) / 2;
+        ctx.textAlign = 'left'; ctx.font = f(800, 13, 'b'); ctx.fillText(a, sx, y + 13); ctx.fillStyle = K.muted; ctx.font = f(500, 13, 'b'); ctx.fillText(b, sx + wa, y + 13);
+        ctx.textAlign = 'center'; ctx.fillText(ctt, W / 2, y + 13 + 22);
+      }
+      y += 13 + 22 + 52;
+      return y;
+    }
+    ctx.canvas.width = W; ctx.canvas.height = 10;
+    const H = Math.ceil(layout(false));
+    cv.width = W * S; cv.height = H * S;
+    ctx.scale(S, S); ctx.fillStyle = K.bg; ctx.fillRect(0, 0, W, H);
+    layout(true);
+    return new Promise((res) => cv.toBlob((b) => res(b), 'image/png'));
+  }
+  root.Welcome = { data, emailHTML, emailText, assunto, zapTexto, renderImage, parseBR };
+})(window);
+
+
+var bvBlobAtual = null, bvBlobUrl = null, bvSeq = 0, bvTimer = null;
+
+function pacDoBv(){
+  var c = P.bv && P.bv.paciente && P.bv.paciente.value;
+  return c ? S.d.pacientes.filter(function(p){ return p.codigo === c; })[0] : null;
+}
+function profDoBv(){
+  var n = P.bv && P.bv.prof && P.bv.prof.value;
+  return n ? profs().filter(function(p){ return p.nome === n; })[0] : null;
+}
+
+function irBoasVindas(codigo){
+  go('boas_vindas');
+  if(P.bv && P.bv.paciente){
+    P.bv.paciente.value = codigo;
+    preencherBoasVindas(true);
+  }
+}
+
+function preencherBoasVindas(trocouPac){
+  var f = P.bv;
+  if(!f) return;
+  var pac = pacDoBv();
+  if(trocouPac && pac){
+    var fi = fichaDoPac(pac.codigo) || {};
+    f.nome.value = pac.nome || fi.paciente || '';
+    f.tel.value = pac.telefone || fi.telefone || '';
+    f.email.value = pac.email || fi.email || '';
+    
+    // Procura próxima sessão do paciente na agenda
+    var ses = S.d.agenda.filter(function(a){ return a.codigo === pac.codigo && a.status !== 'cancelada'; })
+      .sort(function(a,b){ return (b.data+b.hora).localeCompare(a.data+a.hora); });
+    var prox = ses.filter(function(a){ return a.data >= todayKey; })
+      .sort(function(a,b){ return (a.data+a.hora).localeCompare(b.data+b.hora); })[0] || ses[0];
+    var fxs = ses.filter(function(a){ return a.fixo === 'sim'; })[0], base = fxs || prox;
+
+    if(base){
+      var d = new Date(base.data + 'T12:00:00');
+      var diasSemana = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+      f.diasem.value = diasSemana[d.getDay()];
+      f.hora.value = base.hora || '';
+      f.data.value = brDate(base.data);
+      if(base.servico){
+        var svMatch = svcs().filter(function(s){ return s.id === base.servico; })[0];
+        f.servico.value = svMatch ? svMatch.nome : base.servico;
+      }
+      if(base.modalidade) f.mod.value = base.modalidade;
+      if(base.profissional) f.prof.value = base.profissional;
+    } else {
+      f.diasem.value = '';
+      f.hora.value = '';
+      f.data.value = '';
+    }
+    
+    var pr = profDoBv();
+    if(pr){
+      if(pr.endereco && (!f.local.value.trim() || f.local.dataset.auto === '1')){
+        f.local.value = pr.endereco;
+        f.local.dataset.auto = '1';
+      }
+      if(pr.pixChave && !f.pix.value) f.pix.value = pr.pixChave;
+      if(!f.forma.value) f.forma.value = pr.pixChave ? 'Pix' : 'A combinar';
+    }
+  }
+  
+  var pr2 = profDoBv();
+  if(pr2){
+    if(pr2.endereco && (!f.local.value.trim() || f.local.dataset.auto === '1')){
+      f.local.value = pr2.endereco;
+      f.local.dataset.auto = '1';
+    }
+    if(pr2.pixChave && !f.pix.value) f.pix.value = pr2.pixChave;
+  }
+  
+  wbAgendarPreview();
+}
+
+function dadosBoasVindas(){
+  var f = P.bv;
+  if(!f) return null;
+  var pac = pacDoBv(), pr = profDoBv();
+  var nome = f.nome.value.trim() || (pac && pac.nome) || '';
+  var partes = pr ? pr.nome.trim().split(/\s+/) : [];
+  var profCurto = partes.length > 1 ? partes[0] + ' ' + partes[partes.length - 1] : (partes[0] || 'Psicólogo(a)');
+  var crpNum = pr ? (pr.crp || '') : '';
+  
+  var pres = f.mod.value === 'Presencial' || f.mod.value === 'Presencial e online';
+  var onl = f.mod.value === 'Online' || f.mod.value === 'Presencial e online';
+  var loc = [];
+  if(pres && f.local.value.trim()) loc.push(f.local.value.trim());
+  if(onl) loc.push('Link da sala enviado antes da sessão');
+  if(!loc.length && f.local.value.trim()) loc.push(f.local.value.trim());
+  
+  var st = {
+    paciente: nome,
+    telefone: f.tel.value.trim(),
+    email: f.email.value.trim(),
+    servico: f.servico.value,
+    modalidade: f.mod.value,
+    ct_serv: [f.servico.value],
+    ct_mod: [f.mod.value],
+    ct_diasem: f.diasem.value.trim(),
+    ct_hora: f.hora.value.trim(),
+    bv_data: f.data.value.trim(),
+    ct_local: pres ? f.local.value.trim() : '',
+    ct_link: onl ? 'Link da sala enviado antes da sessão' : '',
+    ct_valor: f.valor.value.trim() || '150,00',
+    ct_forma: f.forma.value,
+    ct_pix: f.pix.value.trim(),
+    ct_quando: f.quando.value,
+    __prof: {
+      id: pr ? (pr.nome.toLowerCase().indexOf('luana') >= 0 ? 'luana' : 'gabriel') : 'gabriel',
+      nome: pr ? pr.nome : 'Psicólogo(a)',
+      crpn: crpNum,
+      crpe: crpNum.replace('/', '—')
+    }
+  };
+  
+  var w = window.Welcome ? window.Welcome.data(st, { contrato: f.chkContrato.checked, valores: f.chkValores.checked }) : null;
+  return { st: st, w: w, pac: pac, prof: pr };
+}
+
+function wbAgendarPreview(){
+  clearTimeout(bvTimer);
+  bvTimer = setTimeout(renderBoasVindasPreview, 150);
+}
+
+async function garantirLogo(){
+  if(window.EMOTISS_LOGO) return window.EMOTISS_LOGO;
+  try {
+    await carregarScript('contrato.js');
+    return window.EMOTISS_LOGO || null;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function renderBoasVindasPreview(){
+  var f = P.bv;
+  if(!f || !f.pMail) return;
+  var d = dadosBoasVindas();
+  if(!d || !d.w) return;
+  var w = d.w, n = ++bvSeq;
+  
+  // Atualiza botões e links
+  var ass = window.Welcome.assunto(w);
+  var mailTxt = window.Welcome.emailText(w);
+  var mailHtml = window.Welcome.emailHTML(w, window.EMOTISS_LOGO);
+  var zapTxt = window.Welcome.zapTexto(w);
+  
+  f.pMail.innerHTML = mailHtml;
+  
+  var para = encodeURIComponent(w.email || '');
+  var su = encodeURIComponent(ass);
+  var corpo = encodeURIComponent(mailTxt);
+  f.btnGmail.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + para + '&su=' + su + '&body=' + corpo;
+  
+  var fone = (w.fone || '').replace(/\D/g, '');
+  if(fone && fone.length <= 11) fone = '55' + fone;
+  f.btnZap.href = 'https://wa.me/' + (fone ? fone + '?' : '?') + 'text=' + encodeURIComponent(zapTxt);
+  f.zapPreview.textContent = zapTxt;
+  
+  // Renderiza Canvas
+  try {
+    var logo = await garantirLogo();
+    var bl = await window.Welcome.renderImage(w, logo);
+    if(n !== bvSeq || !bl) return;
+    bvBlobAtual = bl;
+    if(bvBlobUrl) URL.revokeObjectURL(bvBlobUrl);
+    bvBlobUrl = URL.createObjectURL(bl);
+    f.img.src = bvBlobUrl;
+    f.imgBox.hidden = false;
+  } catch(e) {
+    console.warn('Erro ao renderizar imagem de boas-vindas:', e);
+  }
+}
+
+function buildBoasVindas(){
+  var el = h('section', { class: 'stack', role: 'tabpanel' });
+  var f = {};
+  P.bv = f;
+
+  f.paciente = h('select', { id: 'bv-paciente' });
+  patientSelects.push({ sel: f.paciente, todos: false });
+  f.paciente.addEventListener('change', function(){ preencherBoasVindas(true); });
+
+  f.nome = h('input', { id: 'bv-nome', type: 'text', placeholder: 'Nome completo do paciente' });
+  f.tel = h('input', { id: 'bv-tel', type: 'tel', placeholder: '(31) 98837-4248' });
+  f.email = h('input', { id: 'bv-email', type: 'email', placeholder: 'paciente@exemplo.com' });
+
+  f.servico = h('select', { id: 'bv-servico' },
+    opt('Psicoterapia', 'Psicoterapia'),
+    opt('Avaliação neuropsicológica', 'Avaliação neuropsicológica'));
+  
+  f.mod = h('select', { id: 'bv-mod' },
+    opt('Presencial', 'Presencial'),
+    opt('Online', 'Online'),
+    opt('Presencial e online', 'Presencial e online'));
+
+  f.diasem = h('input', { id: 'bv-diasem', type: 'text', placeholder: 'Ex.: Terça-feira' });
+  f.hora = h('input', { id: 'bv-hora', type: 'text', placeholder: 'Ex.: 14:00' });
+  f.data = h('input', { id: 'bv-data', type: 'text', placeholder: 'dd/mm/aaaa (primeiro encontro)' });
+
+  f.prof = h('select', { id: 'bv-prof' });
+  profSelects.push({ sel: f.prof, vazio: 'Selecione o profissional' });
+  f.prof.addEventListener('change', function(){ preencherBoasVindas(false); });
+
+  f.local = h('input', { id: 'bv-local', type: 'text', placeholder: 'Endereço presencial ou link' });
+
+  f.valor = h('input', { id: 'bv-valor', type: 'text', value: '150,00', placeholder: '150,00' });
+  f.forma = h('select', { id: 'bv-forma' },
+    opt('Pix', 'Pix'),
+    opt('Transferência', 'Transferência'),
+    opt('A combinar', 'A combinar'));
+  f.pix = h('input', { id: 'bv-pix', type: 'text', placeholder: 'Chave Pix' });
+  f.quando = h('select', { id: 'bv-quando' },
+    opt('antes', 'Antes da sessão'),
+    opt('apos', 'Após cada sessão'),
+    opt('dia', 'Mensal'));
+
+  f.chkValores = h('input', { type: 'checkbox', checked: true });
+  f.chkContrato = h('input', { type: 'checkbox', checked: true });
+
+  [f.nome, f.tel, f.email, f.servico, f.mod, f.diasem, f.hora, f.data, f.local, f.valor, f.forma, f.pix, f.quando, f.chkValores, f.chkContrato].forEach(function(inp){
+    inp.addEventListener('input', wbAgendarPreview);
+    inp.addEventListener('change', wbAgendarPreview);
+  });
+
+  // Botões de ação
+  f.btnGmail = h('a', { class: 'btn primary small', target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no Gmail');
+  var btnCopiarHtml = btn('Copiar e-mail formatado (HTML)', async function(){
+    var d = dadosBoasVindas();
+    if(!d || !d.w) return;
+    var html = window.Welcome.emailHTML(d.w, window.EMOTISS_LOGO);
+    var txt = window.Welcome.emailText(d.w);
+    try {
+      if(navigator.clipboard && window.ClipboardItem){
+        var item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([txt], { type: 'text/plain' })
+        });
+        await navigator.clipboard.write([item]);
+        toast('E-mail formatado copiado! Pode colar no Gmail ou Outlook.');
+      } else {
+        await navigator.clipboard.writeText(txt);
+        toast('Texto do e-mail copiado.');
+      }
+    } catch(e){
+      toast('Não foi possível copiar automaticamente.');
+    }
+  }, 'small');
+
+  var btnCopiarTxt = btn('Copiar texto simples', async function(){
+    var d = dadosBoasVindas();
+    if(!d || !d.w) return;
+    try {
+      await navigator.clipboard.writeText(window.Welcome.emailText(d.w));
+      toast('Texto do e-mail copiado.');
+    } catch(e){
+      toast('Não foi possível copiar.');
+    }
+  }, 'small');
+
+  f.btnZap = h('a', { class: 'btn primary small', target: '_blank', rel: 'noopener noreferrer' }, 'Abrir WhatsApp');
+  var btnCopiarZap = btn('Copiar mensagem WhatsApp', async function(){
+    var d = dadosBoasVindas();
+    if(!d || !d.w) return;
+    try {
+      await navigator.clipboard.writeText(window.Welcome.zapTexto(d.w));
+      toast('Mensagem para WhatsApp copiada.');
+    } catch(e){
+      toast('Não foi possível copiar.');
+    }
+  }, 'small');
+
+  var btnCopiarImg = btn('Copiar imagem', async function(){
+    if(!bvBlobAtual){ toast('Aguarde a imagem ser gerada.'); return; }
+    try {
+      if(navigator.clipboard && window.ClipboardItem){
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': bvBlobAtual })]);
+        toast('Imagem copiada para a área de transferência.');
+      } else {
+        toast('Seu navegador não suporta copiar imagem diretamente.');
+      }
+    } catch(e){
+      toast('Não foi possível copiar a imagem. Você pode baixá-la no botão ao lado.');
+    }
+  }, 'small');
+
+  var btnBaixarImg = btn('Baixar imagem (PNG)', function(){
+    if(!bvBlobAtual || !bvBlobUrl){ toast('Aguarde a imagem ser gerada.'); return; }
+    var d = dadosBoasVindas();
+    var nome = (d && d.w && d.w.nome) || 'paciente';
+    var a = document.createElement('a');
+    a.download = 'Boas-vindas - ' + nome + '.png';
+    a.href = bvBlobUrl;
+    a.click();
+    toast('Download da imagem iniciado.');
+  }, 'small');
+
+  f.pMail = h('div', { class: 'bv-mail-view', style: 'background:#FBF8F3;border:1px solid var(--line);border-radius:14px;padding:14px;max-height:500px;overflow-y:auto;' });
+  f.zapPreview = h('div', { class: 'bv-zap-box', style: 'background:var(--surface-2);border-radius:10px;padding:12px;font-size:.9rem;line-height:1.45;color:var(--fg);white-space:pre-wrap;' });
+  
+  f.img = h('img', { class: 'bv-img-preview', style: 'max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);display:block;margin:0 auto;', alt: 'Prévia da imagem de boas-vindas' });
+  f.imgBox = h('div', { style: 'text-align:center;padding:10px 0;' }, f.img);
+
+  var form = h('div', { class: 'card panel-form' },
+    h('h2', {}, 'Dados do atendimento'),
+    h('p', { class: 'meta' }, 'Escolha o paciente cadastrado para puxar os dados da próxima sessão e do profissional automaticamente:'),
+    h('div', { class: 'fields' },
+      field('Paciente cadastrado', f.paciente, true),
+      field('Nome do paciente', f.nome),
+      field('Telefone (WhatsApp)', f.tel),
+      field('E-mail', f.email),
+      field('Profissional responsável', f.prof),
+      field('Serviço', f.servico),
+      field('Modalidade', f.mod),
+      field('Dia da semana', f.diasem),
+      field('Horário', f.hora),
+      field('Data do 1º encontro', f.data),
+      field('Local ou Link', f.local, true),
+      field('Honorários por sessão', f.valor),
+      field('Forma de pagamento', f.forma),
+      field('Chave Pix', f.pix),
+      field('Quando paga', f.quando)),
+    h('div', { class: 'row', style: 'margin-top:10px;gap:18px;flex-wrap:wrap;' },
+      h('label', { class: 'f check' }, f.chkValores, h('span', {}, 'Mostrar honorários e forma de pagamento')),
+      h('label', { class: 'f check' }, f.chkContrato, h('span', {}, 'Avisar que o contrato segue para assinatura (Gov.br)'))));
+
+  var emailSec = h('div', { class: 'card stack' },
+    h('div', { class: 'row' },
+      h('h2', {}, 'E-mail de boas-vindas'),
+      h('div', { class: 'actions' }, f.btnGmail, btnCopiarHtml, btnCopiarTxt)),
+    h('p', { class: 'meta' }, 'Clique em "Abrir no Gmail" para redigir direto ou "Copiar e-mail formatado" para colar na caixa de composição mantendo o layout e as cores da clínica.'),
+    f.pMail);
+
+  var zapSec = h('div', { class: 'card stack' },
+    h('div', { class: 'row' },
+      h('h2', {}, 'Mensagem para WhatsApp'),
+      h('div', { class: 'actions' }, f.btnZap, btnCopiarZap)),
+    f.zapPreview,
+    h('div', { class: 'row', style: 'margin-top:14px;' },
+      h('h3', {}, 'Imagem em alta resolução (WhatsApp)'),
+      h('div', { class: 'actions' }, btnCopiarImg, btnBaixarImg)),
+    h('p', { class: 'meta' }, 'Card visual pronto para compartilhar na conversa com o paciente:'),
+    f.imgBox);
+
+  el.append(form, emailSec, zapSec);
+  return el;
+}
+
+function renderBoasVindas(){
+  if(!P.bv) return;
+  if(!P.bv.paciente.value && S.d.pacientes.length){
+    P.bv.paciente.value = S.d.pacientes[0].codigo;
+    preencherBoasVindas(true);
+  } else {
+    wbAgendarPreview();
+  }
+}
+
 /* ---------- início ---------- */
 var SECS={
  hoje:['Hoje','sun'],agenda:['Agenda','calendar','Sessões da semana por dia, profissional e serviço.'],pacientes:['Pacientes','users','Cadastro, fichas e ações de cada paciente.'],
  recepcao:['Recepção','check'],financeiro:['Financeiro','wallet','Cobranças, comprovantes e pagamentos.'],contratos_g:['Contratos','file','Emissão e acompanhamento das assinaturas.'],
- profissionais:['Profissionais','heart','Equipe, serviços e dados de recebimento.'],materiais:['Avisos e materiais','megaphone'],disp:['Disponibilidade','clock','Janelas de atendimento que geram os horários.'],
+ profissionais:['Profissionais','heart','Equipe, serviços e dados de recebimento.'],materiais:['Avisos e materiais','megaphone'],boas_vindas:['Boas-vindas','sparkles','Mensagem de boas-vindas com e-mail formatado, imagem para WhatsApp e texto.'],disp:['Disponibilidade','clock','Janelas de atendimento que geram os horários.'],
  entrada:['Atualizações','inbox'],p_sessoes:['Minhas sessões','calendar','Suas próximas sessões e agendamentos.'],p_avisos:['Avisos','bell'],p_pagamentos:['Pagamentos','wallet'],p_docs:['Documentos','folder','Materiais recebidos e arquivos que você envia.']};
 var main=document.getElementById('main');
 PANELS.gate=buildGate();
-PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();PANELS.paciente_g=buildPacienteG();PANELS.hoje=buildHoje();
+PANELS.agenda=buildAgenda();PANELS.pacientes=buildPacientes();PANELS.recepcao=buildRecepcao();PANELS.financeiro=buildFinanceiro();PANELS.contratos_g=buildContratos();PANELS.profissionais=buildProfissionais();PANELS.materiais=buildMateriais();PANELS.boas_vindas=buildBoasVindas();PANELS.entrada=buildEntrada();PANELS.disp=buildDisp();PANELS.paciente_g=buildPacienteG();PANELS.hoje=buildHoje();
 P.subEl=h('nav',{class:'subtabs nt-tabs',id:'subtabs','aria-label':'Subseções',hidden:true});document.getElementById('main').prepend(P.subEl);
 P.fab=h('button',{type:'button',class:'fab-novo',hidden:true,onclick:function(){novoAbrir(true)}},'+ Novo');document.body.append(P.fab);
 P.fabX=h('button',{type:'button',class:'fab-fechar',hidden:true,'aria-label':'Fechar esta página',onclick:fecharAba},'✕ Fechar');document.body.append(P.fabX);
