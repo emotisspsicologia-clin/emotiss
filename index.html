@@ -713,6 +713,7 @@ body.gx-on .top{display:none!important}
 .gx-brand{display:flex;flex-direction:column;gap:2px}
 .gx-brand b{font:700 26px/1.2 var(--font-display);letter-spacing:-.5px}
 .gx-brand span{font-size:12px;color:var(--muted)}
+.gx-logo{height:56px;aspect-ratio:3.357;color:var(--fg);display:block;flex:none}
 .gx-help{color:var(--fg);font-weight:600;font-size:14px;text-decoration:none;min-height:44px;display:flex;align-items:center}
 .gx-hs,.gx-fs{display:none}
 .gx-help:hover,.gx-foot a:hover{text-decoration:underline}
@@ -801,6 +802,7 @@ body.gx-on .top{display:none!important}
   .gx-head{padding:20px 20px 0}
   .gx-brand b{font-size:22px;letter-spacing:-.4px}
   .gx-brand span{font-size:11px}
+  .gx-logo{height:44px}
   .gx-help{font-size:13px}
   .gx-hl{display:none}.gx-hs{display:inline}
   .gx-main{flex-direction:column;flex-wrap:nowrap;align-items:stretch;justify-content:flex-start;gap:18px;padding:18px 20px 12px}
@@ -981,7 +983,7 @@ function opt(v,l){return h('option',{value:v},l)}
 
 /* ---------- servidor (Apps Script como API) ---------- */
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
-var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
+var API_URL='COLE_AQUI_O_LINK_EXEC';
 async function api(fn){
   var args=[].slice.call(arguments,1);
   var r;
@@ -1197,9 +1199,14 @@ function buildGate(){
   }
 
   /* ---------- peças comuns ---------- */
+  function logoSvg(){
+    var NS='http://www.w3.org/2000/svg',sv=document.createElementNS(NS,'svg'),u=document.createElementNS(NS,'use');
+    sv.setAttribute('class','gx-logo');sv.setAttribute('role','img');sv.setAttribute('aria-label','Emotiss. Psicologia Clínica e Neuropsicologia');
+    u.setAttribute('href','#logo');sv.appendChild(u);return sv;
+  }
   function cab(){
     return h('div',{class:'gx-head'},
-      h('div',{class:'gx-brand'},h('b',{},'Emotiss'),h('span',{},'Psicologia Clínica e Neuropsicologia')),
+      h('div',{class:'gx-brand'},logoSvg()),
       h('a',{class:'gx-help',href:waUrl(ZAP),target:'_blank',rel:'noopener noreferrer'},h('span',{class:'gx-hl'},'Precisa de ajuda? Fale com a equipe'),h('span',{class:'gx-hs'},'Ajuda')));
   }
   function rodape(){
