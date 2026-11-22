@@ -829,6 +829,63 @@ body.gx-on .top{display:none!important}
 .nm-t{font-weight:800;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .nm-b{background:var(--gold);color:#17130f;border-radius:99px;padding:2px 10px;font:800 .68rem var(--font-body);letter-spacing:.06em;text-transform:uppercase}
 .nm-s{font-size:.82rem;font-weight:600;color:var(--ink2)}
+
+/* ===== v4: ficha — marcadores padronizados, subtítulos e movimento (efeito lupa) ===== */
+/* opções e caixas: todas com marcador de 20px, mesmo espaçamento do texto e alinhadas à 1ª linha */
+.fx .o{gap:12px;padding:12px 14px;line-height:1.4}
+.fx .opts.col .o{align-items:flex-start}
+.fx .o::before{width:20px;height:20px;box-sizing:border-box;border:2px solid var(--bord);margin-top:1px;transition:border-color .2s,background .2s}
+.fx .yn .o{align-items:center}
+.fx .o>span{flex:1;min-width:0}.fx .yn .o>span{flex:none}
+.fx .chk,.fx .f>label.chk{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;line-height:1.45;margin:0;font-weight:500;font-size:.98rem}
+.fx .f>label.chk.consent{font-weight:600;font-size:1rem;line-height:1.55;padding:16px}
+.fx .chk>span{flex:1;min-width:0}
+.fx .chk input[type=checkbox],.fx .chk.consent input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;width:20px;height:20px;min-width:20px;margin:2px 0 0;padding:0;border:2px solid var(--bord);border-radius:6px;background:var(--surface) center/14px 14px no-repeat;cursor:pointer;transition:background-color .2s,border-color .2s}
+.fx .chk input[type=checkbox]:checked{background-color:var(--ink);border-color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme: dark){.fx .chk input[type=checkbox]:checked{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%2317130f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}}
+.fx .chk.consent input[type=checkbox]:checked{background-color:var(--ok);border-color:var(--ok);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.fx .chk input[type=checkbox]:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+.fx .chk:not(.consent):has(input:checked){border-color:var(--ink);background:var(--surface-2)}
+/* pergunta travada (paciente menor: comunicações com o responsável) */
+.fx .f.locked .o{cursor:not-allowed}
+.fx .f.locked .o:not(:has(input:checked)){opacity:.45}
+.fx #fx_trava{font-weight:600;color:var(--ink2)}
+
+/* subtítulos das seções: selo numerado + linha de continuação */
+.fx .fstep{counter-reset:fxblk}
+.fx .blk>h2{counter-increment:fxblk;display:flex;align-items:center;gap:12px;font-size:1.15rem;color:var(--ink);padding:0;border:0;margin:0 0 14px;letter-spacing:-.01em}
+.fx .blk>h2::before{content:counter(fxblk);flex:none;width:32px;height:32px;border-radius:10px;background:var(--gold);color:#17130f;font:800 .92rem var(--font-body);display:grid;place-items:center;box-shadow:inset 0 -3px 0 rgba(23,19,15,.14)}
+.fx .blk>h2::after{content:'';flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--bord),transparent)}
+.fx .blk+.blk{border-top:0;margin-top:22px;padding-top:6px}
+/* subtítulos internos (blocos informativos) */
+.fx .f.info>.q{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.06rem;letter-spacing:-.005em}
+.fx .f.info>.q::before{content:'';flex:none;width:9px;height:9px;border-radius:2px;background:var(--warm);transform:rotate(45deg)}
+.fx .f.info>.hint{margin-top:2px}
+/* "Como prefiro pagar": título de etapa */
+.fx .q.big{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.4rem;line-height:1.2;letter-spacing:-.015em;margin:4px 0 10px;padding-top:18px;border-top:1px dashed var(--bord)}
+.fx .q.big::before{content:'';flex:none;width:6px;height:1.25em;border-radius:3px;background:linear-gradient(var(--warm),var(--gold))}
+
+/* movimento: a etapa entra com zoom e o campo em uso se aproxima (lupa) */
+@keyframes fxZoomIn{from{opacity:0;transform:scale(.93) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fxReveal{from{opacity:0;transform:scale(.96) translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes fxPop{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+.fx .fstep:not([hidden]){animation:fxZoomIn .55s cubic-bezier(.2,.8,.2,1) both;transform-origin:50% 0}
+.fx .sub:not([hidden]),.fx .sub2:not([hidden]){animation:fxReveal .35s cubic-bezier(.2,.8,.2,1) both;transform-origin:50% 0}
+.fx .blk>.f{margin:0 -12px 6px}
+.fx .blk>.row{margin:0 -12px;gap:0}
+.fx .blk>.row>.f{margin:0 0 6px}
+.fx .blk>.f,.fx .blk>.row>.f{padding:10px 12px;border-radius:14px;transform-origin:50% 50%;transition:transform .4s cubic-bezier(.2,.8,.2,1),box-shadow .4s,background-color .4s,opacity .4s}
+.fx .blk>.f.lupa,.fx .blk>.row>.f.lupa{transform:scale(1.03);background:var(--surface);box-shadow:0 18px 40px -18px rgba(23,19,15,.45),0 0 0 2px color-mix(in srgb,var(--gold) 75%,transparent);position:relative;z-index:2}
+.fx .blk>.f.nota-neuro.lupa{background:var(--warnbg)}
+.fx form.lupa-on .fstep:has(.f.lupa) .blk>.f:not(.lupa),.fx form.lupa-on .fstep:has(.f.lupa) .blk>.row>.f:not(.lupa){opacity:.7}
+.fx .o:has(input:checked){animation:fxPop .35s ease-out}
+.fx .pbar i{transition:width .6s cubic-bezier(.2,.8,.2,1)}
+@media (max-width:560px){.fx .blk>.f.lupa,.fx .blk>.row>.f.lupa{transform:scale(1.015)}}
+@media (prefers-reduced-motion:reduce){
+  .fx .fstep:not([hidden]),.fx .sub:not([hidden]),.fx .sub2:not([hidden]),.fx .o:has(input:checked){animation:none}
+  .fx .blk>.f,.fx .blk>.row>.f{transition:none}
+  .fx .blk>.f.lupa,.fx .blk>.row>.f.lupa{transform:none}
+}
 </style>
 </head>
 <body>
@@ -1567,7 +1624,7 @@ function sessaoItem(a){
   return h('li',{class:'ag2 st-'+a.status,style:'--c:'+(a.profissional?cor:'var(--line)')},
     h('div',{class:'ag2-time'},h('b',{},a.hora),a.duracao?h('small',{},a.duracao+' min'):null),
     h('div',{class:'ag2-main'},
-      h('div',{class:'ag2-who'},pgDe(a.codigo)?linkPac(a.codigo,nomeDe(a.codigo,a.iniciais)):nomeDe(a.codigo,a.iniciais)),
+      h('div',{class:'ag2-who'},pgDe(a.codigo)?linkPac(a.codigo,nomeRico(a.codigo,nomeDe(a.codigo,a.iniciais))):nomeRico(a.codigo,nomeDe(a.codigo,a.iniciais))),
       tags.length?h('div',{class:'ag2-meta'},tags.join(' · ')):null,
       h('div',{class:'ag2-chips'},
         a.profissional?h('span',{class:'pchip',style:'--c:'+cor},dot(cor),a.profissional):h('span',{class:'meta'},'Sem profissional'),
@@ -1728,7 +1785,7 @@ function renderRecepcao(){
     return h('article',{class:'sx st-'+x.cor},
       h('div',{class:'sx-date','aria-hidden':'true'},h('b',{},(p.nome||'?').charAt(0).toUpperCase())),
       h('div',{class:'sx-main'},
-        h('div',{class:'sx-top'},h('h3',{},linkPac(p.codigo,p.nome)),h('span',{class:'sx-badge'},x.tit),x.tri.urg?h('span',{class:'sx-badge'},'Urgência alta'):null,x.tri.soc?h('span',{class:'sx-badge'},'Valor reduzido'+(x.tri.faixa?': '+x.tri.faixa:'')):null),
+        h('div',{class:'sx-top'},h('h3',{},linkPac(p.codigo,nomeRico(p.codigo,p.nome))),h('span',{class:'sx-badge'},x.tit),x.tri.urg?h('span',{class:'sx-badge'},'Urgência alta'):null,x.tri.soc?h('span',{class:'sx-badge'},'Valor reduzido'+(x.tri.faixa?': '+x.tri.faixa:'')):null),
         h('p',{class:'meta'},[p.telefone||'Sem telefone',p.email||'Sem e-mail',diasDesde(x.desde)].join(' · ')),
         h('div',{class:'actions'},
           x.tpl?btn('WhatsApp',function(){abrirModelos(p.codigo,x.tpl);resolverRec(x,'contato iniciado por WhatsApp')},'primary small'):btn('Gerar contrato',function(){irContrato(p.codigo);resolverRec(x,'contrato encaminhado')},'primary small'),
@@ -1739,7 +1796,7 @@ function renderRecepcao(){
   var feitos=itensRecepcao(true).filter(function(x){return rsFeito(x.chave)});
   if(feitos.length)P.rcList.append(h('details',{class:'card fold'},h('summary',{},'Resolvidos ('+feitos.length+')'),h('div',{class:'list',style:'margin-top:10px'},feitos.map(function(x){
     var e=rsEst(x.chave);
-    return h('article',{class:'item feito'},h('div',{class:'row'},h('h3',{},linkPac(x.p.codigo,x.p.nome)),h('span',{class:'pill confirmada'},'✓ '+((e&&e.resolucao)||'Resolvido'))),h('p',{class:'meta'},x.tit),h('div',{class:'actions'},btn('Reabrir',function(){rsSet(x.chave,'aberta','')},'small')))}))));
+    return h('article',{class:'item feito'},h('div',{class:'row'},h('h3',{},linkPac(x.p.codigo,nomeRico(x.p.codigo,x.p.nome))),h('span',{class:'pill confirmada'},'✓ '+((e&&e.resolucao)||'Resolvido'))),h('p',{class:'meta'},x.tit),h('div',{class:'actions'},btn('Reabrir',function(){rsSet(x.chave,'aberta','')},'small')))}))));
 }
 function renderPacientes(){
   var lista=S.d.pacientes.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)});
@@ -2365,15 +2422,18 @@ var TIT=['Para mim mesmo','Para outra pessoa maior de idade','Para um filho meno
 var CONTATO=['Somente o responsável','O responsável e o paciente'];
 var REC=['Meu próprio nome','No nome de outra pessoa'];
 var PAGQ=['Antes de cada sessão','Depois de cada sessão','Em um dia fixo do mês'];
+/* textos exibidos (o valor gravado continua o de PAGQ, que o servidor e os contratos já reconhecem) */
+var PAGQ_TXT=['Antes do início de cada sessão','Ao final de cada sessão','Numa data específica do mês (todas as sessões realizadas no mês)'];
+var URG3=['O paciente precisa começar logo, está em sofrimento intenso','Gostaria que o paciente começasse em breve','Sem urgência'];
 var SERV=['Psicoterapia','Avaliação neuropsicológica'];
 var NEUPAG=['Valor integral em parcela única','Dividido em 3 vezes','Por sessão realizada'];
 var T=function(k,l,o){o=o||{};o.t='text';o.k=k;o.l=l;return o};
 var SEC=[
   {h:'Atendimento',f:[
     {t:'sel',k:'titular',l:'Titular: para quem é o atendimento?',o:TIT,req:1,resp:[T('resp_nome','Nome completo do responsável',{req:1,ac:'name'}),T('resp_cpf','CPF do responsável',{req:1,mask:'cpf',im:'numeric'})]},
-    {t:'sel',k:'servico',l:'O que você procura?',o:SERV},
+    {t:'sel',k:'servico',l:'O que você procura?',l3:'Qual atendimento o paciente procura?',o:SERV},
     {t:'sel',k:'modalidade',l:'Modalidade preferida',o:['Presencial','Online']},
-    {t:'sel',k:'urgencia',l:'Qual a urgência?',o:URG,req:1,alerta:1},
+    {t:'sel',k:'urgencia',l:'Qual a urgência para você começar?',l3:'Qual a urgência para o paciente começar?',o:URG,ol3:URG3,req:1,alerta:1},
     {t:'sel',k:'recibo',l:'Em nome de quem será emitido o recibo?',o:REC,req:1,
       desc:'O recibo (Receita Saúde) emitido pelo site da Receita Federal é vinculado ao CPF do pagador para fins de dedução do imposto de renda, comprovante de serviço para planos de saúde, etc. Saiba mais pelo site:',href:'https://www.gov.br/receitafederal/pt-br',
       rec:[T('recibo_nome','Nome completo do pagador',{req:1,ac:'off'}),T('recibo_cpf','CPF do pagador',{req:1,mask:'cpf',im:'numeric'})]}
@@ -2381,19 +2441,19 @@ var SEC=[
   {h:'Dados do paciente',f:[
     T('paciente','Nome completo',{req:1,ac:'name'}),
     {row:[T('nascimento','Data de nascimento',{req:1,mask:'date',ph:'dd/mm/aaaa',im:'numeric'}),T('cpf','CPF',{req:1,mask:'cpf',im:'numeric'})]},
-    {t:'info',k:'menor_info',l:'Contatos do responsável',hint:'Para pacientes menores de 18 anos, os contatos são os do responsável. Preenchemos automaticamente com os dados da sua conta; corrija se precisar.'},
+    {t:'info',k:'menor_info',l:'Contatos do responsável',hint:'Informe os contatos do responsável (quem solicita o atendimento). Preenchemos automaticamente com os dados da sua conta; corrija se precisar.'},
     {row:[T('telefone','Telefone (WhatsApp)',{req:1,mask:'tel',ac:'tel',type:'tel'}),T('email','E-mail',{req:1,ac:'email',type:'email',im:'email',ph:'nome@exemplo.com'})]},
     {t:'sel',k:'contato_quem',l:'Quem deve ser contactado para as comunicações sobre os atendimentos?',o:CONTATO,req:1,
       pac:[T('pac_telefone','Telefone (WhatsApp) do paciente',{req:1,mask:'tel',type:'tel',ac:'off'}),T('pac_email','E-mail do paciente (opcional)',{type:'email',im:'email',ac:'off',ph:'nome@exemplo.com'})]},
-    {row:[T('telefone_ref','Telefone de uma pessoa de referência (opcional)',{mask:'tel',type:'tel',hint:'Pessoas de referência são aquelas que você pode acionar e que podem te oferecer apoio.'})]}
+    {row:[T('telefone_ref','Telefone de uma pessoa de referência (opcional)',{mask:'tel',type:'tel',hint:'Pessoas de referência são aquelas que você pode acionar e que podem te oferecer apoio.',hint3:'Pessoas de referência são aquelas que o paciente pode acionar e que podem oferecer apoio a ele.'})]}
   ]},
   {h:'Dados sociodemográficos do paciente',f:[
     {row:[{t:'sel',k:'sexo',l:'Sexo',o:SEXO},{t:'sel',k:'orientacao',l:'Orientação sexual',o:ORIENT}]},
     {row:[{t:'sel',k:'estado_civil',l:'Estado civil',o:CIVIL},{t:'sel',k:'raca',l:'Cor (autodeclaração racial)',o:RACA}]},
-    {row:[T('nacionalidade','Nacionalidade',{ph:'Ex.: brasileira',ac:'country-name',hint:'Informe o país de origem. Se for brasileira(o), escreva “brasileira” ou “brasileiro”.'})]},
+    {row:[T('nacionalidade','Nacionalidade',{req:1,ph:'Ex.: brasileira',ac:'country-name',hint:'Informe o país de origem. Se for brasileira(o), escreva “brasileira” ou “brasileiro”.'})]},
     {row:[{t:'sel',k:'escolaridade',l:'Escolaridade',o:ESCOL},T('ocupacao','Ocupação')]},
-    {t:'yn',k:'religiao',l:'Possui alguma religião?',sub:[T('religiao_qual','Qual?')]},
-    {row:[T('mae','Nome da mãe',{req:1,ac:'off'}),T('pai','Nome do pai')]}
+    {t:'yn',k:'religiao',l:'Você possui alguma religião?',l3:'O paciente possui alguma religião?',sub:[T('religiao_qual','Qual?')]},
+    {row:[T('mae','Nome da sua mãe',{req:1,ac:'off',l3:'Nome da mãe do paciente'}),T('pai','Nome do seu pai',{l3:'Nome do pai do paciente'})]}
   ]},
   {h:'Endereço',f:[
     {row:[T('cep','CEP',{req:1,mask:'cep',im:'numeric',ac:'postal-code'}),T('numero','Número',{req:1})]},
@@ -2401,25 +2461,25 @@ var SEC=[
     {row:[T('complemento','Complemento (opcional)'),T('bairro','Bairro',{req:1})]},
     {row:[T('cidade','Cidade',{req:1}),{t:'sel',k:'uf',l:'UF',o:UFS,req:1}]}
   ]},
-  {h:'Queixa principal',f:[{t:'area',k:'demanda',l:'Conte o que o trouxe até aqui',req:1,hint:'O que sente · quando começou · como se apresenta · em quais circunstâncias acontece.'}]},
+  {h:'Queixa principal',f:[{t:'area',k:'demanda',l:'Conte o que trouxe você até aqui',l3:'Conte o que trouxe o paciente até aqui',req:1,hint:'O que você sente · quando começou · como se apresenta · em quais circunstâncias acontece.',hint3:'O que o paciente sente · quando começou · como se apresenta · em quais circunstâncias acontece.'}]},
   {h:'História clínica pregressa',f:[
-    {t:'yn',k:'doenca_fisica',l:'1) Possui alguma doença física?',sub:[T('doenca_fisica_qual','Se sim, qual(is)?')]},
-    {t:'yn',k:'transtorno',l:'2) Tem algum transtorno mental diagnosticado por algum profissional?',sub:[T('transtorno_qual','Se sim, qual(is)?')]}
+    {t:'yn',k:'doenca_fisica',l:'1) Você possui alguma doença física?',l3:'1) O paciente possui alguma doença física?',sub:[T('doenca_fisica_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'transtorno',l:'2) Você tem algum transtorno mental diagnosticado por algum profissional?',l3:'2) O paciente tem algum transtorno mental diagnosticado por algum profissional?',sub:[T('transtorno_qual','Se sim, qual(is)?')]}
   ]},
   {h:'Acompanhamento psicológico e/ou psiquiátrico',f:[
-    {t:'yn',k:'psico_ja',l:'3) Já fez acompanhamento psicológico alguma vez?',sub:[{t:'sel',k:'psico_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
-    {t:'yn',k:'psico_atual',l:'4) Está em acompanhamento psicológico atualmente com outro profissional?',sub:[T('psico_prof_nome','Nome do profissional'),T('psico_prof_contato','Contato')]},
-    {t:'yn',k:'psiq_ja',l:'5) Já fez acompanhamento psiquiátrico?',sub:[{t:'sel',k:'psiq_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
-    {t:'yn',k:'psiq_atual',l:'6) Você está em acompanhamento psiquiátrico atualmente?',sub:[{t:'yn',k:'psiq_informar',l:'Poderia informar o nome e um contato do profissional?',sub:[T('psiq_prof','Nome e contato')]}]},
-    {t:'chk',k:'ciente',l:'7) Caso seja necessário, entraremos em contato com o profissional. Estou ciente e de acordo (informaremos quando e se isso for necessário). Nenhuma informação será compartilhada, exceto o estritamente necessário e o que tiver sido pactuado com você.',v:'CIENTE E DE ACORDO'}
+    {t:'yn',k:'psico_ja',l:'3) Você já fez acompanhamento psicológico alguma vez?',l3:'3) O paciente já fez acompanhamento psicológico alguma vez?',sub:[{t:'sel',k:'psico_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
+    {t:'yn',k:'psico_atual',l:'4) Você está em acompanhamento psicológico atualmente com outro profissional?',l3:'4) O paciente está em acompanhamento psicológico atualmente com outro profissional?',sub:[T('psico_prof_nome','Nome do profissional'),T('psico_prof_contato','Contato')]},
+    {t:'yn',k:'psiq_ja',l:'5) Você já fez acompanhamento psiquiátrico?',l3:'5) O paciente já fez acompanhamento psiquiátrico?',sub:[{t:'sel',k:'psiq_ja_tempo',l:'Se sim, por quanto tempo?',o:DUR}]},
+    {t:'yn',k:'psiq_atual',l:'6) Você está em acompanhamento psiquiátrico atualmente?',l3:'6) O paciente está em acompanhamento psiquiátrico atualmente?',sub:[{t:'yn',k:'psiq_informar',l:'Poderia informar o nome e um contato do profissional?',sub:[T('psiq_prof','Nome e contato')]}]},
+    {t:'chk',k:'ciente',l:'7) Caso seja necessário, entraremos em contato com o profissional. Estou ciente e de acordo (informaremos quando e se isso for necessário). Nenhuma informação será compartilhada, exceto o estritamente necessário e o que tiver sido pactuado com você.',l3:'7) Caso seja necessário, entraremos em contato com o profissional que acompanha o paciente. Estou ciente e de acordo (informaremos quando e se isso for necessário). Nenhuma informação será compartilhada, exceto o estritamente necessário e o que tiver sido pactuado com o paciente e o responsável.',v:'CIENTE E DE ACORDO'}
   ]},
   {h:'Medicamentos',f:[
-    {t:'yn',k:'med_psiq',l:'8) Atualmente faz uso de alguma medicação prescrita por algum médico psiquiatra?',sub:[T('med_psiq_qual','Se sim, qual(is)?')]},
-    {t:'yn',k:'med_outras',l:'9) Faz uso de outras medicações prescritas por médicos de outras especialidades?',sub:[T('med_outras_qual','Se sim, qual(is)?')]},
-    {t:'yn',k:'profilatico',l:'10) Faz uso de algum profilático não medicamentoso? (chás, conserva, jejum etc.)',sub:[T('profilatico_qual','Se sim, qual(is)?')]}
+    {t:'yn',k:'med_psiq',l:'8) Atualmente você faz uso de alguma medicação prescrita por algum médico psiquiatra?',l3:'8) Atualmente o paciente faz uso de alguma medicação prescrita por algum médico psiquiatra?',sub:[T('med_psiq_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'med_outras',l:'9) Você faz uso de outras medicações prescritas por médicos de outras especialidades?',l3:'9) O paciente faz uso de outras medicações prescritas por médicos de outras especialidades?',sub:[T('med_outras_qual','Se sim, qual(is)?')]},
+    {t:'yn',k:'profilatico',l:'10) Você faz uso de algum profilático não medicamentoso? (chás, conserva, jejum etc.)',l3:'10) O paciente faz uso de algum profilático não medicamentoso? (chás, conserva, jejum etc.)',sub:[T('profilatico_qual','Se sim, qual(is)?')]}
   ]},
   {h:'Valores e pagamento',f:[
-    {t:'info',k:'lim_tit',l:'Limitadores para o acesso à psicoterapia',hint:'Marque o que se aplica a você (opcional). Isso nos ajuda a organizar horários, formato e valores.'},
+    {t:'info',k:'lim_tit',l:'Limitadores para o acesso à psicoterapia',hint:'Marque o que se aplica a você (opcional). Isso nos ajuda a organizar o formato e os valores.',hint3:'Marque o que se aplica ao paciente ou a você, responsável (opcional). Isso nos ajuda a organizar o formato e os valores.'},
     {t:'chk',k:'lim_financeiro',v:'SIM',l:'Estou com dificuldades financeiras no momento',sub:[
       {t:'info',k:'soc_info',l:'Valor reduzido (Emotiss Social)',hint:'As vagas são limitadas e dependem de análise da equipe. Marcar esta opção não garante o desconto. Estas informações servem só para definir o valor e a ordem de atendimento.'},
       {row:[T('soc_renda','Renda mensal somada da casa (R$)',{req:1,mask:'money',im:'decimal',ph:'Ex.: 3200'}),T('soc_pessoas','Pessoas que vivem dessa renda',{req:1,mask:'num',im:'numeric'})]},
@@ -2432,24 +2492,22 @@ var SEC=[
       {t:'chk',k:'soc_c_moradia',v:'SIM',l:'Aluguel ou financiamento de moradia'},
       {t:'chk',k:'soc_c_saude',v:'SIM',l:'Gastos recorrentes com saúde'},
       {t:'chk',k:'soc_aceite',v:'SIM',req:1,l:'Autorizo o uso dos dados de renda e de situação social para a triagem do valor reduzido.'},
-      {t:'chk',k:'soc_encaminhar',v:'SIM',l:'Se não houver vaga na Emotiss, autorizo encaminhar meu contato a outros psicólogos(as) parceiros(as). (opcional)'}
+      {t:'chk',k:'soc_encaminhar',v:'SIM',l:'Se não houver vaga na Emotiss, autorizo encaminhar meu contato a outros psicólogos(as) parceiros(as). (opcional)',l3:'Se não houver vaga na Emotiss, autorizo encaminhar o contato do responsável a outros psicólogos(as) parceiros(as). (opcional)'}
     ]},
-    {t:'chk',k:'lim_horario',v:'SIM',l:'Meus horários de trabalho ou estudo são pouco flexíveis'},
-    {t:'chk',k:'lim_transporte',v:'SIM',l:'Distância ou transporte dificultam o atendimento presencial'},
-    {t:'chk',k:'lim_acessibilidade',v:'SIM',l:'Preciso de adaptações de acessibilidade'},
+    {t:'chk',k:'lim_acessibilidade',v:'SIM',l:'Preciso de adaptações de acessibilidade',l3:'O paciente precisa de adaptações de acessibilidade'},
     {t:'info',k:'neuro_aviso',only:'neuro',cls:'nota-neuro',l:'Avaliação neuropsicológica',hint:'Você receberá, após a conclusão, uma relação das sessões realizadas, assinada e anexada ao contrato.'},
-    {t:'sel',k:'pagamento_neuro',only:'neuro',l:'Como prefiro pagar:',o:NEUPAG,desc:'O valor da avaliação consta no contrato. O pagamento é feito por Pix.'},
-    {t:'sel',k:'pagamento',l:'Como prefiro pagar:',o:PAGQ,desc:'O valor da sessão é definido pelo profissional que irá atendê-lo e consta no contrato. O pagamento é feito por Pix: a cobrança aparece na aba Pagamentos conforme a sua escolha.',
+    {t:'sel',k:'pagamento_neuro',only:'neuro',big:1,l:'Como prefiro pagar',o:NEUPAG,desc:'O valor da avaliação consta no contrato. O pagamento é feito por Pix.'},
+    {t:'sel',k:'pagamento',big:1,l:'Como prefiro pagar',o:PAGQ,ol:PAGQ_TXT,desc:'O valor da sessão é definido pelo profissional que irá atendê-lo e consta no contrato. O pagamento é feito por Pix: a cobrança aparece na aba Pagamentos conforme a sua escolha.',desc3:'O valor da sessão é definido pelo profissional que irá atender o paciente e consta no contrato. O pagamento é feito por Pix: a cobrança aparece na aba Pagamentos conforme a sua escolha.',
       dt:[T('pagamento_dia','Dia do mês para pagar (de 1 a 28)',{req:1,mask:'dia',im:'numeric',ph:'Ex.: 10'})]}
   ]},
-  {h:'Consentimento',f:[{t:'chk',k:'lgpd',req:1,v:'SIM',l:'Autorizo a Emotiss a tratar os dados informados nesta ficha (inclusive dados de saúde, que são sensíveis) para fins de avaliação e acompanhamento psicológico, conforme a LGPD (Lei 13.709/2018). Posso solicitar a correção ou a exclusão dos meus dados a qualquer momento.'}]}
+  {h:'Consentimento',f:[{t:'chk',k:'lgpd',req:1,v:'SIM',l:'Autorizo a Emotiss a tratar os dados informados nesta ficha (inclusive dados de saúde, que são sensíveis) para fins de avaliação e acompanhamento psicológico, conforme a LGPD (Lei 13.709/2018). Posso solicitar a correção ou a exclusão dos meus dados a qualquer momento.',l3:'Autorizo a Emotiss a tratar os dados do paciente informados nesta ficha (inclusive dados de saúde, que são sensíveis) para fins de avaliação e acompanhamento psicológico, conforme a LGPD (Lei 13.709/2018). Posso solicitar a correção ou a exclusão desses dados a qualquer momento.'}]}
 ];
 var STEPS=[
   {n:'Atendimento',s:[0],lead:'Comece nos contando para quem é o acompanhamento.'},
-  {n:'Seus dados',s:[1,2,3],lead:'Informe os dados de quem será atendido.'},
-  {n:'Saúde',s:[4,5,6,7],lead:'Estas informações ajudam a preparar o seu primeiro encontro.'},
+  {n:'Seus dados',n3:'Sobre o paciente',s:[1,2,3],lead:'Informe os seus dados: você é quem será atendido.',lead3:'Informe os dados do paciente, a pessoa que será atendida.'},
+  {n:'Saúde',s:[4,5,6,7],lead:'Estas informações ajudam a preparar o seu primeiro encontro.',lead3:'Estas informações ajudam a preparar o primeiro encontro do paciente.'},
   {n:'Valores e pagamento',s:[8],lead:'Estas informações agilizam a formalização do contrato e qualificam o seu agendamento.'},
-  {n:'Consentimento',s:[9],lead:'Falta pouco: revise e autorize o uso dos seus dados.'}
+  {n:'Consentimento',s:[9],lead:'Falta pouco: revise e autorize o uso dos seus dados.',lead3:'Falta pouco: revise e autorize o uso dos dados do paciente.'}
 ];
 var dig=function(s){return String(s).replace(/\D/g,'')};
 var MASK={
@@ -2492,8 +2550,9 @@ function fichaView(fi){
     var itens=fichaFlat(sc.f,[]).filter(function(f){return d[f.k]&&f.t!=='info'});
     if(!itens.length)return;tot+=itens.length;
     var g=h('dl',{class:'fvx-g'},itens.map(function(f){
-      var v=String(d[f.k]),sn=/^(sim|não|nao)$/i.test(v),longo=v.length>64||f.t==='area',rot=f.l;
-      if(d.titular===TIT[2]){if(f.k==='telefone')rot='Telefone do responsável (WhatsApp)';else if(f.k==='email')rot='E-mail do responsável'}
+      var terc=!!d.titular&&d.titular!==TIT[0],v=String(d[f.k]),sn=/^(sim|não|nao)$/i.test(v),longo=v.length>64||f.t==='area',rot=f.l3||f.l;
+      if(f.o&&(f.ol||f.ol3)){var oi=f.o.indexOf(v);if(oi>=0)v=((terc&&f.ol3)||f.ol||f.o)[oi]}
+      if(terc){if(f.k==='telefone')rot='Telefone do responsável (WhatsApp)';else if(f.k==='email')rot='E-mail do responsável'}
       return h('div',{class:'fvx-i'+(longo?' wide':'')},h('dt',{},rot.replace(/^\d+\)\s*/,'')),h('dd',{},sn?h('span',{class:'fvx-p '+(/^sim$/i.test(v)?'s':'n')},v.toUpperCase()):v));
     }));
     secs.push(h('section',{class:'fvx-s'},h('h4',{},h('span',{class:'fvx-n'},String(secs.length+1)),sc.h),g));
@@ -2513,12 +2572,15 @@ function verFichaPopup(){var f=S.d.ficha;if(!f)return;dialogo({titulo:'Minha fic
 function buildFicha(){
   var el=h('section',{class:'fx',role:'tabpanel'});
   var form=h('form',{novalidate:true,autocomplete:'on'});
-  var keys=[],stepKeys=[],cur=0,tm=null,wasMenor=null;
+  var keys=[],stepKeys=[],cur=0,tm=null,wasMenor=null,AD=[];
+  /* textos que mudam conforme o titular: a = falando com você · b = falando do paciente */
+  function ad(el,a,b){if(b&&b!==a)AD.push({el:el,a:a,b:b});return el}
   function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-  function lab(f,id){var l=mk('label',f.req?'req':'',f.l);if(id)l.htmlFor=id;return l}
+  function lab(f,id){var l=mk('label',f.req?'req':'',f.l);if(id)l.htmlFor=id;return ad(l,f.l,f.l3)}
+  function hint(f){var p=mk('p','hint',f.hint);return ad(p,f.hint,f.hint3)}
   function pills(f,cls){
     var g=mk('div',cls);g.setAttribute('role','radiogroup');g.setAttribute('aria-label',f.l);
-    f.o.forEach(function(v){var l=mk('label','o'),r=mk('input');r.type='radio';r.name=f.k;r.value=v;r.addEventListener('change',refresh);l.append(r,mk('span',null,v));g.append(l)});
+    f.o.forEach(function(v,i){var l=mk('label','o'),r=mk('input');r.type='radio';r.name=f.k;r.value=v;r.addEventListener('change',refresh);var tx=(f.ol&&f.ol[i])||v;l.append(r,ad(mk('span',null,tx),tx,f.ol3&&f.ol3[i]));g.append(l)});
     return g;
   }
   function build(f,host){
@@ -2527,34 +2589,34 @@ function buildFicha(){
     if(f.t==='text'){
       w.append(lab(f,id));var i=mk('input');i.type=f.type||'text';i.id=id;i.name=f.k;if(f.ph)i.placeholder=f.ph;if(f.im)i.inputMode=f.im;if(f.ac)i.autocomplete=f.ac;i.maxLength=160;
       if(f.mask)i.dataset.mask=f.mask;if(f.type==='email')i.dataset.mask='email';w.append(i);
-      if(f.hint)w.append(mk('p','hint',f.hint));
+      if(f.hint)w.append(hint(f));
     }else if(f.t==='area'){
       w.append(lab(f,id));var a=mk('textarea');a.id=id;a.name=f.k;a.maxLength=3000;w.append(a);
-      if(f.hint)w.append(mk('p','hint',f.hint));
+      if(f.hint)w.append(hint(f));
     }else if(f.t==='sel'){
       var curto=f.o.length<=3;
-      if(curto)w.append(mk('span','q'+(f.req?' req':''),f.l));else w.append(lab(f,id));
-      if(f.desc){var dp=mk('p','hint',f.desc+' ');dp.style.margin='0 0 9px';if(f.href){var ah=mk('a',null,f.href);ah.href=f.href;ah.target='_blank';ah.rel='noopener noreferrer';dp.append(ah)}w.append(dp)}
+      if(curto)w.append(ad(mk('span','q'+(f.req?' req':'')+(f.big?' big':''),f.l),f.l,f.l3));else w.append(lab(f,id));
+      if(f.desc){var dp=mk('p','hint');dp.append(ad(document.createTextNode(f.desc+' '),f.desc+' ',f.desc3&&f.desc3+' '));dp.style.margin='0 0 9px';if(f.href){var ah=mk('a',null,f.href);ah.href=f.href;ah.target='_blank';ah.rel='noopener noreferrer';dp.append(ah)}w.append(dp)}
       if(curto)w.append(pills(f,'opts col'));
       else{var s=mk('select');s.id=id;s.name=f.k;s.append(new Option('Selecione',''));f.o.forEach(function(o){s.append(new Option(o,o))});s.addEventListener('change',refresh);w.append(s)}
       if(f.rec){var cb=mk('div','sub2');cb.id='fx_rec';cb.hidden=true;f.rec.forEach(function(x){build(x,cb)});w.append(cb)}
       if(f.dt){var db=mk('div','sub2');db.id='fx_dt';db.hidden=true;f.dt.forEach(function(x){build(x,db)});w.append(db)}
       if(f.pac){var pb=mk('div','sub2');pb.id='fx_pac';pb.hidden=true;f.pac.forEach(function(x){build(x,pb)});w.append(pb)}
-      if(f.alerta){var ab=mk('div','sub2');ab.id='fx_alerta';ab.hidden=true;ab.append(mk('p','hint','Se você está em sofrimento intenso agora, não espere o nosso retorno: ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure o CAPS ou a UPA mais próxima. Depois você pode continuar a ficha.'));w.append(ab)}
+      if(f.alerta){var ab=mk('div','sub2');ab.id='fx_alerta';ab.hidden=true;var at1='Se você está em sofrimento intenso agora, não espere o nosso retorno: ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure o CAPS ou a UPA mais próxima. Depois você pode continuar a ficha.',at3='Se o paciente está em sofrimento intenso agora, não espere o nosso retorno: ligue 188 (CVV, 24h) ou 192 (SAMU), ou procure com ele o CAPS ou a UPA mais próxima. Depois você pode continuar a ficha.';ab.append(ad(mk('p','hint',at1),at1,at3));w.append(ab)}
       if(f.resp){var rb=mk('div','sub2');rb.id='fx_resp';rb.hidden=true;var rp=mk('p','hint','Quem solicita o atendimento e assina o contrato. Os dados de quem será atendido são pedidos na próxima etapa.');rp.style.margin='0 0 10px';rb.append(rp);f.resp.forEach(function(x){build(x,rb)});w.append(rb)}
     }else if(f.t==='yn'){
-      w.append(mk('span','q',f.l));w.append(pills({k:f.k,l:f.l,o:SN},'yn'));
+      w.append(ad(mk('span','q',f.l),f.l,f.l3));w.append(pills({k:f.k,l:f.l,o:SN},'yn'));
       if(f.sub){var sb=mk('div','sub');sb.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb)});w.append(sb)}
     }else if(f.t==='info'){
-      w.append(mk('span','q',f.l));if(f.hint)w.append(mk('p','hint',f.hint));
+      w.className+=' info';w.append(ad(mk('span','q',f.l),f.l,f.l3));if(f.hint)w.append(hint(f));
     }else if(f.t==='chk'){
-      var l=mk('label','chk'+((f.k==='lgpd'||f.k==='ciente')?' consent':'')),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;c.addEventListener('change',refresh);l.append(c,mk('span',f.req?'req':'',f.l));w.append(l);if(f.sub){var sb2=mk('div','sub');sb2.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb2)});w.append(sb2)}
+      var l=mk('label','chk'+((f.k==='lgpd'||f.k==='ciente')?' consent':'')),c=mk('input');c.type='checkbox';c.id=id;c.name=f.k;c.value=f.v;c.addEventListener('change',refresh);l.append(c,ad(mk('span',f.req?'req':'',f.l),f.l,f.l3));w.append(l);if(f.sub){var sb2=mk('div','sub');sb2.dataset.when=f.k;f.sub.forEach(function(x){build(x,sb2)});w.append(sb2)}
     }
     w.dataset.k=f.k;if(f.only)w.dataset.only=f.only;if(f.cls)w.className+=' '+f.cls;host.append(w);
   }
   STEPS.forEach(function(st,i){
     var k0=keys.length,card=h('section',{class:'card fstep'+(st.n==='Consentimento'?' consent-step':''),'data-i':i});
-    card.append(h('h2',{},st.n),mk('p','lead',st.lead));
+    card.append(ad(h('h2',{},st.n),st.n,st.n3),ad(mk('p','lead',st.lead),st.lead,st.lead3));
     if(st.n==='Consentimento')card.append(h('div',{class:'consent-banner',role:'note'},h('b',{'aria-hidden':'true'},'!'),h('div',{},h('strong',{},'Última etapa: leia com atenção'),h('p',{},'Sem a sua autorização não conseguimos receber a ficha. Você pode pedir a correção ou a exclusão dos dados quando quiser.'))));
     st.s.forEach(function(si){var sc=SEC[si],blk=mk('div','blk');if(st.s.length>1)blk.append(mk('h2',null,sc.h));sc.f.forEach(function(f){build(f,blk)});card.append(blk)});
     form.append(card);stepKeys[i]=keys.slice(k0);
@@ -2565,7 +2627,7 @@ function buildFicha(){
 
   function fechaFicha(){if(S.d.ficha){P.fxEdit=false;P.fxRender()}else go('sessoes')}
   var intro=h('div',{class:'card'},h('div',{class:'row'},h('h2',{},'Ficha de inscrição'),btn('✕ Fechar',function(){fechaFicha()},'small')),h('p',{class:'meta'},'Preencha os dados de quem será atendido. Campos com * são obrigatórios. Somente a equipe Emotiss terá acesso a estas informações (sigilo profissional e LGPD).'));
-  var pn=h('b',{},'1'),pp=h('span',{},'25%'),pb=h('i',{style:'width:25%'}),pd=h('div',{class:'dots'},STEPS.map(function(s){return h('span',{},s.n)}));
+  var pn=h('b',{},'1'),pp=h('span',{},'25%'),pb=h('i',{style:'width:25%'}),pd=h('div',{class:'dots'},STEPS.map(function(s){return ad(h('span',{},s.n),s.n,s.n3)}));
   var prog=h('div',{class:'card prog'},h('div',{class:'t'},h('span',{},'Etapa ',pn,' de '+STEPS.length),pp),h('div',{class:'pbar'},pb),pd);
   var okmsg=h('p',{class:'meta'});
   var okc=h('div',{class:'card stack',hidden:true},h('h2',{},'Ficha enviada'),okmsg,
@@ -2586,8 +2648,9 @@ function buildFicha(){
     var neuro=val('servico')===SERV[1];
     form.querySelectorAll('.f[data-only="neuro"]').forEach(function(w){w.hidden=!neuro});
     var fpg=form.querySelector('.f[data-k="pagamento"]');
-    if(fpg){fpg.hidden=neuro&&val('pagamento_neuro')!==NEUPAG[2];var qq=fpg.querySelector('.q');if(qq)qq.textContent=neuro?'Pagando por sessão realizada: quando prefere pagar?':'Como prefiro pagar:'}
+    if(fpg){fpg.hidden=neuro&&val('pagamento_neuro')!==NEUPAG[2];var qq=fpg.querySelector('.q');if(qq){qq.textContent=neuro?'Pagando por sessão realizada: quando prefere pagar?':'Como prefiro pagar';qq.classList.toggle('big',!neuro)}}
     var tv=val('titular'),outro=!!tv&&tv!==TIT[0];
+    AD.forEach(function(x){var t=outro?x.b:x.a;if(x.el.textContent!==t)x.el.textContent=t});
     var br=form.querySelector('#fx_resp');if(br)br.hidden=!outro;
     var bc=form.querySelector('#fx_rec');if(bc)bc.hidden=val('recibo')!==REC[1];
     var bd=form.querySelector('#fx_dt');if(bd)bd.hidden=val('pagamento')!==PAGQ[2];
@@ -2600,13 +2663,15 @@ function buildFicha(){
     /* paciente menor de 18 anos: contatos do responsável (vêm da conta) e pergunta de quem contactar */
     var menor=tv===TIT[2];
     aplicaMenor(menor);
-    var fq=form.querySelector('.f[data-k="contato_quem"]');if(fq)fq.hidden=!menor;
-    var fm=form.querySelector('.f[data-k="menor_info"]');if(fm)fm.hidden=!menor;
-    var bp=form.querySelector('#fx_pac');if(bp)bp.hidden=!(menor&&val('contato_quem')===CONTATO[1]);
-    setLab('telefone',menor?'Telefone do responsável (WhatsApp)':'Telefone (WhatsApp)');
-    setLab('email',menor?'E-mail do responsável':'E-mail');
     /* idade do paciente: até 13 anos a pergunta de orientação sexual não se aplica */
     var idade=idadeNasc();
+    /* "Quem deve ser contactado": só quando outra pessoa solicita. Paciente menor de 18 anos: fica "o responsável", bloqueado */
+    var fq=form.querySelector('.f[data-k="contato_quem"]');if(fq)fq.hidden=!outro;
+    travaContato(outro&&(menor||(idade!==null&&idade<18)));
+    var fm=form.querySelector('.f[data-k="menor_info"]');if(fm)fm.hidden=!outro;
+    var bp=form.querySelector('#fx_pac');if(bp)bp.hidden=!(outro&&val('contato_quem')===CONTATO[1]);
+    setLab('telefone',outro?'Telefone do responsável (WhatsApp)':'Telefone (WhatsApp)');
+    setLab('email',outro?'E-mail do responsável':'E-mail');
     var os=form.querySelector('select[name="orientacao"]');
     if(os){
       var nao=idade!==null&&idade<=13,opt=os.querySelector('option[data-na]');
@@ -2615,6 +2680,14 @@ function buildFicha(){
       notaCampo('orientacao','fx_na','Para pacientes até 13 anos esta pergunta não se aplica e será registrada como "não se aplica".',nao);
     }
     notaCampo('nascimento','fx_idade','Paciente menor de 18 anos: volte à etapa Atendimento e escolha "Para um filho menor de idade" para informar os dados do responsável.',idade!==null&&idade<18&&!menor);
+  }
+  function travaContato(on){
+    var w=form.querySelector('.f[data-k="contato_quem"]');if(!w)return;
+    var rs=w.querySelectorAll('input[name="contato_quem"]');
+    if(on){rs.forEach(function(r){r.checked=r.value===CONTATO[0];r.disabled=true});w.dataset.auto='1'}
+    else if(w.dataset.auto){rs.forEach(function(r){r.disabled=false;r.checked=false});delete w.dataset.auto}
+    w.classList.toggle('locked',!!on);
+    notaCampo('contato_quem','fx_trava','Paciente menor de 18 anos: as comunicações sobre os atendimentos são feitas com o responsável.',!!on);
   }
   function idadeNasc(){
     var i=form.querySelector('[name="nascimento"]'),m=i&&/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(i.value);
@@ -2664,7 +2737,17 @@ function buildFicha(){
   function preSocial(){if(!PRE_SOCIAL)return;var c=form.querySelector('[name="lim_financeiro"]');if(c&&!c.checked){c.checked=true;refresh()}PRE_SOCIAL=false;try{sessionStorage.removeItem('siage-social')}catch(e){}}
   function prefill(){var p=S.d.perfil||{},men=val('titular')===TIT[2];[['email',p.email],['telefone',p.telefone],['paciente',men?'':p.nome,1],['resp_nome',men?p.nome:'',1]].forEach(function(x){var i=form.querySelector('[name="'+x[0]+'"]');if(i&&!i.value&&x[1]){i.value=x[2]?String(x[1]).replace(/\s*\(.*?\)/g,''):String(x[1]);var m=i.dataset.mask;if(m&&MASK[m])i.value=MASK[m](i.value);tick(i)}})}
 
+  /* efeito lupa: aproxima o campo em uso (clique, toque ou Tab) */
+  function lupa(t){
+    var w=t&&t.closest?t.closest('.blk>.f, .blk>.row>.f'):null;
+    if(w&&w.hidden)w=null;
+    form.querySelectorAll('.f.lupa').forEach(function(x){if(x!==w)x.classList.remove('lupa')});
+    if(w)w.classList.add('lupa');form.classList.toggle('lupa-on',!!w);
+  }
+  form.addEventListener('focusin',function(e){lupa(e.target)});
+  el.addEventListener('pointerdown',function(e){lupa(form.contains(e.target)?e.target:null)});
   function mostra(i,rolar){
+    lupa(null);
     cur=i;form.querySelectorAll('.fstep').forEach(function(s){s.hidden=+s.dataset.i!==i});
     var pc=Math.round((i+1)/STEPS.length*100);pn.textContent=i+1;pp.textContent=pc+'%';pb.style.width=pc+'%';
     pd.querySelectorAll('span').forEach(function(s,j){s.className=j===i?'on':''});
@@ -2684,9 +2767,9 @@ function buildFicha(){
   function marca(k){var x=form.querySelector('[name="'+k+'"]');if(x)x.classList.add('bad');var w=form.querySelector('.f[data-k="'+k+'"]');if(w)w.classList.add('bad')}
   function erro(d,escopo){
     var no=function(k){return !escopo||escopo.indexOf(k)>=0};
-    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','urgencia','lgpd'];
+    var obrig=['titular','recibo','paciente','nascimento','cpf','telefone','email','nacionalidade','mae','cep','logradouro','numero','bairro','cidade','uf','demanda','urgencia','lgpd'];
     if(d.titular&&d.titular!==TIT[0])obrig.push('resp_nome','resp_cpf');
-    if(d.titular===TIT[2]){obrig.push('contato_quem');if(d.contato_quem===CONTATO[1])obrig.push('pac_telefone')}
+    if(d.titular&&d.titular!==TIT[0]){obrig.push('contato_quem');if(d.contato_quem===CONTATO[1])obrig.push('pac_telefone')}
     if(d.recibo===REC[1])obrig.push('recibo_nome','recibo_cpf');
     if(d.servico===SERV[1])obrig.push('pagamento_neuro');
     if(d.pagamento===PAGQ[2])obrig.push('pagamento_dia');
@@ -2709,7 +2792,7 @@ function buildFicha(){
     if(cur<STEPS.length-1){var er=erro(d,stepKeys[cur]);if(er){msg.textContent=er.m;foca(er.k);return}mostra(cur+1,true);return}
     var eg=erro(d,null);
     if(eg){var alvo=0;stepKeys.forEach(function(ks,i){if(ks.indexOf(eg.k)>=0)alvo=i});if(alvo!==cur)mostra(alvo,true);msg.textContent=eg.m;setTimeout(function(){foca(eg.k)},50);return}
-    var LAB={};SEC.forEach(function(sc){fichaFlat(sc.f,[]).forEach(function(f){LAB[f.k]=String(f.l||'').replace(/^\d+\)\s*/,'').replace(/\?$/,'')})});
+    var terc=!!d.titular&&d.titular!==TIT[0],LAB={};SEC.forEach(function(sc){fichaFlat(sc.f,[]).forEach(function(f){LAB[f.k]=String((terc&&f.l3)||f.l||'').replace(/^\d+\)\s*/,'').replace(/\?$/,'')})});
     var vazios=Object.keys(d).filter(function(k){return d[k]===''&&k!=='complemento'&&k.indexOf('lim_')!==0&&k.indexOf('soc_')!==0&&LAB[k]});
     if(vazios.length&&!P.fxOk){
       var primeiro=vazios[0];
@@ -3649,7 +3732,7 @@ function renderHoje(){
   var mostrar=fila.slice(0,12);
   P.hjFila.replaceChildren.apply(P.hjFila,mostrar.length?mostrar.map(function(f){
     var pc=f.cod?pgDe(f.cod):null;
-    return h('article',{class:'item'},h('div',{class:'row'},h('div',{},pc?h('h3',{},linkPac(pc.codigo,pc.nome)):null,h('p',{class:'meta'},f.tit)),h('div',{class:'actions'},f.bs)))
+    return h('article',{class:'item'},h('div',{class:'row'},h('div',{},pc?h('h3',{},linkPac(pc.codigo,nomeRico(pc.codigo,pc.nome))):null,h('p',{class:'meta'},f.tit)),h('div',{class:'actions'},f.bs)))
   }).concat(fila.length>12?[h('p',{class:'meta'},'+ '+(fila.length-12)+' itens. Veja a lista completa em Recepção, Financeiro e Atualizações.')]:[]):[empty('Tudo em dia','Nada aguardando ação agora.')]);
   P.hjSess.replaceChildren.apply(P.hjSess,[ses.length?h('ul',{class:'ag2-grid'},ses.map(sessaoItem)):empty('Sem sessões hoje','Nenhuma sessão marcada para hoje.')]);
 }
