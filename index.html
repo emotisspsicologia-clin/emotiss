@@ -1470,7 +1470,7 @@ button:focus-visible,a:focus-visible,.tab:focus-visible{outline:2px solid var(--
   .app:has(#tabs.gtabs:not([hidden])) #tabs.gtabs .ti{display:inline-flex;align-items:center;flex:none}
   .app:has(#tabs.gtabs:not([hidden])) #tabs.gtabs .tab[aria-selected="true"] .ico{color:var(--c-cream)}
   .app:has(#tabs.gtabs:not([hidden])) #tabs.gtabs .tab .badge{margin-left:auto;position:static;background:var(--warm);color:var(--c-white);font-size:.7rem;line-height:18px;min-width:20px;padding:0 8px}
-  .app:has(#tabs.gtabs:not([hidden])) .hsearch{grid-area:1/2/2/4;margin:28px 40px 0;min-height:48px;padding:0 18px;border:1px solid var(--line);border-radius:var(--r-pill);box-shadow:none}
+  .app:has(#tabs.gtabs:not([hidden])) .hsearch{grid-area:1/2/2/4;width:auto;margin:28px 40px 0;min-height:48px;padding:0 18px;border:1px solid var(--line);border-radius:var(--r-pill);box-shadow:none}
   .app:has(#tabs.gtabs:not([hidden])) .hsearch:hover,.app:has(#tabs.gtabs:not([hidden])) .hsearch:focus-visible{border-color:var(--warm);box-shadow:var(--e1);transform:none}
   .app:has(#tabs.gtabs:not([hidden])) .hs-t{flex-direction:row;align-items:baseline;gap:10px}
   .app:has(#tabs.gtabs:not([hidden])) .hs-t b{font-size:.92rem}.app:has(#tabs.gtabs:not([hidden])) .hs-t small{font-size:.86rem}
@@ -1490,9 +1490,39 @@ button:focus-visible,a:focus-visible,.tab:focus-visible{outline:2px solid var(--
 .dbadge{width:48px;height:56px;border-radius:14px;background:var(--surface-2);color:var(--fg)}
 .dbadge b{font-size:1.25rem}
 .dbadge small{color:var(--muted);font-size:.62rem;letter-spacing:.08em}
-.item.sc,.sx{background:transparent;border-width:0 0 1px 0;border-style:solid;border-color:var(--line);border-radius:0;box-shadow:none;padding:16px 0}
-.item.sc{gap:20px}
-.sx{gap:20px}
+.item.sc{background:transparent;border-width:0 0 1px 0;border-style:solid;border-color:var(--line);border-radius:0;box-shadow:none;padding:16px 0;gap:20px}
+/* sessões do paciente: cartão papel, data em bloco bege, chips neutros */
+.sx{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:none;padding:18px 22px;grid-template-columns:46px 1fr;gap:18px;align-items:center}
+.sx-date{width:46px;height:54px;border-radius:12px;background:var(--surface-2);color:var(--fg)}
+.sx-date b{font-size:1.2rem}
+.sx-date small{color:var(--muted);font-size:.62rem;letter-spacing:.06em;margin-top:3px}
+.sx-badge{color:var(--ink2);background:color-mix(in srgb,var(--fg) 8%,transparent);border-radius:var(--r-pill);padding:5px 12px}
+.sx-tags span{border-radius:var(--r-pill)}
+.sx.st-realizada,.sx.st-cancelada{background:transparent;border-width:0 0 1px 0;border-radius:0;padding:14px 0}
+.tl-i:has(.sx.st-realizada) .tl-dot{background:var(--ok);border-color:var(--ok)}
+/* próxima sessão: cartão escuro com data em bloco claro */
+.tl-i.next .sx{background:var(--band);color:var(--on-band);border:0;padding:22px 26px;gap:22px;box-shadow:var(--e2)}
+.tl-i.next .sx{grid-template-columns:62px 1fr}
+.tl-i.next .sx-date{width:62px;height:72px;border-radius:16px;background:var(--c-cream);color:var(--c-ink)}
+.tl-i.next .sx-date b{font-size:1.65rem}
+.tl-i.next .sx-date small{color:var(--warm);font-size:.7rem}
+.tl-i.next .sx h3,.tl-i.next .sx-time{color:var(--on-band)}
+.tl-i.next .sx p,.tl-i.next .sx .meta,.tl-i.next .sx small{color:var(--xcdc5b6)}
+.tl-i.next .sx-date small{color:var(--warm)}
+.tl-i.next .sx summary,.tl-i.next .sx a{color:var(--gold)}
+.tl-i.next .sx-badge{background:color-mix(in srgb,var(--c-cream) 14%,transparent);color:var(--gold)}
+.tl-i.next .sx-tags span{background:color-mix(in srgb,var(--c-cream) 14%,transparent);color:var(--c-cream)}
+.tl-i.next .sx .pill{background:color-mix(in srgb,var(--c-cream) 14%,transparent);color:var(--c-cream)}
+/* cabeçalho de seção e bloco recolhível, sem caixa bege */
+.nt-head.sec{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;padding:0 0 14px}
+.nt-head.sec .meta{color:var(--muted)}
+.nt-head.sec .sec-ic{background:var(--surface-2);color:var(--warm);border-radius:14px}
+details.card.fold{background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}
+details.card.fold>summary,details.card.fold>summary:hover{background:transparent;padding:0 0 12px;border-bottom:1px solid var(--line)}
+details.card.fold[open]>summary{border-bottom:1px solid var(--line)}
+details.card.fold>*:not(summary){padding:16px 0 20px}
+.sx{align-items:start}
+.tl-i.next .sx .sx-badge{background:color-mix(in srgb,var(--c-cream) 14%,transparent)!important;color:var(--gold)!important}
 .pill{padding:5px 12px;font-size:.75rem}
 .pill.agendada{color:var(--ink2);background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .pill.confirmada,.pill.agendamento{color:var(--ok-ink);background:color-mix(in srgb,var(--ok) 12%,transparent)}
@@ -1501,6 +1531,9 @@ button:focus-visible,a:focus-visible,.tab:focus-visible{outline:2px solid var(--
 .tile.big .tl,.tile.big .ts{color:var(--gold);letter-spacing:.1em}
 h1,h2,h3{letter-spacing:-.01em}
 .tab{font-weight:600}
+.pat-item>.row>h3{background:none;border-left:0;padding:0;font-size:1.2rem}
+.stack>h3,.cols .stack>h2{border-left:0;padding-left:0}
+details.card.fold{padding:0;margin:0}
 </style>
 </head>
 <body>
