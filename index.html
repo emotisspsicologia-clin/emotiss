@@ -1315,10 +1315,13 @@ label.f{gap:6px}
 
 /* ---- container 1080 · coluna do paciente até 720 ---- */
 main,.top>.in{max-width:1080px}
-.app:has(.top.pac) main,
-.app:has(.top.pac) .tabs{max-width:720px}
-.app:has(.top.pac) main{padding:0 var(--s4)}
+/* paciente usa a largura toda no desktop; só formulários/leitura ficam em coluna de 720 */
 .app:has(.top.pac) .card{padding:var(--s4)}
+.app:has(.top.pac) .panel-form,.app:has(.top.pac) .fx{max-width:720px;margin-inline:auto}
+@media (min-width:900px){
+  .app:has(.top.pac) .tiles{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .app:has(.top.pac) .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:var(--s3);align-items:start}
+}
 
 /* ---- início: UM pulso, só na próxima sessão ---- */
 .tl-i.next .tl-dot{animation:nextPulse 2.4s ease-out infinite}
@@ -1329,7 +1332,7 @@ main,.top>.in{max-width:1080px}
 @media (prefers-reduced-motion:reduce){.tl-i.next .tl-dot{animation:none}}
 
 /* ---- sessões / avisos / contrato / financeiro ---- */
-.app:has(.top.pac) .ag2-grid{grid-template-columns:1fr}
+.app:has(.top.pac) .ag2-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
 .callout,.notice,.nudge,.guide,.govbr,.ok-box,.lock-box{border-radius:var(--r-card)}
 .lock-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:var(--r-pill);
   background:color-mix(in srgb,var(--tone,var(--warm)) 14%,var(--surface));color:var(--tone,var(--warm));font-size:0}
