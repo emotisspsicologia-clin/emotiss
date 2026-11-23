@@ -1484,6 +1484,23 @@ button:focus-visible,a:focus-visible,.tab:focus-visible{outline:2px solid var(--
   .app:has(#tabs.gtabs:not([hidden])) .top .btn.novo{background:var(--warm);border-color:var(--warm);color:var(--on-solid)}
   .app:has(#tabs.gtabs:not([hidden]))>main{grid-area:3/2/4/4;max-width:none;width:auto;margin:0;padding:20px 40px 40px;min-width:0}
 }
+/* ===== Terra Clean · componentes (listas planas, data, chips) ===== */
+:root{--ok-ink:#1f5a34;--warn-ink:#6e4300}
+@media (prefers-color-scheme: dark){:root{--ok-ink:var(--ok);--warn-ink:var(--warn)}}
+.dbadge{width:48px;height:56px;border-radius:14px;background:var(--surface-2);color:var(--fg)}
+.dbadge b{font-size:1.25rem}
+.dbadge small{color:var(--muted);font-size:.62rem;letter-spacing:.08em}
+.item.sc,.sx{background:transparent;border-width:0 0 1px 0;border-style:solid;border-color:var(--line);border-radius:0;box-shadow:none;padding:16px 0}
+.item.sc{gap:20px}
+.sx{gap:20px}
+.pill{padding:5px 12px;font-size:.75rem}
+.pill.agendada{color:var(--ink2);background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.pill.confirmada,.pill.agendamento{color:var(--ok-ink);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.pill.reagendada,.pill.solicitacao{color:var(--warn-ink);background:color-mix(in srgb,var(--reag) 14%,transparent)}
+.tile.big{border-radius:var(--r-card);box-shadow:var(--e2)}
+.tile.big .tl,.tile.big .ts{color:var(--gold);letter-spacing:.1em}
+h1,h2,h3{letter-spacing:-.01em}
+.tab{font-weight:600}
 </style>
 </head>
 <body>
