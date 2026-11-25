@@ -3903,7 +3903,7 @@ function buildContratos(){
   f.msg=h('p',{class:'meta',role:'status'});
   var grp=function(arr,labels){return h('div',{class:'stack',style:'gap:6px'},arr.map(function(c,i){return h('label',{class:'f check'},c,h('span',{},labels[i]))}))};
   var cabec=h('div',{class:'fields'},field('Paciente',f.pac),field('Profissional (contratado)',f.prof),txt('data','Data do contrato',{attrs:{inputmode:'numeric',maxlength:10,placeholder:'dd/mm/aaaa'}}),
-    txt('cod','Código do prontuário',{attrs:{placeholder:'INICIAIS.Psic-dd.mm.aaaa/0001'}}));
+    txt('cod','Código do prontuário',{attrs:{placeholder:'INICIAIS.Psic-PAC-XXXXXXXX/01'}}));
   f.dados=h('div',{class:'fields'},
     txt('nome','Contratante (nome completo)'),txt('nac','Nacionalidade',{attrs:{placeholder:'brasileiro(a)'}}),sel('civil','Estado civil',CT_CIVIL),
     txt('cpf','CPF',{attrs:{inputmode:'numeric',maxlength:14}}),txt('tel','Telefone'),txt('email','E-mail'),txt('end','Residente em (endereço completo)',{area:1,wide:1}));
@@ -3938,11 +3938,13 @@ function buildContratos(){
 }
 function atualizaCod(){
   var f=P.ct,pac=pacDoCt();if(!pac)return;
-  var fi=fichaDoPac(pac.codigo)||{};var nasc=String(fi.nascimento||'').replace(/\//g,'.');
+  var fi=fichaDoPac(pac.codigo)||{};
   var neu=f.sv[1].checked&&!f.sv[0].checked;
-  if(!nasc){return}
-  var atual=f.cod.value.trim(),seq=(/\/(\d{1,6})$/.exec(atual)||[])[1]||'0001';
-  f.cod.value=ctIniciais(fi.paciente||pac.nome)+'.'+(neu?'Neur':'Psic')+'-'+nasc+'/'+seq;
+  /* sequencial por paciente: continua o que já está no campo; se vazio, conta os contratos já emitidos para o paciente + 1 */
+  var atual=f.cod.value.trim(),seq=(/\/(\d{1,6})$/.exec(atual)||[])[1];
+  if(!seq){var ja=(S.d.materiais||[]).filter(function(m){return m.categoria==='contrato'&&m.para===pac.codigo}).length;seq=String(ja+1);if(seq.length<2)seq='0'+seq}
+  /* formato: INICIAIS.Tipo-CODIGO_DO_PACIENTE/NN (a letra do documento é acrescentada na geração) */
+  f.cod.value=ctIniciais(fi.paciente||pac.nome)+'.'+(neu?'Neur':'Psic')+'-'+pac.codigo+'/'+seq;
 }
 function pacDoCt(){var c=P.ct&&P.ct.pac.value;return c?S.d.pacientes.filter(function(p){return p.codigo===c})[0]:null}
 function profDoCt(){var n=P.ct&&P.ct.prof.value;return n?profs().filter(function(p){return p.nome===n})[0]:null}

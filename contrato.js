@@ -37,10 +37,14 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
     .replace(/…/g, '...')
     .replace(/[^\n\x20-\x7E -ÿ–—]/g, '?');
 
-  /* Código do paciente: INICIAIS.Serviço-dd.mm.aaaa/0001; cada documento acrescenta a inicial do tipo (P, E, C, F) */
+  /* Código do paciente: INICIAIS.Serviço-PAC-XXXXXXXX/01 (os códigos antigos, com data de nascimento, continuam aceitos); cada documento acrescenta a inicial do tipo (P, E, C, F) */
   const CODRE = /^([A-Z]{1,8})[.|](PSIC|NEUR)-(\d{2})\.(\d{2})\.(\d{4})\/(\d{1,6})(?:-[A-Z])?$/;
+  const CODRE2 = /^([A-Z]{1,8})[.|](PSIC|NEUR)-(PAC-[A-Z0-9]{6,12})\/(\d{1,6})(?:-[A-Z])?$/;
   function codigoBase(x) {
     const t = String(x == null ? '' : x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '').toUpperCase();
+    /* formato atual: INICIAIS.Serviço-PAC-XXXXXXXX/NN (código interno do paciente + sequencial) */
+    const n = CODRE2.exec(t);
+    if (n) return n[1] + '.' + (n[2] === 'PSIC' ? 'Psic' : 'Neur') + '-' + n[3] + '/' + ('00' + n[4]).slice(-Math.max(2, n[4].length));
     const m = CODRE.exec(t);
     if (m) return m[1] + '.' + (m[2] === 'PSIC' ? 'Psic' : 'Neur') + '-' + m[3] + '.' + m[4] + '.' + m[5] + '/' + ('0000' + m[6]).slice(-Math.max(4, m[6].length));
     return '';
