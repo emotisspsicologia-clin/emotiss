@@ -178,8 +178,8 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
   const SIM = 'SIM';
   const CT = {
     title: 'Contrato de Prestação de Serviços',
-    duas: 'Este documento será emitido em duas vias entregues às partes envolvidas.',
-    vias: { paciente: '1ª via do paciente', contratado: '2ª via do contratado' },
+    duas: 'Este documento é emitido em via única, assinada pelo contratante e pela(o) contratada(o).',
+    vias: { unica: 'Via única', paciente: '1ª via do paciente', contratado: '2ª via do contratado' },
     SERV: ['Psicoterapia', 'Neuropsicologia'],
     MOD: ['Presencial', 'Online'],
     FORMAS: ['Pix', 'Transferência'],
@@ -197,7 +197,7 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
     t_psi: '1º Serão prestados serviços de psicoterapia individual, em observância ao disposto na legislação brasileira e na Lei nº 8.078/90, que versa sobre a prestação de serviços por profissional liberal. Em especial, os artigos 4º (inciso IV), 39 (incisos VI e IX) e 40 do Código de Defesa do Consumidor.',
     t_psi_pu: 'A psicoterapia é aqui entendida como um processo baseado em confiança e no trabalho em conjunto entre terapeuta e cliente, buscando a melhoria da qualidade de vida da(o) cliente. Nessa relação, a(o) terapeuta não tem a obrigação de fornecer respostas prontas, mas o de auxiliar a(o) cliente a descobrir suas possibilidades de ação.',
     t_neuro: 'É um processo complexo que visa descrever o funcionamento neuropsicológico da pessoa, num determinado momento de vida, com base em alguma hipótese clínica. Inclui nesse processo instrumentos padronizados (testes psicológicos) que são as fontes fundamentais, entrevista com pais, escola (heterorelato), e outros contextos para compreender de forma ampla as manifestações da queixa. Tem como produto o Laudo Neuropsicológico, que detalha os resultados comparando os desempenhos em relação a amostras normativas.',
-    t_fecho: 'Por estarem justas, contratadas e acordadas com as condições acima, contratante e contratada(o) assinam o presente instrumento, em duas vias de igual teor.',
+    t_fecho: 'Por estarem justas, contratadas e acordadas com as condições acima, contratante e contratada(o) assinam o presente instrumento, em via única.',
     t81p: 'Caso a(o) cliente não compareça à sessão de encerramento ou rescisão contratual sem justificativa, a(o) terapeuta fica desobrigado de realizar novo agendamento para esse fim, e o contrato estará automaticamente rescindido.',
     reajuste: 'O valor dos honorários será reajustado anualmente, conforme negociação direta entre as partes e informado com antecedência mínima de 60 dias.'
   };
@@ -233,7 +233,7 @@ window.EMOTISS_FONTS={"regular": "AAEAAAAOAIAAAwBgR1BPU0R2THUAAFRUAAAAIEdTVUIjfi
     const d = Object.assign({}, data0 || {}, { __let: 'C' });
     const prof = profOf(d);
     const plan = ctPlan(d);
-    const viaTxt = CT.vias[via] || CT.vias.paciente;
+    const viaTxt = CT.vias[via] || CT.vias.unica;
     const emitido = 'Emitido em ' + fmtStamp(now || new Date());
     const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
     const MX = 18, CW = 174, LIM = 262;
