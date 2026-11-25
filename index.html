@@ -680,7 +680,7 @@ details.card.fold>*:not(summary){margin:0;padding:16px 20px 20px}
 .fx .prog .t{color:var(--c-cream);font-size:.92rem}
 .fx .prog .t b{color:var(--gold)}
 .fx .prog .pbar{background:color-mix(in srgb,var(--c-white) 15%,transparent);height:10px}
-.fx .prog .pbar i{background:linear-gradient(90deg,var(--warm),var(--gold))}
+.fx .prog .pbar i{background:var(--gold)}
 .fx .prog .dots{color:var(--xcfc6b4);font-size:.74rem}
 .fx .prog .dots .on{color:var(--gold)}
 @media (prefers-color-scheme: dark){.fx .prog{border-color:var(--x37312a)}}
@@ -1401,6 +1401,30 @@ main,.top>.in{max-width:1080px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
+
+/* ===== v6: seleção da ficha, barra sólida e pop-ups claros ===== */
+.fx .o:has(input:checked){border:2px solid var(--ink);padding:11px 13px;background:color-mix(in srgb,var(--gold) 55%,var(--surface));color:var(--fg);font-weight:700}
+.fx .o:has(input:checked)::before{border-color:var(--ink);background:radial-gradient(var(--ink) 42%,transparent 48%)}
+.fx .yn .o:has(input:checked){background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.fx .prog .pbar i{background:var(--gold)}
+.dlg-ov{background:color-mix(in srgb,var(--c-ink) 55%,transparent);backdrop-filter:blur(3px)}
+.dlg{background:var(--surface);border-radius:22px;max-width:480px;box-shadow:var(--e2)}
+.dlg.largo{max-width:780px}
+.dlg-h{background:var(--surface);border-bottom:0;padding:22px 24px 4px;gap:14px}
+.dlg-eb{display:none}
+.dlg-h h3{color:var(--fg);font:600 1.2rem/1.2 var(--font-display)}
+.dlg-ic{width:44px;height:44px;font:700 1.25rem var(--font-display);background:var(--gold-soft);color:var(--fg)}
+.dlg.t-ok .dlg-ic{background:color-mix(in srgb,var(--ok) 16%,var(--surface));color:var(--ok)}
+.dlg.t-alerta .dlg-ic{background:color-mix(in srgb,var(--warn) 16%,var(--surface));color:var(--warn)}
+.dlg-x{margin-left:auto}
+.dlg-b{padding:12px 24px 20px}
+.dlg-a{background:transparent;border-top:1px solid var(--line-soft);padding:14px 24px 20px}
+.dlg-a .btn{min-height:44px;border-radius:var(--r-pill)}
+.dlg-a .btn:not(.primary){background:transparent;border:1px solid var(--bord);color:var(--fg)}
+.dlg-a .btn.primary{background:var(--c-ink);border-color:var(--c-ink);color:var(--c-cream)}
+.dlg-dest{background:color-mix(in srgb,var(--warn) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 32%,var(--line));color:var(--fg);border-radius:var(--r-inner)}
+.dlg-fab{display:none}
+@media (prefers-color-scheme: dark){.dlg-a .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--c-ink)}}
 </style>
 </head>
 <body>
@@ -1491,11 +1515,11 @@ function dialogo(o){
   function fecha(){ov.remove();document.removeEventListener('keydown',esc);if(!feito){feito=true;if(o.fim)o.fim()}}
   var tipo=o.tipo||(/✓/.test(o.titulo)?'ok':(/não|atenção|erro|inválid|bloquead|expirou|desatualizad|urgência/i.test(o.titulo)?'alerta':'info'));
   var glifo={ok:'✓',alerta:'!',info:'i'}[tipo];
-  var box=h('div',{class:'dlg t-'+tipo+(o.largo?' largo':'')},h('div',{class:'dlg-h'},h('span',{class:'dlg-ic','aria-hidden':'true'},glifo),h('div',{class:'dlg-ht'},h('span',{class:'dlg-eb'},'Emotiss'),h('h3',{},String(o.titulo).replace(/\s*✓\s*$/,'')))),h('div',{class:'dlg-b stack'},o.corpo||[]),
+  var box=h('div',{class:'dlg t-'+tipo+(o.largo?' largo':'')},h('div',{class:'dlg-h'},h('span',{class:'dlg-ic','aria-hidden':'true'},glifo),h('div',{class:'dlg-ht'},h('span',{class:'dlg-eb'},'Emotiss'),h('h3',{},String(o.titulo).replace(/\s*✓\s*$/,''))),h('button',{type:'button',class:'dlg-x','aria-label':'Fechar',onclick:function(){fecha()}},'✕')),h('div',{class:'dlg-b stack'},o.corpo||[]),
     h('div',{class:'dlg-a'},(o.botoes||[]).map(function(b){return btn(b.t,function(){fecha();if(b.fn)b.fn()},(b.cls||'')+' pillb',b.off?{disabled:true}:null)})));
-  ov.append(box);if(o.fab!==false&&(o.largo||!(o.botoes&&o.botoes.length)))ov.append(h('button',{type:'button',class:'dlg-fab',onclick:function(){fecha()}},'✕ Fechar'));
+  ov.append(box);if(false&&(o.largo||!(o.botoes&&o.botoes.length)))ov.append(h('button',{type:'button',class:'dlg-fab',onclick:function(){fecha()}},'✕ Fechar'));
   ov.addEventListener('click',function(e){if(e.target===ov)fecha()});document.addEventListener('keydown',esc);document.body.append(ov);
-  var f=box.querySelector('.dlg-a button.primary:not([disabled])')||box.querySelector('.dlg-a button')||ov.querySelector('.dlg-fab');if(f)f.focus();
+  var f=box.querySelector('.dlg-a button.primary:not([disabled])')||box.querySelector('.dlg-a button')||box.querySelector('.dlg-x');if(f)f.focus();
   return fecha;
 }
 function pad(n){return n<10?'0'+n:''+n}
@@ -4525,6 +4549,7 @@ function refreshSelects(){
       local: local.filter(Boolean), localRotulo: pres && onl ? 'Presencial e online' : (onl ? 'Online' : 'Presencial'),
       valor: 'R$ ' + valor + ' por sessão', pagto, pix: st.ct_forma === 'Pix' ? String(st.ct_pix || '').trim() : '',
       contrato: opt.contrato !== false, valores: opt.valores !== false,
+      link: typeof LINK_SISTEMA !== 'undefined' ? LINK_SISTEMA : '',
       prof: { nome: NOMES[pf.id] || pf.nome, tit: TIT[pf.id] || 'Psicólogo', crp: 'CRP ' + pf.crpn },
       faltam, aviso
     };
@@ -4537,29 +4562,34 @@ function refreshSelects(){
 
   /* ---------- e-mail: HTML com estilos inline (tabelas), pronto para colar no Gmail/Outlook ---------- */
   function emailHTML(w, logo) {
-    const lg = logo ? '<img src="' + logo.data + '" width="280" alt="Emotiss — Psicologia Clínica &amp; Neuropsicologia" style="display:block;margin:0 auto;border:0;width:280px;max-width:100%;height:auto">' : '<div style="font:600 40px/1 ' + FONT_D + ';text-align:center;color:' + K.ink + '">Emotiss<span style="color:' + K.coral + '">.</span></div>';
+    const P = { page: '#F1ECE1', paper: '#FFFDF8', line: '#E3DCCD', sand: '#F8F3EA', soft: '#F8ECD6', gold: '#E8C98F', sub: '#CDC5B6', body: '#3A322A' };
+    const lg = logo && logo.data
+      ? '<img src="' + logo.data + '" width="200" alt="Emotiss — Psicologia Clínica &amp; Neuropsicologia" style="display:block;margin:0 auto;border:0;width:200px;max-width:100%;height:auto">'
+      : '<div style="font:600 34px/1 ' + FONT_D + ';text-align:center;color:' + K.ink + '">Emotiss<span style="color:' + K.coral + '">.</span></div>';
     const loc = w.local.length ? w.local.map((l) => esc(l)).join('<br>') : '';
     const nc = notaContrato(w, 'email');
-    const caixa = (rot, val, sub) => '<td width="50%" valign="top" style="padding:0 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1.5px solid ' + K.ink + ';border-radius:16px"><tr><td style="padding:14px 16px"><div style="font:700 11px/1.3 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + K.muted + '">' + rot + '</div><div style="font:600 17px/1.35 ' + FONT_D + ';color:' + K.ink + ';margin-top:5px">' + esc(val) + '</div>' + (sub ? '<div style="font:500 12px/1.4 ' + FONT_B + ';color:' + K.muted + ';margin-top:4px">' + esc(sub) + '</div>' : '') + '</td></tr></table></td>';
-    return '<div style="background:' + K.bg + ';padding:28px 12px;font-family:' + FONT_B + ';color:' + K.ink + '">' +
-      '<table role="presentation" align="center" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;background:' + K.bg + '">' +
-      '<tr><td align="center" style="padding:6px 0 26px">' + lg + '</td></tr>' +
-      '<tr><td style="padding:0 8px"><div style="font:600 32px/1.2 ' + FONT_D + ';color:' + K.ink + '">Olá, ' + esc(w.nome) + '! 💛<br>Boas-vindas à Emotiss.</div>' +
-      '<p style="margin:14px 0 0;font:700 16px/1.55 ' + FONT_B + ';color:' + K.ink + '">' + T.intro + '</p></td></tr>' +
-      '<tr><td style="padding:22px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.band + ';border-radius:22px"><tr><td style="padding:24px 26px;font:500 16px/1.7 ' + FONT_B + ';color:' + K.ink + '">' + T.corpo + '</td></tr></table></td></tr>' +
-      '<tr><td style="padding:22px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.ink + ';border-radius:26px"><tr><td style="padding:28px 28px 26px;color:' + K.cream + '">' +
-      '<div style="font:700 12px/1.4 ' + FONT_B + ';letter-spacing:.16em;text-transform:uppercase;color:' + K.cream + ';opacity:.85">🗓️ Seu atendimento · ' + esc(w.servico) + '</div>' +
-      '<div style="margin-top:12px;font:600 40px/1.1 ' + FONT_D + ';color:' + K.cream + '">' + esc(w.dia) + ' <span style="color:' + K.coralSoft + ';white-space:nowrap">' + esc(w.hora) + '</span></div>' +
-      (w.primeiro ? '<div style="margin-top:8px;font:600 15px/1.4 ' + FONT_B + ';color:' + K.cream + '">Primeiro encontro: ' + esc(w.primeiro) + '</div>' : '') +
-      '<div style="height:1px;line-height:1px;font-size:1px;background:#4a443c;margin:18px 0 16px">&nbsp;</div>' +
-      '<div style="font:700 11px/1.4 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + K.cream + ';opacity:.85">📍 Local · ' + esc(w.localRotulo) + '</div>' +
-      (loc ? '<div style="margin-top:8px;font:600 19px/1.4 ' + FONT_D + ';color:' + K.cream + '">' + loc + '</div>' : '') +
-      '<div style="margin-top:14px;font:500 13px/1.5 ' + FONT_B + ';color:' + K.cream + ';opacity:.9">' + T.regras + '</div>' +
-      '</td></tr></table></td></tr>' +
-      (w.valores ? '<tr><td style="padding:18px 2px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + caixa('Honorários', w.valor) + caixa('Pagamento', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '') + '</tr></table></td></tr>' : '') +
-      (w.contrato ? '<tr><td style="padding:18px 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.rose + ';border-radius:16px"><tr><td align="center" style="padding:16px 20px;font:500 14px/1.6 ' + FONT_B + ';color:' + K.ink + '">📎 ' + esc(nc[0]) + '<b>' + nc[1] + '</b>' + esc(nc[2]) + '<b>' + nc[3] + '</b>' + esc(nc[4]) + '</td></tr></table></td></tr>' : '') +
-      '<tr><td align="center" style="padding:26px 8px 4px;font:500 13px/1.7 ' + FONT_B + ';color:' + K.muted + '"><b style="color:' + K.ink + '">' + esc(w.prof.nome) + '</b> · ' + w.prof.tit + ' · ' + esc(w.prof.crp) + '<br>' + esc(ctt) + '</td></tr>' +
-      '</table></div>';
+    const caixa = (rot, val, sub) => '<td width="50%" valign="top" style="padding:0 5px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + P.sand + ';border:1px solid ' + P.line + ';border-radius:14px"><tr><td style="padding:13px 15px"><div style="font:700 11px/1.3 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + K.muted + '">' + rot + '</div><div style="font:600 15px/1.35 ' + FONT_D + ';color:' + K.ink + ';margin-top:4px">' + esc(val) + '</div>' + (sub ? '<div style="font:500 12px/1.4 ' + FONT_B + ';color:' + K.muted + ';margin-top:3px">' + esc(sub) + '</div>' : '') + '</td></tr></table></td>';
+    const botao = w.link ? '<tr><td align="center" style="padding:6px 0 22px"><a href="' + esc(w.link) + '" target="_blank" style="display:inline-block;background:' + K.ink + ';color:' + K.cream + ';font:600 15px/1 ' + FONT_B + ';text-decoration:none;padding:15px 30px;border-radius:999px">Abrir minha área do paciente</a></td></tr>' : '';
+    return '<div style="background:' + P.page + ';padding:28px 12px;font-family:' + FONT_B + ';color:' + K.ink + '">' +
+      '<table role="presentation" align="center" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;background:' + P.paper + ';border:1px solid ' + P.line + ';border-radius:22px"><tr><td style="padding:30px 28px 26px">' +
+      '<div style="padding:0 0 24px;text-align:center">' + lg + '</div>' +
+      '<div style="font:600 28px/1.2 ' + FONT_D + ';color:' + K.ink + '">Olá, ' + esc(w.nome) + '!<br>Boas-vindas à Emotiss.</div>' +
+      '<p style="margin:12px 0 18px;font:500 15px/1.6 ' + FONT_B + ';color:' + P.body + '">' + T.intro + '</p>' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.band + ';border-radius:16px"><tr><td style="padding:16px 18px;font:500 14px/1.65 ' + FONT_B + ';color:' + P.body + '">' + T.corpo + '</td></tr></table>' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + K.ink + ';border-radius:20px;margin:16px 0 14px"><tr><td style="padding:22px 24px;color:' + K.cream + '">' +
+      '<div style="font:700 11px/1.4 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + P.sub + '">Seu atendimento · ' + esc(w.servico) + '</div>' +
+      '<div style="margin-top:8px;font:600 32px/1.15 ' + FONT_D + ';color:' + K.cream + '">' + esc(w.dia) + ' <span style="color:' + P.gold + ';white-space:nowrap">' + esc(w.hora) + '</span></div>' +
+      (w.primeiro ? '<div style="margin-top:6px;font:500 14px/1.4 ' + FONT_B + ';color:' + P.sub + '">Primeiro encontro: ' + esc(w.primeiro) + '</div>' : '') +
+      '<div style="height:1px;line-height:1px;font-size:1px;background:#4a443c;margin:16px 0 14px">&nbsp;</div>' +
+      '<div style="font:700 11px/1.4 ' + FONT_B + ';letter-spacing:.14em;text-transform:uppercase;color:' + P.sub + '">Local · ' + esc(w.localRotulo) + '</div>' +
+      (loc ? '<div style="margin-top:6px;font:600 17px/1.4 ' + FONT_D + ';color:' + K.cream + '">' + loc + '</div>' : '') +
+      '<div style="margin-top:12px;font:500 12.5px/1.5 ' + FONT_B + ';color:' + P.sub + '">' + T.regras + '</div>' +
+      '</td></tr></table>' +
+      (w.valores ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 -5px 14px;width:calc(100% + 10px)"><tr>' + caixa('Honorários', w.valor) + caixa('Pagamento', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '') + '</tr></table>' : '') +
+      (w.contrato ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + P.soft + ';border:1px solid ' + P.gold + ';border-radius:16px;margin:0 0 20px"><tr><td width="38" valign="top" style="padding:14px 0 14px 16px"><div style="width:38px;height:38px;line-height:38px;border-radius:50%;background:' + P.paper + ';text-align:center;font-size:18px">📎</div></td><td valign="top" style="padding:14px 16px 14px 12px"><div style="font:600 14px/1.3 ' + FONT_D + ';color:' + K.ink + ';margin-bottom:2px">Contrato para assinatura</div><div style="font:500 13.5px/1.55 ' + FONT_B + ';color:' + P.body + '">' + esc(nc[0]) + '<b>' + nc[1] + '</b>' + esc(nc[2]) + '<b>' + nc[3] + '</b>' + esc(nc[4]) + '</div></td></tr></table>' : '') +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + botao + '</table>' +
+      '<div style="border-top:1px solid ' + P.line + ';padding-top:16px;text-align:center;font:500 12.5px/1.7 ' + FONT_B + ';color:' + K.muted + '"><b style="color:' + K.ink + '">' + esc(w.prof.nome) + '</b> · ' + w.prof.tit + ' · ' + esc(w.prof.crp) + '<br>' + esc(ctt) + '</div>' +
+      '</td></tr></table></div>';
   }
   function emailText(w) {
     const nc = notaContrato(w, 'email').join('').replace(/\s+/g, ' ');
@@ -4569,10 +4599,11 @@ function refreshSelects(){
       '📍 Local · ' + w.localRotulo, w.local.join('\n'), T.regras, '',
       w.valores ? 'Honorários: ' + w.valor + '\nPagamento: ' + (w.pagto || 'a combinar') + (w.pix ? '\nChave Pix: ' + w.pix : '') + '\n' : null,
       w.contrato ? '📎 ' + nc + '\n' : null,
+      w.link ? 'Acesse a sua área do paciente: ' + w.link + '\n' : null,
       w.prof.nome + ' · ' + w.prof.tit + ' · ' + w.prof.crp, ctt].filter((x) => x !== null).join('\n');
   }
   /* mensagem curta que acompanha a imagem no WhatsApp */
-  const zapTexto = (w) => 'Olá, ' + w.nome + '! 💛 Seja bem-vindo(a) à Emotiss. Seguem as informações do seu atendimento: ' + w.dia + ' às ' + w.hora + '.';
+  const zapTexto = (w) => 'Olá, ' + w.nome + '! Seja bem-vindo(a) à Emotiss. Seguem as informações do seu atendimento: ' + w.dia + ' às ' + w.hora + '.' + (w.link ? '\nAcesse a sua área do paciente: ' + w.link : '');
 
   /* ---------- imagem para WhatsApp (canvas, 720 px de largura lógica, 2x) ---------- */
   const loadImg = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
@@ -4583,8 +4614,9 @@ function refreshSelects(){
   }
   async function renderImage(w, logo) {
     await fontes();
-    const lg = logo ? await loadImg(logo.data) : null;
-    const S = 2, W = 720, PX = 56, CW = W - PX * 2;
+    const lg = logo && logo.data ? await loadImg(logo.data) : null;
+    const P = { page: '#F1ECE1', paper: '#FFFDF8', line: '#E3DCCD', sand: '#F8F3EA', soft: '#F8ECD6', gold: '#E8C98F', sub: '#CDC5B6', body: '#3A322A' };
+    const S = 2, W = 720, CX = 24, CWD = W - CX * 2, PX = 64, CW = W - PX * 2;
     const cv = document.createElement('canvas');
     const ctx = cv.getContext('2d');
     const f = (wt, sz, fam) => wt + ' ' + sz + 'px ' + (fam === 'd' ? FONT_D : FONT_B) + ', ' + EMOJI + ', sans-serif';
@@ -4605,96 +4637,99 @@ function refreshSelects(){
       if (fill) { ctx.fillStyle = fill; ctx.fill(); }
       if (stroke) { ctx.lineWidth = lw || 1; ctx.strokeStyle = stroke; ctx.stroke(); }
     };
-    const spaced = (txt, x, y, ls, align) => {
-      let tw = 0; for (const ch of txt) tw += ctx.measureText(ch).width + ls; tw -= ls;
-      let cx = align === 'center' ? x - tw / 2 : x;
-      ctx.textAlign = 'left';
+    const spaced = (txt, x, y, ls) => {
+      let cx = x; ctx.textAlign = 'left';
       for (const ch of txt) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + ls; }
     };
-    /* uma passagem mede, a outra desenha; devolve a altura total */
-    function layout(draw) {
-      let y = 52;
+    /* uma passagem mede, a outra desenha; devolve a altura total do conteúdo */
+    function layout(draw, cardH) {
       ctx.textBaseline = 'alphabetic';
-      /* logo centralizada */
-      if (lg) { const lw = 320, lh = lw / (lg.width / lg.height); if (draw) ctx.drawImage(lg, (W - lw) / 2, y, lw, lh); y += lh; }
-      else { if (draw) { ctx.fillStyle = K.ink; ctx.font = f(600, 46, 'd'); ctx.textAlign = 'center'; ctx.fillText('Emotiss.', W / 2, y + 44); } y += 56; }
-      y += 34;
+      if (draw) rr(CX, CX, CWD, cardH, 22, P.paper, P.line, 1);
+      let y = CX + 38;
+      /* logo */
+      if (lg) { const lw = 240, lh = lw / (lg.width / lg.height); if (draw) ctx.drawImage(lg, (W - lw) / 2, y, lw, lh); y += lh; }
+      else { if (draw) { ctx.fillStyle = K.ink; ctx.font = f(600, 42, 'd'); ctx.textAlign = 'center'; ctx.fillText('Emotiss', W / 2 - 6, y + 38); ctx.fillStyle = K.coral; ctx.textAlign = 'left'; ctx.fillText('.', W / 2 + ctx.measureText('Emotiss').width / 2 - 2, y + 38); } y += 50; }
+      y += 30;
       /* saudação */
-      ctx.font = f(600, 36, 'd'); ctx.textAlign = 'left';
-      ['Olá, ' + w.nome + '! 💛', 'Boas-vindas à Emotiss.'].forEach((l, i) => { if (draw) { ctx.fillStyle = K.ink; ctx.fillText(l, PX, y + 34 + i * 41); } });
-      y += 82 + 14;
-      ctx.font = f(700, 17, 'b');
-      wrap(T.intro, CW).forEach((l) => { if (draw) { ctx.fillStyle = K.ink; ctx.fillText(l, PX, y + 20); } y += 26.4; });
-      y += 26;
+      ctx.font = f(600, 34, 'd'); ctx.textAlign = 'left';
+      ['Olá, ' + w.nome + '!', 'Boas-vindas à Emotiss.'].forEach((l, i) => { if (draw) { ctx.fillStyle = K.ink; ctx.fillText(l, PX, y + 30 + i * 41); } });
+      y += 82 + 12;
+      ctx.font = f(500, 16, 'b');
+      wrap(T.intro, CW).forEach((l) => { if (draw) { ctx.fillStyle = P.body; ctx.fillText(l, PX, y + 18); } y += 25.6; });
+      y += 18;
       /* parágrafo em faixa */
-      ctx.font = f(500, 18, 'b');
-      const pl = wrap(T.corpo, CW - 56), ph = pl.length * 30.6 + 52;
-      if (draw) { rr(PX, y, CW, ph, 22, K.band); ctx.fillStyle = K.ink; ctx.font = f(500, 18, 'b'); pl.forEach((l, i) => ctx.fillText(l, PX + 28, y + 26 + 21 + i * 30.6 - 8)); }
-      y += ph + 26;
-      /* cartão do atendimento (destaque) */
-      const cx = PX + 32, cw = CW - 64;
-      ctx.font = f(600, 50, 'd');
-      const dw = ctx.measureText(w.dia + ' ').width, hw = ctx.measureText(w.hora).width;
-      const quebra = dw + hw > cw;
-      ctx.font = f(600, 22, 'd');
+      ctx.font = f(500, 15, 'b');
+      const pl = wrap(T.corpo, CW - 44), ph = pl.length * 25 + 32;
+      if (draw) { rr(PX, y, CW, ph, 16, K.band); ctx.fillStyle = P.body; ctx.font = f(500, 15, 'b'); pl.forEach((l, i) => ctx.fillText(l, PX + 22, y + 16 + 17 + i * 25 - 4)); }
+      y += ph + 16;
+      /* bloco escuro do atendimento */
+      const cx = PX + 28, cw = CW - 56;
+      ctx.font = f(600, 40, 'd');
+      const dw = ctx.measureText(w.dia + ' ').width, hw = ctx.measureText(w.hora).width, quebra = dw + hw > cw;
+      ctx.font = f(600, 20, 'd');
       const ll = w.local.length ? wrap(w.local.join('\n'), cw) : [];
-      let ch = 32 + 16 + (quebra ? 112 : 58) + (w.primeiro ? 30 : 0) + 18 + 1 + 18 + 14 + 16 + ll.length * 31 + 14 + 20 + 28;
+      const dk = { l1: 39 }; dk.d1 = dk.l1 + 50; dk.d2 = quebra ? dk.d1 + 46 : dk.d1; dk.pr = w.primeiro ? dk.d2 + 28 : dk.d2;
+      dk.dv = dk.pr + 18; dk.l2 = dk.dv + 22; dk.loc = dk.l2 + 34; dk.lend = ll.length ? dk.loc + (ll.length - 1) * 28 : dk.l2; dk.rg = dk.lend + 26; dk.h = dk.rg + 26;
       if (draw) {
-        rr(PX, y, CW, ch, 26, K.ink);
-        let yy = y + 32 + 12; ctx.fillStyle = K.cream;
-        ctx.globalAlpha = .85; ctx.font = f(800, 12, 'b'); spaced('🗓️ SEU ATENDIMENTO · ' + w.servico.toUpperCase(), cx, yy, 1.9, 'left'); ctx.globalAlpha = 1;
-        yy += 16 + 46;
-        ctx.font = f(600, 50, 'd'); ctx.textAlign = 'left'; ctx.fillStyle = K.cream;
-        if (quebra) { ctx.fillText(w.dia, cx, yy); yy += 56; ctx.fillStyle = K.coralSoft; ctx.fillText(w.hora, cx, yy); }
-        else { ctx.fillText(w.dia + ' ', cx, yy); ctx.fillStyle = K.coralSoft; ctx.fillText(w.hora, cx + dw, yy); }
-        if (w.primeiro) { yy += 32; ctx.fillStyle = K.cream; ctx.font = f(700, 16, 'b'); ctx.fillText('Primeiro encontro: ' + w.primeiro, cx, yy); }
-        yy += 24; ctx.globalAlpha = .25; ctx.fillStyle = K.cream; ctx.fillRect(cx, yy, cw, 1); ctx.globalAlpha = 1;
-        yy += 18 + 14; ctx.fillStyle = K.cream; ctx.globalAlpha = .85; ctx.font = f(800, 11.5, 'b'); spaced('📍 LOCAL · ' + w.localRotulo.toUpperCase(), cx, yy, 1.7, 'left'); ctx.globalAlpha = 1;
-        yy += 10; ctx.font = f(600, 22, 'd'); ctx.fillStyle = K.cream;
-        ll.forEach((l, i) => ctx.fillText(l, cx, yy + 22 + i * 31));
-        yy += ll.length * 31 + 14 + 22; ctx.globalAlpha = .9; ctx.font = f(500, 14, 'b'); ctx.fillText(T.regras, cx, yy); ctx.globalAlpha = 1;
+        rr(PX, y, CW, dk.h, 20, K.ink);
+        ctx.fillStyle = P.sub; ctx.font = f(700, 11, 'b'); spaced(('SEU ATENDIMENTO · ' + w.servico).toUpperCase(), cx, y + dk.l1, 1.7);
+        ctx.font = f(600, 40, 'd'); ctx.textAlign = 'left'; ctx.fillStyle = K.cream;
+        if (quebra) { ctx.fillText(w.dia, cx, y + dk.d1); ctx.fillStyle = P.gold; ctx.fillText(w.hora, cx, y + dk.d2); }
+        else { ctx.fillText(w.dia + ' ', cx, y + dk.d1); ctx.fillStyle = P.gold; ctx.fillText(w.hora, cx + dw, y + dk.d1); }
+        if (w.primeiro) { ctx.fillStyle = P.sub; ctx.font = f(500, 15, 'b'); ctx.fillText('Primeiro encontro: ' + w.primeiro, cx, y + dk.pr); }
+        ctx.fillStyle = 'rgba(245,240,232,.2)'; ctx.fillRect(cx, y + dk.dv, cw, 1);
+        ctx.fillStyle = P.sub; ctx.font = f(700, 11, 'b'); spaced(('LOCAL · ' + w.localRotulo).toUpperCase(), cx, y + dk.l2, 1.7);
+        ctx.font = f(600, 20, 'd'); ctx.fillStyle = K.cream; ll.forEach((l, i) => ctx.fillText(l, cx, y + dk.loc + i * 28));
+        ctx.fillStyle = P.sub; ctx.font = f(500, 13, 'b'); ctx.fillText(T.regras, cx, y + dk.rg);
       }
-      y += ch + 24;
+      y += dk.h + 14;
       /* honorários e pagamento */
       if (w.valores) {
-        const bw = (CW - 12) / 2, vals = [['HONORÁRIOS', w.valor, ''], ['PAGAMENTO', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '']];
-        ctx.font = f(600, 18, 'd');
-        const ls = vals.map((v) => wrap(v[1], bw - 34)); const sl = vals.map((v) => (v[2] ? wrap(v[2], bw - 34) : []));
-        const hh = 14 + 11 + 8 + Math.max(ls[0].length, ls[1].length) * 24 + Math.max(sl[0].length, sl[1].length) * 17 + 14 + 4;
+        const bw = (CW - 10) / 2, vals = [['HONORÁRIOS', w.valor, ''], ['PAGAMENTO', w.pagto || 'A combinar', w.pix ? 'Chave Pix: ' + w.pix : '']];
+        ctx.font = f(600, 16, 'd');
+        const ls = vals.map((v) => wrap(v[1], bw - 32)); ctx.font = f(500, 12.5, 'b'); const sl = vals.map((v) => (v[2] ? wrap(v[2], bw - 32) : []));
+        const hh = 14 + 11 + 8 + Math.max(ls[0].length, ls[1].length) * 22 + Math.max(sl[0].length, sl[1].length) * 17 + 20;
         vals.forEach((v, i) => {
           if (!draw) return;
-          const bx = PX + i * (bw + 12);
-          rr(bx, y, bw, hh, 16, null, K.ink, 1.5);
-          ctx.fillStyle = K.muted; ctx.font = f(800, 11, 'b'); spaced(v[0], bx + 17, y + 14 + 11, 1.5, 'left');
-          ctx.fillStyle = K.ink; ctx.font = f(600, 18, 'd'); ls[i].forEach((l, j) => ctx.fillText(l, bx + 17, y + 14 + 11 + 8 + 18 + j * 24));
-          ctx.fillStyle = K.muted; ctx.font = f(500, 13, 'b'); sl[i].forEach((l, j) => ctx.fillText(l, bx + 17, y + 14 + 11 + 8 + 18 + ls[i].length * 24 + 12 + j * 17));
+          const bx = PX + i * (bw + 10);
+          rr(bx, y, bw, hh, 14, P.sand, P.line, 1);
+          ctx.fillStyle = K.muted; ctx.font = f(700, 11, 'b'); spaced(v[0], bx + 16, y + 14 + 10, 1.5);
+          ctx.fillStyle = K.ink; ctx.font = f(600, 16, 'd'); ls[i].forEach((l, j) => ctx.fillText(l, bx + 16, y + 14 + 11 + 8 + 16 + j * 22));
+          ctx.fillStyle = K.muted; ctx.font = f(500, 12.5, 'b'); sl[i].forEach((l, j) => ctx.fillText(l, bx + 16, y + 14 + 11 + 8 + 16 + ls[i].length * 22 + 6 + j * 17));
         });
-        y += hh + 24;
+        y += hh + 14;
       }
       /* aviso do contrato */
       if (w.contrato) {
-        const nc = notaContrato(w, 'zap'), plain = '📎 ' + nc.join('');
-        ctx.font = f(500, 15, 'b');
-        const nl = wrap(plain, CW - 40), nh = nl.length * 24 + 32;
-        if (draw) { rr(PX, y, CW, nh, 16, K.rose); ctx.fillStyle = K.ink; ctx.textAlign = 'center'; ctx.font = f(500, 15, 'b'); nl.forEach((l, i) => ctx.fillText(l, W / 2, y + 16 + 17 + i * 24)); ctx.textAlign = 'left'; }
-        y += nh + 28;
-      }
-      /* assinatura da clínica e do profissional */
-      ctx.textAlign = 'center';
+        const nc = notaContrato(w, 'zap'), plain = nc.join('');
+        const tx = PX + 16 + 38 + 12; ctx.font = f(500, 14, 'b');
+        const nl = wrap(plain, CW - (tx - PX) - 16), nh = Math.max(66, 14 + 26 + nl.length * 22 + 12);
+        if (draw) {
+          rr(PX, y, CW, nh, 16, P.soft, P.gold, 1);
+          ctx.beginPath(); ctx.arc(PX + 16 + 19, y + 14 + 19, 19, 0, Math.PI * 2); ctx.fillStyle = P.paper; ctx.fill();
+          ctx.textAlign = 'center'; ctx.fillStyle = K.ink; ctx.font = f(500, 18, 'b'); ctx.fillText('📎', PX + 16 + 19, y + 14 + 26); ctx.textAlign = 'left';
+          ctx.font = f(600, 15, 'd'); ctx.fillStyle = K.ink; ctx.fillText('Contrato para assinatura', tx, y + 14 + 15);
+          ctx.font = f(500, 14, 'b'); ctx.fillStyle = P.body; nl.forEach((l, i) => ctx.fillText(l, tx, y + 14 + 26 + 14 + i * 22 - 6));
+        }
+        y += nh + 22;
+      } else y += 8;
+      /* assinatura */
       if (draw) {
-        ctx.fillStyle = K.ink; ctx.font = f(800, 13, 'b'); const a = w.prof.nome, b = ' · ' + w.prof.tit + ' · ' + w.prof.crp;
-        const wa = ctx.measureText(a).width; ctx.font = f(500, 13, 'b'); const wb = ctx.measureText(b).width; const sx = W / 2 - (wa + wb) / 2;
-        ctx.textAlign = 'left'; ctx.font = f(800, 13, 'b'); ctx.fillText(a, sx, y + 13); ctx.fillStyle = K.muted; ctx.font = f(500, 13, 'b'); ctx.fillText(b, sx + wa, y + 13);
-        ctx.textAlign = 'center'; ctx.fillText(ctt, W / 2, y + 13 + 22);
+        ctx.fillStyle = P.line; ctx.fillRect(PX, y, CW, 1);
+        const a = w.prof.nome, b = ' · ' + w.prof.tit + ' · ' + w.prof.crp;
+        ctx.font = f(700, 13, 'b'); const wa = ctx.measureText(a).width; ctx.font = f(500, 13, 'b'); const wb = ctx.measureText(b).width; const sx = W / 2 - (wa + wb) / 2;
+        ctx.textAlign = 'left'; ctx.fillStyle = K.ink; ctx.font = f(700, 13, 'b'); ctx.fillText(a, sx, y + 16 + 12);
+        ctx.fillStyle = K.muted; ctx.font = f(500, 13, 'b'); ctx.fillText(b, sx + wa, y + 16 + 12);
+        ctx.textAlign = 'center'; ctx.fillText(ctt, W / 2, y + 16 + 12 + 22); ctx.textAlign = 'left';
       }
-      y += 13 + 22 + 52;
+      y += 16 + 12 + 22 + 32;
       return y;
     }
     ctx.canvas.width = W; ctx.canvas.height = 10;
-    const H = Math.ceil(layout(false));
+    const end = layout(false, 0), H = Math.ceil(end + CX), cardH = Math.ceil(end - CX);
     cv.width = W * S; cv.height = H * S;
-    ctx.scale(S, S); ctx.fillStyle = K.bg; ctx.fillRect(0, 0, W, H);
-    layout(true);
+    ctx.scale(S, S); ctx.fillStyle = P.page; ctx.fillRect(0, 0, W, H);
+    layout(true, cardH);
     return new Promise((res) => cv.toBlob((b) => res(b), 'image/png'));
   }
   root.Welcome = { data, emailHTML, emailText, assunto, zapTexto, renderImage, parseBR };
@@ -4844,11 +4879,12 @@ async function renderBoasVindasPreview(){
   var d = dadosBoasVindas();
   if(!d || !d.w) return;
   var w = d.w, n = ++bvSeq;
+  var logoEm = await garantirLogo();
   
   // Atualiza botões e links
   var ass = window.Welcome.assunto(w);
   var mailTxt = window.Welcome.emailText(w);
-  var mailHtml = window.Welcome.emailHTML(w, window.EMOTISS_LOGO);
+  var mailHtml = window.Welcome.emailHTML(w, logoEm);
   var zapTxt = window.Welcome.zapTexto(w);
   
   f.pMail.innerHTML = mailHtml;
@@ -4934,7 +4970,8 @@ function buildBoasVindas(){
   var btnCopiarHtml = btn('Copiar e-mail formatado (HTML)', async function(){
     var d = dadosBoasVindas();
     if(!d || !d.w) return;
-    var html = window.Welcome.emailHTML(d.w, window.EMOTISS_LOGO);
+    var lgE = await garantirLogo();
+    var html = window.Welcome.emailHTML(d.w, lgE);
     var txt = window.Welcome.emailText(d.w);
     try {
       if(navigator.clipboard && window.ClipboardItem){
