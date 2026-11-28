@@ -1502,6 +1502,12 @@ main,.top>.in{max-width:1080px}
 .gx-eut{display:flex;flex-direction:column;flex:1;min-width:0}.gx-eut b{font-weight:700;font-size:14px}.gx-eut small{color:var(--xcdc5b6);font-size:12px}
 .gx-eu .gx-link{min-height:32px;font-size:12.5px;text-decoration:underline;font-weight:600}
 @media (max-width:640px){.gx-lgpd.in{display:flex}.gx-lgpd.out{display:none}}
+
+.gx-hlinks{display:flex;align-items:center;gap:10px}
+.gx-troca{font:700 13.5px var(--font-body);color:var(--c-ink);text-decoration:none;border:1px solid color-mix(in srgb,var(--c-ink) 35%,transparent);border-radius:var(--r-pill);padding:8px 14px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.gx-troca:hover{background:color-mix(in srgb,var(--c-ink) 7%,transparent)}
+.gx-troca .gx-hs{display:none}
+@media (max-width:640px){.gx-troca .gx-hl{display:none}.gx-troca .gx-hs{display:inline}.gx-troca{padding:6px 12px;min-height:36px;font-size:13px}}
 </style>
 </head>
 <body>
@@ -2045,9 +2051,13 @@ function buildGate(){
     u.setAttribute('href','#logo');sv.appendChild(u);return sv;
   }
   function cab(){
+    var eq=G.view==='equipe';
+    var tr=h('a',{class:'gx-troca',href:eq?'#':'#equipe'},h('span',{class:'gx-hl'},eq?'Área do paciente':'Acesso da equipe'),h('span',{class:'gx-hs'},eq?'Paciente':'Equipe'));
+    tr.addEventListener('click',function(ev){ev.preventDefault();mostrar(eq?base():'equipe',true)});
     return h('div',{class:'gx-head'},
       h('div',{class:'gx-brand'},logoSvg()),
-      h('a',{class:'gx-help',href:waUrl(ZAP),target:'_blank',rel:'noopener noreferrer'},h('span',{class:'gx-hl'},'Precisa de ajuda? Fale com a equipe'),h('span',{class:'gx-hs'},'Ajuda')));
+      h('div',{class:'gx-hlinks'},tr,
+      h('a',{class:'gx-help',href:waUrl(ZAP),target:'_blank',rel:'noopener noreferrer'},h('span',{class:'gx-hl'},'Precisa de ajuda? Fale com a equipe'),h('span',{class:'gx-hs'},'Ajuda'))));
   }
   function rodape(){
     var eq=G.view==='equipe';
