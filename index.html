@@ -1460,6 +1460,48 @@ main,.top>.in{max-width:1080px}
 .pf-row:first-child{border-top:0}.pf-row span:nth-child(2){flex:1}.pf-go{color:var(--muted)}
 .pf-row.sair{color:var(--xa02a1c)}
 @media (max-width:640px){.idstrip{padding:12px}.id-seg{width:100%}.id-seg button{flex:1}.top.pac .hact{gap:6px}}
+
+/* ===== v8: carregamento ===== */
+@keyframes skp{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes ldm{0%{left:-35%}100%{left:100%}}
+@keyframes ldr{to{transform:rotate(360deg)}}
+#ldbar{position:fixed;left:0;right:0;top:0;height:3px;z-index:9999;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s}
+#ldbar.on{opacity:1}
+#ldbar i{position:absolute;top:0;bottom:0;width:35%;background:var(--c-gold);animation:ldm 1.2s ease-in-out infinite}
+.sk{background:color-mix(in srgb,var(--c-ink) 9%,var(--surface));border-radius:8px;animation:skp 1.4s ease-in-out infinite}
+.esq{display:flex;flex-direction:column;gap:12px;padding:62px 0 6px}
+.esq[hidden]{display:none}
+.sk-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.sk-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:6px 14px}
+.sk-lin{display:flex;align-items:center;gap:12px;padding:10px 0}.sk-lin+.sk-lin{border-top:1px solid var(--line)}
+.sk-st{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.9rem}
+.sk-hor{display:flex;flex-direction:column;gap:8px}
+.spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--c-ink) 22%,transparent);border-top-color:var(--c-ink);animation:ldr .8s linear infinite;display:inline-block;flex:none}
+.sk-slow{background:color-mix(in srgb,var(--c-gold) 22%,var(--surface));border:1px solid var(--c-gold);border-radius:var(--r-card);padding:14px 16px}
+.sk-slow[hidden]{display:none}.sk-slow p{margin:4px 0 12px;font-size:.92rem}
+.sk-slow .actions{display:flex;gap:8px;flex-wrap:wrap}
+#main{transition:opacity .2s}
+.esq-on .fab-fechar,.esq-on .fab-novo{display:none!important}
+.rf-on #main{opacity:.55;pointer-events:none}
+.rf-on .rf{pointer-events:none}
+.rf-on .btn.rf::before{content:"";width:13px;height:13px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:ldr .8s linear infinite;display:inline-block;margin-right:7px;vertical-align:-2px}
+.rf-on .pf-row.rf .pf-go{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);border-top-color:transparent;animation:ldr .8s linear infinite;font-size:0}
+@media (prefers-reduced-motion:reduce){.sk,#ldbar i,.spin,.rf-on .btn.rf::before,.rf-on .pf-row.rf .pf-go{animation:none}}
+
+/* ===== v9: ajustes finos da entrada (textos, tipografia e ícones iguais) ===== */
+.gx-card .gx-check input[type=checkbox]{appearance:none;-webkit-appearance:none;width:38px;height:22px;min-height:0;margin:0;padding:0;border:0;border-radius:99px;background:color-mix(in srgb,var(--c-cream) 24%,transparent);position:relative;cursor:pointer;flex:none;transition:background .15s}
+.gx-card .gx-check input[type=checkbox]::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--c-cream);transition:transform .15s,background .15s}
+.gx-card .gx-check input[type=checkbox]:checked{background:var(--gold)}
+.gx-card .gx-check input[type=checkbox]:checked::after{transform:translateX(16px);background:var(--c-ink)}
+.gx-card .gx-check input[type=checkbox]:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.gx-check{align-items:center}
+.gx-link.pill{border:1px solid var(--gold);border-radius:var(--r-pill);padding:0 18px;min-height:40px;font-size:13.5px;align-self:center}
+.gx-link.pill:hover{text-decoration:none;background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.gx-eu{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--c-white) 7%,transparent);border:1px solid color-mix(in srgb,var(--c-cream) 22%,transparent);border-radius:14px;padding:9px 12px}
+.gx-eu .av2{background:var(--c-gold);color:var(--c-ink)}
+.gx-eut{display:flex;flex-direction:column;flex:1;min-width:0}.gx-eut b{font-weight:700;font-size:14px}.gx-eut small{color:var(--xcdc5b6);font-size:12px}
+.gx-eu .gx-link{min-height:32px;font-size:12.5px;text-decoration:underline;font-weight:600}
+@media (max-width:640px){.gx-lgpd.in{display:flex}.gx-lgpd.out{display:none}}
 </style>
 </head>
 <body>
@@ -1619,6 +1661,43 @@ function corProf(n){var p=profPor(n);return p&&p.cor?p.cor:'#6b6358'}
 function profServ(p){return String(p.servicos||'').split(',').filter(Boolean)}
 function profsAtivos(){return profs().filter(function(p){return p.ativo!=='nao'})}
 
+/* ================= CARREGAMENTO: barra fina, esqueleto e aviso de demora ================= */
+var LD={n:0,t:null,bar:null,sk:null,slow:null};
+function ldBar(){
+  if(!LD.bar){LD.bar=h('div',{id:'ldbar','aria-hidden':'true'},h('i'));document.body.append(LD.bar)}
+  return LD.bar;
+}
+function ldInc(){
+  LD.n++;
+  if(LD.n===1){clearTimeout(LD.t);LD.t=setTimeout(function(){if(LD.n>0)ldBar().classList.add('on')},250)}
+}
+function ldDec(){
+  LD.n=Math.max(0,LD.n-1);
+  if(LD.n===0){clearTimeout(LD.t);if(LD.bar)LD.bar.classList.remove('on')}
+}
+function esqueleto(on,rotulo){
+  var main=document.getElementById('main');
+  if(!LD.sk){
+    var bloco=function(w,hh,r){return h('div',{class:'sk',style:'height:'+hh+'px;width:'+w+';'+(r?'border-radius:'+r+'px':'')})};
+    var linha=function(a,b){return h('div',{class:'sk-lin'},h('div',{class:'sk',style:'width:34px;height:34px;border-radius:50%'}),h('div',{style:'flex:1'},bloco(a,12),h('div',{style:'height:7px'}),bloco(b,10)))};
+    LD.status=h('span',{},'Carregando…');
+    LD.slow=h('div',{class:'sk-slow',hidden:true,role:'status'},h('b',{},'Está demorando mais que o normal'),h('p',{},'O servidor da clínica pode estar acordando. Seguimos tentando; não precisa fechar a página.'),
+      h('div',{class:'actions'},btn('Tentar de novo',function(){location.reload()},'primary small pillb'),btnEquipe('Olá! Estou com dificuldade para entrar no SiAGE.','small pillb','Falar com a equipe')));
+    LD.sk=h('div',{class:'esq','aria-busy':'true',hidden:true},bloco('46%',24),bloco('72%',12),
+      h('div',{class:'sk-tiles'},bloco('100%',64,14),bloco('100%',64,14),bloco('100%',64,14)),
+      h('div',{class:'sk-card'},linha('58%','36%'),linha('46%','30%'),linha('64%','24%')),
+      h('div',{class:'sk-st'},h('span',{class:'spin','aria-hidden':'true'}),LD.status),LD.slow);
+    main.prepend(LD.sk);
+  }
+  clearTimeout(LD.slowT);
+  LD.slow.hidden=true;LD.sk.hidden=!on;document.body.classList.toggle('esq-on',!!on);
+  var rl=document.getElementById('role-label'),sb=document.getElementById('sub');
+  if(on){if(rl)rl.textContent='Carregando';if(sb)sb.textContent=rotulo||'Carregando…'}
+  else if(S.modo===null){if(rl)rl.textContent='Acesso';if(sb)sb.textContent='Entre com seu e-mail ou faça o primeiro acesso.'}
+  if(on){LD.status.textContent=rotulo||'Carregando…';LD.slowT=setTimeout(function(){LD.slow.hidden=false},8000)}
+}
+
+
 /* ================= PERFIL: identidade na gestão e vínculo com o terapeuta ================= */
 function iniNome(n){var p=String(n||'').replace(/\s*\(.*?\)/g,'').trim().split(/\s+/).filter(Boolean);return ((p[0]||'?').charAt(0)+(p.length>1?p[p.length-1].charAt(0):'')).toUpperCase()}
 function primeiroDe(n){var x=String(n||'').replace(/\s*\(.*?\)/g,'').trim().split(/\s+/)[0]||'';return x?x.charAt(0).toUpperCase()+x.slice(1):''}
@@ -1718,7 +1797,7 @@ function renderPPerfil(){
       m?linha('heart','Conhecer '+primeiroDe(m.t.nome),function(){perfilTerapeuta(m.t,m.ref)}):null,
       linha('clip','Minha ficha e dados',function(){go('ficha')}),
       linha('chat','Falar com a equipe',function(){window.open(waUrl('Olá! Sou '+(primeiroNome()||'paciente')+' e preciso de ajuda com o meu atendimento.'),'_blank','noopener')}),
-      linha('sparkles','Atualizar a página',function(){recarregar()}),
+      linha('sparkles','Atualizar a página',function(){recarregar()},'rf'),
       linha('lock','Sair',function(){if(S.longo)sairPaciente();else sair()},'sair')));
 }
 
@@ -1740,6 +1819,10 @@ function opt(v,l){return h('option',{value:v},l)}
 // Cole aqui o link /exec da implantação do Apps Script (Implantar > Gerenciar implantações).
 var API_URL='https://script.google.com/macros/s/AKfycbwQzCCxphSTv3PsWwgUFcLkQRB1-xncnTPvm_MKBkQ1gcfxTCHOmAfoZcv0ka2lmz0T/exec';
 async function api(fn){
+  ldInc();
+  try{return await api0.apply(null,arguments)}finally{ldDec()}
+}
+async function api0(fn){
   var args=[].slice.call(arguments,1);
   var r;
   try{
@@ -1768,8 +1851,10 @@ function falha(e){
   toast(e.message,'Atenção');
 }
 async function recarregar(silencioso){
+  if(!silencioso)document.body.classList.add('rf-on');
   try{S.d=await api('getEstado',ctx());sesRenovar();renderDados()}
   catch(e){if(!silencioso||/SESSAO_EXPIRADA/.test(e.message))falha(e)}
+  finally{document.body.classList.remove('rf-on')}
 }
 function lerArquivo(f){
   return new Promise(function(ok,fail){
@@ -1972,7 +2057,7 @@ function buildGate(){
   }
   function hero(o){return h('div',{class:'gx-hero'},o.badge?h('span',{class:'gx-badge'},gi('mail',24)):null,o.eye?h('div',{class:'gx-eye'},o.eye):null,h('h1',{},o.titulo),o.texto)}
   function lgpd(cls,txt){return h('div',{class:'gx-lgpd '+cls},gi('lock',cls==='out'?16:18,null,2),h('span',{},txt))}
-  function linkBtn(txt,fn){var b=h('button',{type:'button',class:'gx-link'},txt);b.addEventListener('click',fn);return b}
+  function linkBtn(txt,fn,cls){var b=h('button',{type:'button',class:'gx-link'+(cls?' '+cls:'')},txt);b.addEventListener('click',fn);return b}
   function checkLembrar(txt){var c=h('input',{type:'checkbox'});c.checked=G.lembrar;return {box:c,el:h('label',{class:'gx-check'},c,h('span',{},txt))}}
   function emails(){return h('div',{class:'gx-mails'},
     h('a',{href:'https://mail.google.com',target:'_blank',rel:'noopener noreferrer'},'Abrir Gmail'),
@@ -1989,7 +2074,7 @@ function buildGate(){
       h('div',{class:'gx-sec'},h('h2',{},'Entrar'),h('p',{},'Vamos enviar um código de confirmação e um botão de acesso direto para o seu e-mail.')),
       h('div',{class:'gx-fld'},h('label',{for:'gx-id'},'E-mail ou código do paciente'),inp),
       lem.el,R.msg,R.btn,h('div',{class:'gx-div'}),
-      h('div',{class:'gx-row'},h('span',{},'Primeira vez aqui?'),linkBtn('Criar cadastro',function(){G.id=inp.value.trim();mostrar('cadastro',true)})),
+      h('div',{class:'gx-row sp'},h('span',{},'Primeira vez aqui?'),linkBtn('Criar cadastro',function(){G.id=inp.value.trim();mostrar('cadastro',true)},'pill')),
       lgpd('in','Seus dados são protegidos e tratados conforme a LGPD. Seu acesso é só seu.'));
     f.addEventListener('submit',function(ev){
       ev.preventDefault();G.id=inp.value.trim();G.lembrar=lem.box.checked;
@@ -2121,6 +2206,15 @@ function buildGate(){
   }
 
   /* ---------- acesso da equipe (gestão) ---------- */
+  /* perfil lembrado neste aparelho (escolhido em "Quem está acessando?"); a senha nunca é guardada */
+  function chipEu(){
+    var v=lsGet('siage-eu')||'';if(!v)return null;
+    var nome=v==='*'?'Coordenação':primeiroDe(v);
+    var el=h('div',{class:'gx-eu'},v==='*'?h('span',{class:'av2','aria-hidden':'true',style:'width:34px;height:34px;font-size:12px'},'CL'):avIni({nome:v},34),
+      h('span',{class:'gx-eut'},h('b',{},nome),h('small',{},'Neste aparelho')),
+      linkBtn('Não sou eu',function(){lsSet('siage-eu','');lsSet('siage-escopo','');el.remove()}));
+    return el;
+  }
   function vEquipe(){
     var pw=h('input',{id:'gx-senha',type:'password',required:true,autocomplete:'current-password',placeholder:'Digite sua senha'});
     var ver=h('button',{type:'button','aria-label':'Mostrar senha','aria-pressed':'false'},'Mostrar');
@@ -2129,9 +2223,10 @@ function buildGate(){
     R.btn=h('button',{type:'submit',class:'gx-btn'},'Entrar na gestão');R.foco=pw;
     var f=h('form',{class:'gx-card'},
       h('div',{class:'gx-sec'},h('h2',{},'Gestão'),h('p',{},'Acesso restrito à equipe: agenda, pacientes, materiais e avisos.')),
+      chipEu(),
       h('div',{class:'gx-fld'},h('label',{for:'gx-senha'},'Senha da gestão'),h('div',{class:'gx-pw'},pw,ver)),
       R.msg,R.btn,h('div',{class:'gx-div'}),
-      linkBtn('Voltar ao acesso do paciente',function(){mostrar(base(),true)}),
+      linkBtn('Voltar ao acesso do paciente',function(){mostrar(base(),true)},'pill'),
       lgpd('in','Sessão protegida.'));
     f.addEventListener('submit',async function(ev){
       ev.preventDefault();if(G.busy)return;ocupado(true);dizer('Entrando…');
@@ -2198,7 +2293,7 @@ function buildGate(){
   return root;
 }
 async function entrar(jaCarregado){
-  if(!jaCarregado) await recarregar();
+  if(!jaCarregado){PANELS.gate.hidden=true;esqueleto(true,'Buscando a sua agenda e os seus pacientes…');try{await recarregar()}finally{esqueleto(false)}}
   PANELS.gate.hidden=true;
   Object.keys(PANELS).forEach(function(k){if(k!=='gate')PANELS[k].hidden=true});
   S.tab=S.modo==='gestao'?'hoje':'sessoes';
@@ -2219,7 +2314,7 @@ async function retomarSessao(){
   var m=/[#&]ml=([a-f0-9]{32,80})/.exec(location.hash||'');
   if(m){
     try{history.replaceState(null,'',location.pathname+location.search)}catch(e){} // tira o token da barra de endereço
-    PANELS.gate.hidden=true;
+    PANELS.gate.hidden=true;esqueleto(true,'Entrando pelo link do e-mail…');
     try{
       var manter=lsGet('siage-manter')==='1';
       var r=await api('entrarPorLink',m[1],manter);
@@ -2228,16 +2323,18 @@ async function retomarSessao(){
       if(!S.longo)setTimeout(function(){toastAcao('Você entrou! Quer continuar conectado neste aparelho por 30 dias, sem precisar pedir código de novo? Use só em aparelho seu.','Manter conectado',async function(){
         try{var e=await api('estenderSessao',ctx());S.ptoken=e.token;S.longo=true;sesSalvar();lsSet('siage-manter','1');toast('Pronto: este aparelho ficará conectado.')}catch(er){falha(er)}})},600);
     }catch(e){S.modo=null;S.codigo='';S.ptoken='';PANELS.gate.hidden=false;toast(e.message,'Atenção')}
+    finally{esqueleto(false)}
     return;
   }
   var s=sesLer();if(!s)return;
-  S.modo='paciente';S.codigo=s.c;S.ptoken=s.t;S.longo=!!s.l;PANELS.gate.hidden=true;
-  try{S.d=await api('getEstado',ctx());sesRenovar();await entrar(true)}
+  S.modo='paciente';S.codigo=s.c;S.ptoken=s.t;S.longo=!!s.l;PANELS.gate.hidden=true;esqueleto(true,'Buscando as suas informações…');
+  try{S.d=await api('getEstado',ctx());sesRenovar();esqueleto(false);await entrar(true)}
   catch(e){
     S.modo=null;S.codigo='';S.ptoken='';S.longo=false;PANELS.gate.hidden=false;
     if(/SESSAO_EXPIRADA/.test(e.message))sesLimpar(); // sem internet: mantém a sessão guardada para a próxima tentativa
     else toast(e.message,'Atenção');
   }
+  finally{esqueleto(false)}
 }
 function sair(msg){
   sesLimpar();S.longo=false;
@@ -2940,7 +3037,7 @@ function renderBooking(){
     kids.push(guia(b,'Toque num dia destacado e depois no horário. Serviço: '+sv.nome+(b.mod?' ('+b.mod.toLowerCase()+')':'')+'.'));
     if(pronto&&!b.mes){var k=Object.keys(slots).sort()[0],d0=k?parse(k):new Date();b.mes=new Date(d0.getFullYear(),d0.getMonth(),1)}
     var hs=(pronto&&b.data&&slots[b.data])||[];
-    kids.push(!pronto?(slots==='carregando'?h('p',{class:'meta'},'Carregando horários…'):h('div',{class:'stack'},h('p',{class:'meta'},'Não foi possível carregar os horários.'),btn('Tentar novamente',function(){carregarSlots()},'pillb')))
+    kids.push(!pronto?(slots==='carregando'?h('div',{class:'sk-hor','aria-busy':'true'},h('div',{class:'sk-st'},h('span',{class:'spin','aria-hidden':'true'}),h('span',{},'Carregando horários…')),h('div',{class:'sk',style:'height:38px;border-radius:12px'}),h('div',{class:'sk',style:'height:38px;width:70%;border-radius:12px'})):h('div',{class:'stack'},h('p',{class:'meta'},'Não foi possível carregar os horários.'),btn('Tentar novamente',function(){carregarSlots()},'pillb')))
       :Object.keys(slots).length?h('div',{class:'cols two'},calendario(slots),
         h('div',{},h('strong',{class:'weeklabel'},b.data?longDay(b.data):'Horários'),
           b.data?h('div',{class:'hours mt-8'},hs.map(function(x){return h('button',{type:'button',class:'btn pillb'+(b.hora===x?' primary':''),'aria-pressed':b.hora===x?'true':'false',onclick:function(){b.hora=x;b.fixo=null;dica('Horário selecionado: '+x);renderBooking()}},x)}))
@@ -4600,7 +4697,7 @@ function renderShell(){
   document.getElementById('role-label').textContent=g?'Gestão':'Área do paciente';
   document.getElementById('sub').textContent=g?'Agenda, pacientes, profissionais, disponibilidade e atualizações.':'';document.getElementById('hsearch').hidden=!g;if(g)document.getElementById('h-title').replaceChildren(h('span',{class:'sg'},'SiAGE'),h('span',{class:'sg-r'},'Sistema de Agendamento e Gestão Emotiss'));document.querySelector('.top').classList.toggle('pac',!g);
   if(P.fab)P.fab.hidden=!g;
-  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?h('button',{type:'button',class:'btn small novo novo-h',onclick:function(ev){novoAbrir(false,ev.currentTarget)}},'+ Novo ▾'):null,g?null:btnPerfil(),g?btn('Atualizar',function(){recarregar()},'small'):null,g?btn('Sair',function(){sair()},'small'):null].filter(Boolean));
+  var act=document.getElementById('top-actions');act.replaceChildren.apply(act,[g?h('button',{type:'button',class:'btn small novo novo-h',onclick:function(ev){novoAbrir(false,ev.currentTarget)}},'+ Novo ▾'):null,g?null:btnPerfil(),g?btn('Atualizar',function(){recarregar()},'small rf'):null,g?btn('Sair',function(){sair()},'small'):null].filter(Boolean));
   Object.keys(PANELS).forEach(function(k){PANELS[k].hidden=true});
   PANELS[g?S.tab:'p_'+S.tab].hidden=false;setTimeout(atualizaFabX,60);
   renderTabs();renderDados();renderIdent();
